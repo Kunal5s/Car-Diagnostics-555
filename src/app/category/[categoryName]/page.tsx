@@ -1,6 +1,6 @@
 import { ArticleGrid } from "@/components/article-grid";
 import { Search } from "@/components/search";
-import { ensureCategoryArticles } from "@/ai/flows/ensure-articles";
+import { getArticles } from "@/lib/data";
 import { categories } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
@@ -43,8 +43,10 @@ export default async function CategoryPage({
     notFound();
   }
   
-  // This is the core change. This function will generate articles if they don't exist in the cache.
-  const articlesForCategory = await ensureCategoryArticles(categoryName);
+  const allArticles = await getArticles();
+  const articlesForCategory = allArticles.filter(
+    (article) => article.category.toLowerCase() === categoryName.toLowerCase()
+  );
 
   const filteredArticles = articlesForCategory.filter(
     (article) => article.title.toLowerCase().includes(searchTerm.toLowerCase())

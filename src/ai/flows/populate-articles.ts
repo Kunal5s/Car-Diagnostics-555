@@ -21,6 +21,8 @@ export interface Article {
   slug: string;
 }
 
+const FAILED_GENERATION_TEXT = "Content Generation Failed";
+
 export async function populateAllArticles(): Promise<{
   success: boolean;
   articlesGenerated: number;
@@ -34,8 +36,8 @@ export async function populateAllArticles(): Promise<{
   let successfulGenerations = 0;
 
   for (const topic of allArticleTopics) {
-    // Wait for a few seconds to respect API rate limits. 15 reqs/min -> 4s per request. Let's do 6s to be safe.
-    await new Promise(resolve => setTimeout(resolve, 6000));
+    // Wait for 10 seconds to respect API rate limits.
+    await new Promise(resolve => setTimeout(resolve, 10000));
     console.log(`- Processing topic: "${topic.title}"`);
 
     let articleData: GenerateArticleOutput | null = null;
@@ -70,7 +72,7 @@ export async function populateAllArticles(): Promise<{
       title: topic.title,
       category: topic.category,
       summary: articleData?.summary ?? "Error: Failed to generate article summary.",
-      content: articleData?.content ?? "# Content Generation Failed\n\nThis article could not be generated. This may be due to API rate limits or a content policy violation. Please check the server logs.",
+      content: articleData?.content ?? `# ${FAILED_GENERATION_TEXT}\n\nThis article could not be generated. This may be due to API rate limits or a content policy violation. Please check the server logs.`,
       imageUrl,
       slug: `${slugify(topic.title)}-${topic.id}`,
     });
@@ -84,6 +86,8 @@ export async function populateAllArticles(): Promise<{
   } catch (error: any) {
     const criticalError = `CRITICAL: Failed to write final articles cache file: ${error.message}`;
     console.error(criticalError);
-    throw new Error(criticalError);
+    // Even if writing fails, we return the errors that happened during generation.
+    errors.push(criticalError);
+    return { success: false, articlesGenerated: successfulGenerations, totalArticles: allArticleTopics.length, errors };
   }
 }
