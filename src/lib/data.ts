@@ -29,15 +29,15 @@ function rotateArray<T>(arr: T[], count: number): T[] {
 }
 
 
-export async function getArticles(): Promise<ArticleTopic[]> {
+export async function getArticles(): Promise<FullArticle[]> {
   const slot = getCurrentTimeSlot();
   // Rotate the entire list for the /blog page to show a different order.
   return rotateArray(articles, slot * 9); // Rotate by a larger amount for variety
 }
 
-export async function getHomepageArticles(): Promise<ArticleTopic[]> {
+export async function getHomepageArticles(): Promise<FullArticle[]> {
     const slot = getCurrentTimeSlot();
-    const homepageArticles: ArticleTopic[] = [];
+    const homepageArticles: FullArticle[] = [];
   
     // We want to feature one article from each category on the homepage.
     // The specific article from each category will change based on the time slot.
@@ -55,7 +55,7 @@ export async function getHomepageArticles(): Promise<ArticleTopic[]> {
     return homepageArticles;
 }
 
-export async function getArticlesByCategory(categoryName: string): Promise<ArticleTopic[]> {
+export async function getArticlesByCategory(categoryName: string): Promise<FullArticle[]> {
     const lowerCategoryName = categoryName.toLowerCase();
     
     if (lowerCategoryName === 'all') {

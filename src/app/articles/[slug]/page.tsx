@@ -64,7 +64,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 className="rounded-lg object-cover"
                 sizes="100vw"
                 priority
-                data-ai-hint={article.title.toLowerCase().split(' ').slice(0,2).join(' ')}
+                data-ai-hint={article.imageHint}
                 />
             </div>
             <div className="prose prose-lg dark:prose-invert max-w-none">

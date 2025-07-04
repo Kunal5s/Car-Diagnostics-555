@@ -12,10 +12,16 @@ import {
 } from 'lucide-react';
 
 export interface ArticleTopic {
-  id: string;
+  id: number;
   slug: string;
   title: string;
   category: string;
+}
+
+export interface FullArticle extends ArticleTopic {
+  content: string;
+  imageUrl: string;
+  imageHint: string;
 }
 
 export interface CategoryInfo {
