@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 import Link from "next/link";
 import { type ArticleTopic } from "@/lib/definitions";
@@ -14,16 +13,19 @@ import { ArrowRight } from "lucide-react";
 import { Skeleton } from './ui/skeleton';
 
 interface ArticleCardProps {
-  article: ArticleTopic;
+  article: ArticleTopic & { imageUrl?: string };
 }
 
 export function ArticleCard({ article }: ArticleCardProps) {
   const imageUrl = article.imageUrl;
+  
+  // Pass title and category as search params to the article page
+  const articleUrl = `/articles/${article.slug}?title=${encodeURIComponent(article.title)}&category=${encodeURIComponent(article.category)}`;
 
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <CardHeader className="p-0">
-        <Link href={`/articles/${article.slug}`} className="block relative h-48 w-full">
+        <Link href={articleUrl} className="block relative h-48 w-full">
             {imageUrl ? (
               <Image
                 src={imageUrl}
@@ -43,14 +45,14 @@ export function ArticleCard({ article }: ArticleCardProps) {
           {article.category}
         </Badge>
         <h3 className="mb-2 line-clamp-3 font-semibold leading-tight">
-          <Link href={`/articles/${article.slug}`} className="hover:text-primary">
+          <Link href={articleUrl} className="hover:text-primary">
             {article.title}
           </Link>
         </h3>
       </CardContent>
       <CardFooter className="p-6 pt-0">
         <Button asChild variant="link" className="p-0">
-          <Link href={`/articles/${article.slug}`}>
+          <Link href={articleUrl}>
             Read More <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>

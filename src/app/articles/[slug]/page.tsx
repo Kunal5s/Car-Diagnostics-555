@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { allArticleTopics } from '@/lib/definitions';
 import { generateArticleAction } from '@/app/actions/generate-article';
 import { generateImageAction } from '@/app/actions/generate-image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -13,28 +12,30 @@ import { AlertCircle } from 'lucide-react';
 import { MotionWrapper } from '@/components/motion-wrapper';
 import type { Metadata } from 'next';
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const articleTopic = allArticleTopics.find((a) => a.slug === params.slug);
-  if (!articleTopic) {
+export async function generateMetadata({ searchParams }: { params: { slug: string }, searchParams: { [key: string]: string | string[] | undefined } }): Promise<Metadata> {
+  const title = searchParams?.title as string;
+  const category = searchParams?.category as string;
+  
+  if (!title) {
     return {
       title: 'Article Not Found'
     }
   }
   return {
-    title: `${articleTopic.title} - Car Diagnostics AI`,
-    description: `An in-depth article on ${articleTopic.title}, covering ${articleTopic.category} diagnostics and maintenance tips.`,
+    title: `${title} - Car Diagnostics AI`,
+    description: `An in-depth article on ${title}, covering ${category || 'automotive'} diagnostics and maintenance tips.`,
   }
 }
 
-// This is now an async Server Component
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  const slug = params.slug;
+export default async function ArticlePage({ params, searchParams }: { params: { slug: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
+  const title = searchParams?.title as string;
+  const category = searchParams?.category as string;
 
-  const articleTopic = allArticleTopics.find((a) => a.slug === slug);
-
-  if (!articleTopic) {
+  if (!title || !category) {
     notFound();
   }
+  
+  const articleTopic = { title, category, slug: params.slug };
 
   // Fetch data on the server
   const [articleResult, imageResult] = await Promise.all([
@@ -52,8 +53,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       <article className="container mx-auto max-w-4xl px-4 py-12">
         <Breadcrumbs items={[
           { label: 'Home', href: '/' },
-          { label: articleTopic?.category || 'Category', href: `/category/${articleTopic?.category.toLowerCase()}` },
-          { label: articleTopic?.title || 'Article' },
+          { label: articleTopic.category, href: `/category/${articleTopic.category.toLowerCase()}` },
+          { label: articleTopic.title },
         ]} />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />

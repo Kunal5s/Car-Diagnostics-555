@@ -1,10 +1,11 @@
 import { ArticleGrid } from "@/components/article-grid";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { allArticleTopics, categories, categoryDetails, type ArticleTopic } from "@/lib/definitions";
+import { categories, categoryDetails, type ArticleTopic } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
 import { MotionWrapper } from "@/components/motion-wrapper";
 import { generateImageAction } from "@/app/actions/generate-image";
+import { generateTopicsAction } from "@/app/actions/generate-topics";
 
 export async function generateMetadata({ params }: { params: { categoryName: string } }): Promise<Metadata> {
   const categoryName = decodeURIComponent(params.categoryName);
@@ -46,16 +47,15 @@ export default async function CategoryPage({
     notFound();
   }
   
-  const articlesForCategory = allArticleTopics.filter(
-    (article) => article.category.toLowerCase() === categoryName.toLowerCase()
-  );
+  // Generate a dynamic list of topics for the category
+  const articlesForCategory = await generateTopicsAction(categoryInfo.name, 9);
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
     { label: categoryInfo.name },
   ];
   
-  // Fetch all images in parallel on the server
+  // Fetch all images in parallel for the generated topics
   const articlesWithImages: ArticleTopicWithImage[] = await Promise.all(
     articlesForCategory.map(async (article) => {
       const { imageUrl } = await generateImageAction(`${article.title} ${article.category}`);

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArticleGrid } from "@/components/article-grid";
-import { allArticleTopics, categoryDetails, type ArticleTopic } from "@/lib/definitions";
+import { categoryDetails, type ArticleTopic } from "@/lib/definitions";
 import { CategoryCard } from "@/components/category-card";
 import {
   Car,
@@ -31,6 +31,8 @@ import {
 import { MotionWrapper } from "@/components/motion-wrapper";
 import { MotionGrid } from "@/components/motion-grid";
 import { generateImageAction } from "./actions/generate-image";
+import { generateTopicsAction } from "./actions/generate-topics";
+
 
 export const metadata: Metadata = {
   title: "AI Car Diagnostics Made Easy with BrainAi - Engine Fault Scan",
@@ -162,9 +164,10 @@ interface ArticleTopicWithImage extends ArticleTopic {
 }
 
 export default async function HomePage() {
-  const trendingArticleTopics = allArticleTopics.slice(0, 6);
+  // Generate unique topics on the server for a general, high-traffic category
+  const trendingArticleTopics = await generateTopicsAction("Car Maintenance", 6);
 
-  // Fetch all images in parallel on the server
+  // Fetch all images in parallel for the generated topics
   const trendingArticles: ArticleTopicWithImage[] = await Promise.all(
     trendingArticleTopics.map(async (article) => {
       const { imageUrl } = await generateImageAction(`${article.title} ${article.category}`);

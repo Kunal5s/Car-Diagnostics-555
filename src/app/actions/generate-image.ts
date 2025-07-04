@@ -14,7 +14,9 @@ export async function generateImageAction(query: string): Promise<{ imageUrl: st
   }
 
   try {
-    const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1`, {
+    // Fetch a random page to ensure image uniqueness on revalidation
+    const randomPage = Math.floor(Math.random() * 50) + 1; // 1 to 50
+    const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1&page=${randomPage}`, {
       headers: {
         Authorization: apiKey,
       },
@@ -30,7 +32,18 @@ export async function generateImageAction(query: string): Promise<{ imageUrl: st
     if (data.photos && data.photos.length > 0) {
       return { imageUrl: data.photos[0].src.large };
     } else {
-      console.warn(`No image found on Pexels for query: "${query}". Using placeholder.`);
+      console.warn(`No image found on Pexels for query: "${query}" on page ${randomPage}. Trying again with a broader query.`);
+      // Fallback to a more generic query if the specific one fails
+      const fallbackResponse = await fetch(`https://api.pexels.com/v1/search?query=car%20engine%20mechanic&per_page=1&page=${randomPage}`, {
+          headers: { Authorization: apiKey },
+          next: { revalidate: 300 },
+      });
+      if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          if (fallbackData.photos && fallbackData.photos.length > 0) {
+              return { imageUrl: fallbackData.photos[0].src.large };
+          }
+      }
       return { imageUrl: 'https://placehold.co/600x400.png' };
     }
   } catch (error: any) {
