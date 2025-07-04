@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import type { SVGProps } from 'react';
 import { Car, Mail, Phone, MapPin, Heart, Twitter, Linkedin } from 'lucide-react';
@@ -98,3 +99,5 @@ export function Footer() {
     </footer>
   );
 }
+
+    

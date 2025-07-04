@@ -1,6 +1,7 @@
+
 import Image from "next/image";
 import Link from "next/link";
-import { type ArticleTopic } from "@/lib/definitions";
+import { type Article } from "@/lib/definitions";
 import {
   Card,
   CardContent,
@@ -13,22 +14,19 @@ import { ArrowRight } from "lucide-react";
 import { Skeleton } from './ui/skeleton';
 
 interface ArticleCardProps {
-  article: ArticleTopic & { imageUrl?: string };
+  article: Article;
 }
 
 export function ArticleCard({ article }: ArticleCardProps) {
-  const imageUrl = article.imageUrl;
-  
-  // The URL now only contains the self-contained slug.
   const articleUrl = `/articles/${article.slug}`;
 
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <CardHeader className="p-0">
         <Link href={articleUrl} className="block relative h-48 w-full">
-            {imageUrl ? (
+            {article.imageUrl ? (
               <Image
-                src={imageUrl}
+                src={article.imageUrl}
                 alt={article.title}
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -49,6 +47,9 @@ export function ArticleCard({ article }: ArticleCardProps) {
             {article.title}
           </Link>
         </h3>
+        <p className="line-clamp-2 text-sm text-muted-foreground">
+          {article.summary}
+        </p>
       </CardContent>
       <CardFooter className="p-6 pt-0">
         <Button asChild variant="link" className="p-0">
@@ -60,3 +61,5 @@ export function ArticleCard({ article }: ArticleCardProps) {
     </Card>
   );
 }
+
+    

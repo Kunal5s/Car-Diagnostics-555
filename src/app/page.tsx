@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import type { Metadata } from "next";
 import {
@@ -10,8 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArticleGrid } from "@/components/article-grid";
-import { categoryDetails, type ArticleTopic } from "@/lib/definitions";
+import { categoryDetails, type Article } from "@/lib/definitions";
 import { CategoryCard } from "@/components/category-card";
+import { getArticles } from "@/lib/data";
 import {
   Car,
   Truck,
@@ -30,9 +32,6 @@ import {
 } from "lucide-react";
 import { MotionWrapper } from "@/components/motion-wrapper";
 import { MotionGrid } from "@/components/motion-grid";
-import { generateImageAction } from "./actions/generate-image";
-import { generateTopicsAction } from "./actions/generate-topics";
-
 
 export const metadata: Metadata = {
   title: "AI Car Diagnostics Made Easy with BrainAi - Engine Fault Scan",
@@ -159,21 +158,10 @@ const faqItems = [
   },
 ];
 
-interface ArticleTopicWithImage extends ArticleTopic {
-  imageUrl: string;
-}
 
 export default async function HomePage() {
-  // Generate unique topics on the server for a general, high-traffic category
-  const trendingArticleTopics = await generateTopicsAction("Car Maintenance", 6);
-
-  // Fetch all images in parallel for the generated topics
-  const trendingArticles: ArticleTopicWithImage[] = await Promise.all(
-    trendingArticleTopics.map(async (article) => {
-      const { imageUrl } = await generateImageAction(`${article.title} ${article.category}`);
-      return { ...article, imageUrl };
-    })
-  );
+  const allArticles = await getArticles();
+  const trendingArticles = allArticles.slice(0, 6);
 
   return (
     <div className="flex flex-col">
@@ -372,3 +360,5 @@ export default async function HomePage() {
     </div>
   );
 }
+
+    

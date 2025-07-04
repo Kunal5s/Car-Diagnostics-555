@@ -1,11 +1,11 @@
+
 import { ArticleGrid } from "@/components/article-grid";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { categories, categoryDetails, type ArticleTopic } from "@/lib/definitions";
+import { categories, categoryDetails } from "@/lib/definitions";
+import { getArticlesByCategory } from "@/lib/data";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
 import { MotionWrapper } from "@/components/motion-wrapper";
-import { generateImageAction } from "@/app/actions/generate-image";
-import { generateTopicsAction } from "@/app/actions/generate-topics";
 
 export async function generateMetadata({ params }: { params: { categoryName: string } }): Promise<Metadata> {
   const categoryName = decodeURIComponent(params.categoryName);
@@ -31,10 +31,6 @@ export async function generateStaticParams() {
     }));
 }
 
-interface ArticleTopicWithImage extends ArticleTopic {
-  imageUrl: string;
-}
-
 export default async function CategoryPage({ 
   params
 }: { 
@@ -47,21 +43,12 @@ export default async function CategoryPage({
     notFound();
   }
   
-  // Generate a dynamic list of topics for the category
-  const articlesForCategory = await generateTopicsAction(categoryInfo.name, 9);
+  const articlesForCategory = await getArticlesByCategory(categoryName);
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
     { label: categoryInfo.name },
   ];
-  
-  // Fetch all images in parallel for the generated topics
-  const articlesWithImages: ArticleTopicWithImage[] = await Promise.all(
-    articlesForCategory.map(async (article) => {
-      const { imageUrl } = await generateImageAction(`${article.title} ${article.category}`);
-      return { ...article, imageUrl };
-    })
-  );
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -76,7 +63,9 @@ export default async function CategoryPage({
           </p>
         </div>
       </MotionWrapper>
-      <ArticleGrid articles={articlesWithImages} />
+      <ArticleGrid articles={articlesForCategory} />
     </div>
   );
 }
+
+    

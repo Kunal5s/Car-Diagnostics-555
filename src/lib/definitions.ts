@@ -1,3 +1,4 @@
+
 import {
   Car,
   Cog,
@@ -18,15 +19,6 @@ export interface Article {
   summary: string;
   content: string;
   imageUrl: string;
-  slug: string;
-  generatedAt?: number;
-}
-
-// This now represents a dynamically generated topic.
-export interface ArticleTopic {
-  id: number;
-  title: string;
-  category: string;
   slug: string;
 }
 
@@ -127,5 +119,4 @@ export const categories = [
   "Trends",
 ];
 
-// The static list of topics has been removed to make the site fully dynamic.
-// Topics are now generated on-the-fly by the `generateTopicsAction` server action.
+    

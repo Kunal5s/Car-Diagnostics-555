@@ -1,11 +1,12 @@
-import { ArticleTopic } from "@/lib/definitions";
+
+import { Article } from "@/lib/definitions";
 import { ArticleCard } from "./article-card";
 import { Card, CardContent } from "./ui/card";
 import { AlertCircle } from "lucide-react";
 import { MotionGrid } from "./motion-grid";
 
 interface ArticleGridProps {
-  articles: ArticleTopic[];
+  articles: Article[];
 }
 
 export function ArticleGrid({ articles }: ArticleGridProps) {
@@ -14,8 +15,8 @@ export function ArticleGrid({ articles }: ArticleGridProps) {
       <Card className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground shadow-none border-dashed">
         <CardContent className="p-6">
             <AlertCircle className="mx-auto h-10 w-10 text-primary mb-4" />
-            <p className="font-semibold text-lg text-foreground mb-2">No Topics Found</p>
-            <p>It looks like there are no article topics for this category yet.</p>
+            <p className="font-semibold text-lg text-foreground mb-2">No Articles Found</p>
+            <p>There are no articles available for this category yet.</p>
         </CardContent>
       </Card>
     );
@@ -29,3 +30,5 @@ export function ArticleGrid({ articles }: ArticleGridProps) {
     </MotionGrid>
   );
 }
+
+    

@@ -1,11 +1,11 @@
-'use client'; // Error components must be Client Components
+
+'use client'; 
 
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, AlertCircle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { MotionWrapper } from '@/components/motion-wrapper';
 
 export default function Error({
@@ -16,11 +16,8 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
     console.error(error);
   }, [error]);
-
-  const isApiKeyError = error?.message?.toLowerCase().includes('api key');
 
   return (
     <div className="container mx-auto flex min-h-[70vh] items-center justify-center px-4 py-12">
@@ -39,32 +36,22 @@ export default function Error({
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-muted-foreground">
-              This can happen if the AI service is busy, or if the API key is missing or invalid.
+              Please try again in a few moments. If the problem persists, please contact support.
             </p>
 
-            {isApiKeyError && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>API Key Error Detected</AlertTitle>
-                <AlertDescription className="text-left">
-                  The AI features require a Google AI API key to function. Please add your key on the settings page.
-                  <Button asChild variant="link" className="p-0 h-auto ml-1 font-bold">
-                    <Link href="/settings">Go to Settings</Link>
-                  </Button>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="rounded-md bg-muted p-3 text-sm text-muted-foreground text-left">
-              <p><strong>Error Details:</strong> {error.message}</p>
+            <div className="flex items-center justify-center space-x-4">
+                <Button onClick={() => reset()} size="lg">
+                Try Again
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                    <Link href="/">Go Home</Link>
+                </Button>
             </div>
-            
-            <Button onClick={() => reset()} size="lg">
-              Try Again
-            </Button>
           </CardContent>
         </Card>
       </MotionWrapper>
     </div>
   );
 }
+
+    

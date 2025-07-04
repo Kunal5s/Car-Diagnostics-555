@@ -67,18 +67,12 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
       const result = await generateTopicsFlow({ subject, count });
       
       // Success, process and return the topics
-      return result.topics.map((topic, index) => {
-        const slugData = {
-            title: topic.title,
-            category: topic.category,
-            // Add a nonce to ensure slug is unique even for identical titles
-            nonce: Math.floor(Math.random() * 100000) 
-        };
-        // Create a URL-safe base64 slug
-        const slug = Buffer.from(JSON.stringify(slugData)).toString('base64url');
+      return result.topics.map((topic) => {
+        // The slug is now a simple, robust base64 encoding of the title.
+        const slug = Buffer.from(topic.title).toString('base64url');
         
         return {
-          id: Math.floor(Math.random() * 100000) + index, 
+          id: slug, // Use the stable slug as the key
           slug: slug,
           ...topic,
         };
