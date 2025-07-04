@@ -28,6 +28,7 @@ export interface ArticleTopic {
   title: string;
   category: string;
   slug: string;
+  imageUrl?: string;
 }
 
 export interface CategoryInfo {
@@ -127,7 +128,7 @@ export const categories = [
   "Trends",
 ];
 
-const topics: Omit<ArticleTopic, 'slug'>[] = [
+const topics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
   // Engine (6 articles)
   { id: 1, title: "Resolving Common Engine Performance Issues in Modern Vehicles", category: "Engine" },
   { id: 2, title: "A Comprehensive Guide to Fixing an Overheating Engine", category: "Engine" },

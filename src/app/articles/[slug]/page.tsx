@@ -1,7 +1,5 @@
-'use client';
-
-import React, { useEffect, useState, useMemo } from 'react';
-import { notFound, useParams } from 'next/navigation';
+import React from 'react';
+import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -12,123 +10,42 @@ import { generateArticleAction } from '@/app/actions/generate-article';
 import { generateImageAction } from '@/app/actions/generate-image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { MotionWrapper } from '@/components/motion-wrapper';
+import type { Metadata } from 'next';
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-interface CachedArticle {
-  content: string;
-  imageUrl: string;
-  timestamp: number;
-}
-
-function ArticleLoadingSkeleton() {
-  return (
-    <div className="container mx-auto max-w-4xl px-4 py-12 space-y-8">
-      <Skeleton className="h-8 w-1/3" />
-      <Skeleton className="h-12 w-3/4" />
-      <div className="relative mb-8 h-64 w-full md:h-96">
-        <Skeleton className="h-full w-full rounded-lg" />
-      </div>
-      <div className="space-y-4">
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-6 w-11/12" />
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-6 w-5/6" />
-        <br />
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-6 w-full" />
-      </div>
-    </div>
-  )
-}
-
-export default function ArticlePage() {
-  const params = useParams();
-  const slug = params.slug as string;
-
-  const [articleContent, setArticleContent] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const articleTopic = useMemo(() => {
-    if (!slug) return undefined;
-    return allArticleTopics.find((a) => a.slug === slug);
-  }, [slug]);
-
-  useEffect(() => {
-    if (!articleTopic) {
-      if (slug) {
-        notFound();
-      }
-      return;
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const articleTopic = allArticleTopics.find((a) => a.slug === params.slug);
+  if (!articleTopic) {
+    return {
+      title: 'Article Not Found'
     }
-
-    const fetchContent = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      const cacheKey = `article_${slug}`;
-      try {
-        const cachedData = localStorage.getItem(cacheKey);
-        if (cachedData) {
-          const { content, imageUrl, timestamp }: CachedArticle = JSON.parse(cachedData);
-          if (Date.now() - timestamp < CACHE_DURATION) {
-            setArticleContent(content);
-            setImageUrl(imageUrl);
-            setIsLoading(false);
-            console.log("Loaded from cache");
-            return;
-          }
-           console.log("Cache expired, fetching new content");
-        }
-      } catch (e) {
-          console.error("Could not read from cache", e);
-      }
-      
-      try {
-        const [articleResult, imageResult] = await Promise.all([
-          generateArticleAction(articleTopic.title),
-          generateImageAction(`${articleTopic.title} ${articleTopic.category}`)
-        ]);
-
-        if (articleResult.error) {
-          setError(articleResult.error);
-        } else {
-          setArticleContent(articleResult.content);
-        }
-        
-        setImageUrl(imageResult.imageUrl);
-        
-        if (!articleResult.error && articleResult.content) {
-            try {
-                const newCacheData: CachedArticle = {
-                    content: articleResult.content,
-                    imageUrl: imageResult.imageUrl,
-                    timestamp: Date.now()
-                };
-                localStorage.setItem(cacheKey, JSON.stringify(newCacheData));
-            } catch (e) {
-                console.error("Could not write to cache", e);
-            }
-        }
-
-      } catch (e) {
-        setError('An unexpected error occurred while fetching the article content.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchContent();
-  }, [slug, articleTopic]);
-  
-  if (isLoading) {
-    return <ArticleLoadingSkeleton />;
   }
+  return {
+    title: `${articleTopic.title} - Car Diagnostics AI`,
+    description: `An in-depth article on ${articleTopic.title}, covering ${articleTopic.category} diagnostics and maintenance tips.`,
+  }
+}
+
+// This is now an async Server Component
+export default async function ArticlePage({ params }: { params: { slug: string } }) {
+  const slug = params.slug;
+
+  const articleTopic = allArticleTopics.find((a) => a.slug === slug);
+
+  if (!articleTopic) {
+    notFound();
+  }
+
+  // Fetch data on the server
+  const [articleResult, imageResult] = await Promise.all([
+    generateArticleAction(articleTopic.title),
+    generateImageAction(`${articleTopic.title} ${articleTopic.category}`)
+  ]);
+
+  const { content: articleContent, error: articleError } = articleResult;
+  const { imageUrl, error: imageError } = imageResult;
+  
+  const error = articleError || imageError;
 
   if (error || !articleContent) {
     return (

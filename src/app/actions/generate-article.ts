@@ -20,13 +20,9 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
     return { content: '', error: "The service is not configured correctly. Missing API Key." };
   }
   
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15-second timeout
-
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      signal: controller.signal,
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
@@ -40,6 +36,7 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
           },
         ],
       }),
+      next: { revalidate: 300 }, // Cache for 5 minutes
     });
 
     if (!response.ok) {
@@ -59,13 +56,7 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
     return { content };
 
   } catch (error: any) {
-    if (error.name === 'AbortError') {
-      console.error("Request to OpenRouter API timed out.");
-      return { content: '', error: 'The request took too long and was timed out. Please try again.' };
-    }
     console.error("An error occurred during article generation:", error);
     return { content: '', error: error.message || 'An unexpected error occurred while generating the article.' };
-  } finally {
-      clearTimeout(timeoutId);
   }
 }

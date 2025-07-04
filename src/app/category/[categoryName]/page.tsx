@@ -1,9 +1,10 @@
 import { ArticleGrid } from "@/components/article-grid";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { allArticleTopics, categories, categoryDetails } from "@/lib/definitions";
+import { allArticleTopics, categories, categoryDetails, type ArticleTopic } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
 import { MotionWrapper } from "@/components/motion-wrapper";
+import { generateImageAction } from "@/app/actions/generate-image";
 
 export async function generateMetadata({ params }: { params: { categoryName: string } }): Promise<Metadata> {
   const categoryName = decodeURIComponent(params.categoryName);
@@ -29,6 +30,10 @@ export async function generateStaticParams() {
     }));
 }
 
+interface ArticleTopicWithImage extends ArticleTopic {
+  imageUrl: string;
+}
+
 export default async function CategoryPage({ 
   params
 }: { 
@@ -49,6 +54,14 @@ export default async function CategoryPage({
     { label: "Home", href: "/" },
     { label: categoryInfo.name },
   ];
+  
+  // Fetch all images in parallel on the server
+  const articlesWithImages: ArticleTopicWithImage[] = await Promise.all(
+    articlesForCategory.map(async (article) => {
+      const { imageUrl } = await generateImageAction(`${article.title} ${article.category}`);
+      return { ...article, imageUrl };
+    })
+  );
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -63,8 +76,7 @@ export default async function CategoryPage({
           </p>
         </div>
       </MotionWrapper>
-      {/* We pass articles without images; ArticleCard will fetch them on the client */}
-      <ArticleGrid articles={articlesForCategory} />
+      <ArticleGrid articles={articlesWithImages} />
     </div>
   );
 }

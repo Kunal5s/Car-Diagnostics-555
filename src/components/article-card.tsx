@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Image from "next/image";
 import Link from "next/link";
-import { ArticleTopic } from "@/lib/definitions";
+import { type ArticleTopic } from "@/lib/definitions";
 import {
   Card,
   CardContent,
@@ -14,26 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Skeleton } from './ui/skeleton';
-import { generateImageAction } from '@/app/actions/generate-image';
 
 interface ArticleCardProps {
   article: ArticleTopic;
 }
 
 export function ArticleCard({ article }: ArticleCardProps) {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchImage() {
-      const { imageUrl: url } = await generateImageAction(`${article.title} ${article.category}`);
-      if (isMounted) {
-        setImageUrl(url);
-      }
-    }
-    fetchImage();
-    return () => { isMounted = false; };
-  }, [article.title, article.category]);
+  const imageUrl = article.imageUrl;
 
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">

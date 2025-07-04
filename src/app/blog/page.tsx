@@ -1,22 +1,32 @@
 import { ArticleGrid } from "@/components/article-grid";
-import { allArticleTopics } from "@/lib/definitions";
+import { allArticleTopics, type ArticleTopic } from "@/lib/definitions";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MotionWrapper } from "@/components/motion-wrapper";
+import { generateImageAction } from "@/app/actions/generate-image";
 
 export const metadata: Metadata = {
   title: 'All Articles - Car Diagnostics AI',
   description: 'Browse all our articles on car diagnostics, maintenance, and technology.',
 };
 
-export default function BlogPage() {
+interface ArticleTopicWithImage extends ArticleTopic {
+  imageUrl: string;
+}
+
+export default async function BlogPage() {
   const breadcrumbItems = [
     { label: "Home", href: "/" },
     { label: "Blog" },
   ];
   
-  // We pass the topics without images. The ArticleCard component will fetch them.
-  const articles = allArticleTopics;
+  // Fetch all images in parallel on the server
+  const articlesWithImages: ArticleTopicWithImage[] = await Promise.all(
+    allArticleTopics.map(async (article) => {
+      const { imageUrl } = await generateImageAction(`${article.title} ${article.category}`);
+      return { ...article, imageUrl };
+    })
+  );
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -31,7 +41,7 @@ export default function BlogPage() {
               </p>
           </div>
         </MotionWrapper>
-        <ArticleGrid articles={articles} />
+        <ArticleGrid articles={articlesWithImages} />
     </div>
   );
 }

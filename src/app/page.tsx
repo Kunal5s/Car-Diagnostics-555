@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArticleGrid } from "@/components/article-grid";
-import { allArticleTopics, categoryDetails } from "@/lib/definitions";
+import { allArticleTopics, categoryDetails, type ArticleTopic } from "@/lib/definitions";
 import { CategoryCard } from "@/components/category-card";
 import {
   Car,
@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { MotionWrapper } from "@/components/motion-wrapper";
 import { MotionGrid } from "@/components/motion-grid";
+import { generateImageAction } from "./actions/generate-image";
 
 export const metadata: Metadata = {
   title: "AI Car Diagnostics Made Easy with BrainAi - Engine Fault Scan",
@@ -156,9 +157,20 @@ const faqItems = [
   },
 ];
 
+interface ArticleTopicWithImage extends ArticleTopic {
+  imageUrl: string;
+}
 
 export default async function HomePage() {
-  const trendingArticles = allArticleTopics.slice(0, 6);
+  const trendingArticleTopics = allArticleTopics.slice(0, 6);
+
+  // Fetch all images in parallel on the server
+  const trendingArticles: ArticleTopicWithImage[] = await Promise.all(
+    trendingArticleTopics.map(async (article) => {
+      const { imageUrl } = await generateImageAction(`${article.title} ${article.category}`);
+      return { ...article, imageUrl };
+    })
+  );
 
   return (
     <div className="flex flex-col">
