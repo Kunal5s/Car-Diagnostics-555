@@ -10,9 +10,11 @@ const validCategories = categories.filter(c => c !== "All") as [string, ...strin
 
 const TopicSchema = z.object({
   title: z.string().describe("A unique, engaging, 9-word article title about an automotive topic."),
-  // The AI must choose a category from this specific list.
-  category: z.enum(validCategories)
-             .describe("The most relevant category for the article title from the provided list."),
+  // This is now a flexible string, which makes the parsing much more robust.
+  // The AI is still instructed to provide a relevant category, but we no longer fail validation
+  // if it deviates slightly from our predefined list (e.g., "Electric Cars" vs "EVs").
+  category: z.string()
+             .describe("The most relevant category for the article title (e.g., 'Engine', 'EVs')."),
 });
 
 const TopicsResponseSchema = z.object({
@@ -64,11 +66,11 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
           messages: [
             {
               role: "system",
-              content: `You are an expert automotive content strategist. Your task is to generate a list of unique and compelling article topics. The response must be a JSON object with a single key "topics", which is an array of objects. Each object in the array must have a "title" and a "category". The category MUST be one of the following: ${validCategories.map(c => `"${c}"`).join(', ')}. Do not include any other text, explanation, or markdown formatting in your response. The JSON object must look like this: {"topics": [{"title": "...", "category": "..."}]}`
+              content: `You are an expert automotive content strategist. Your task is to generate a list of unique and compelling article topics. The response must be a JSON object with a single key "topics", which is an array of objects. Each object must have a "title" (a string) and a "category" (a relevant string like "Engine" or "EVs"). The response must be only the JSON object itself, without any surrounding text or markdown. Example format: {"topics": [{"title": "...", "category": "..."}]}`
             },
             {
               role: "user",
-              content: `Generate ${count} unique, engaging, and highly specific article titles about "${subject}". Each title MUST be exactly 9 words long. Do not repeat topics. Focus on providing real value to a car owner. For each title, assign the most appropriate category from the allowed list.`
+              content: `Generate ${count} unique, engaging, and highly specific article titles about "${subject}". Each title MUST be exactly 9 words long. Do not repeat topics. Focus on providing real value to a car owner. For each title, assign the most appropriate category.`
             },
           ],
         }),
