@@ -74,7 +74,7 @@ export default function GenerateContentPage() {
                   <div>
                     <p className="font-semibold">{result.success ? "Process Complete" : "Process Finished with Issues"}</p>
                     <p className="text-sm text-muted-foreground">{result.message}</p>
-                    {result.success && (
+                    {result.generated > 0 && (
                       <Button asChild variant="link" className="p-0 mt-2">
                         <Link href="/">Go to Home Page to see the results</Link>
                       </Button>

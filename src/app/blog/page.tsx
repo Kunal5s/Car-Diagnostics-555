@@ -24,7 +24,7 @@ export default async function BlogPage() {
                 All Articles
             </h1>
             <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
-                Explore our comprehensive library of automotive articles.
+                Explore our comprehensive library of automotive articles. Use the admin panel to generate full content.
             </p>
         </div>
         <ArticleGrid articles={articles} />

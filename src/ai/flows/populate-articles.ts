@@ -1,7 +1,7 @@
 'use server';
 /**
  * @fileOverview A flow to generate and populate all 54 articles for the website.
- * This is a long-running, one-time process that should be manually triggered.
+ * This is a long-running, one-time process that should be manually triggered from the admin panel.
  */
 
 import { generateArticle, type GenerateArticleOutput } from '@/ai/flows/generate-article';
@@ -67,21 +67,29 @@ export async function populateAllArticles(): Promise<{success: boolean; message:
         // This doesn't count as a full failure, as we have a placeholder.
       }
       
-      if (success) {
+      if (success && articleData) {
         generatedCount++;
+        articles.push({
+          id: topic.id,
+          title: topic.title,
+          category: topic.category,
+          summary: articleData.summary,
+          content: articleData.content,
+          imageUrl,
+          slug: `${slugify(topic.title)}-${topic.id}`,
+        });
       } else {
         failedCount++;
+         articles.push({
+          id: topic.id,
+          title: topic.title,
+          category: topic.category,
+          summary: "Error: Failed to generate article summary.",
+          content: `# ${FAILED_GENERATION_TEXT}\n\nThis article could not be generated. This may be due to API rate limits or a content policy violation. Please check the server logs.`,
+          imageUrl,
+          slug: `${slugify(topic.title)}-${topic.id}`,
+        });
       }
-
-      articles.push({
-        id: topic.id,
-        title: topic.title,
-        category: topic.category,
-        summary: articleData?.summary ?? "Error: Failed to generate article summary.",
-        content: articleData?.content ?? `# ${FAILED_GENERATION_TEXT}\n\nThis article could not be generated. This may be due to API rate limits or a content policy violation. Please check the server logs.`,
-        imageUrl,
-        slug: `${slugify(topic.title)}-${topic.id}`,
-      });
     }
 
     await fs.writeFile(articlesFilePath, JSON.stringify(articles, null, 2));
