@@ -13,7 +13,7 @@ import {z} from 'zod';
 const GenerateArticleInputSchema = z.object({
   topic: z.string().describe('The topic of the article to generate.'),
 });
-export type GenerateArticleInput = z.infer<typeof GenerateArticleInputSchema>;
+type GenerateArticleInput = z.infer<typeof GenerateArticleInputSchema>;
 
 const GenerateArticleOutputSchema = z.object({
   summary: z
@@ -22,7 +22,7 @@ const GenerateArticleOutputSchema = z.object({
   content: z
     .string()
     .describe(
-      'The full, detailed, SEO-friendly article content, as plain text with paragraphs separated by double newlines.'
+      'The full, detailed, SEO-friendly article content, in Markdown format. It should be well-structured with H1, H2, H3, etc., for headings.'
     ),
 });
 export type GenerateArticleOutput = z.infer<typeof GenerateArticleOutputSchema>;
@@ -33,14 +33,14 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateArticleOutputSchema},
   prompt: `You are an expert automotive writer and SEO specialist. Write a detailed, comprehensive, and engaging article about the following topic: '{{{topic}}}'.
 
-The article should be well-structured and easy to read. It should be at least 600 words long.
+The article should be well-structured, unique, and at least 1700 words long.
 
-Start with a compelling introduction, then use headings and subheadings to organize the content logically. Conclude with a useful summary.
+Start with a compelling introduction. Use Markdown for formatting. The main title should be an H1 heading (#). Use H2 (##), H3 (###), and even H4-H6 for subheadings to organize the content logically and create a deep structure. Conclude with a useful summary paragraph.
 
-IMPORTANT: The output format for the article content must be plain text, with paragraphs separated by double newlines (\\n\\n). Do not use Markdown formatting like # for headings or * for lists.
+IMPORTANT: The output format for the article content MUST be Markdown.
 
 Provide a concise, SEO-friendly summary for the article (around 160 characters).
-Also provide the full article content as plain text.`,
+Also provide the full article content as Markdown.`,
 });
 
 const generateArticleFlow = ai.defineFlow(

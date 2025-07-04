@@ -4,6 +4,8 @@ import { getArticles } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import type { Metadata } from 'next';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ArticlePageProps {
   params: { slug: string };
@@ -84,9 +86,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       </div>
 
       <div className="prose prose-lg dark:prose-invert max-w-none">
-        {article.content.split('\n\n').map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-        ))}
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content}</ReactMarkdown>
       </div>
     </article>
   );

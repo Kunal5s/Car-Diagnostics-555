@@ -21,18 +21,33 @@ interface ArticleTopic {
 }
 
 const articleTopics: ArticleTopic[] = [
-  { id: 1, title: "Understanding Why Your Modern Car Engine Misfires And How To Fix", category: "Engine" },
-  { id: 2, title: "The Ultimate Guide to Diagnosing Your Car's Overheating Engine Issues", category: "Engine" },
-  { id: 3, title: "How to Tell if Your Car's Timing Belt Needs Replacement", category: "Engine" },
-  { id: 5, title: "Top Five Reasons Your Car's Check Engine Light Is On", category: "Engine" },
-  { id: 7, title: "How to Test and Replace a Faulty Oxygen Sensor Today", category: "Sensors" },
-  { id: 8, title: "The Role of the Mass Airflow Sensor in Your Vehicle", category: "Sensors" },
-  { id: 13, title: "A Beginner's Guide to Using an OBD2 Scanner Correctly", category: "OBD2" },
-  { id: 14, title: "Top 10 Most Common OBD2 Codes and What They Mean", category: "OBD2" },
-  { id: 19, title: "Understanding Electric Vehicle Battery Health And Maximizing Its Lifespan Now", category: "EVs" },
-  { id: 20, title: "Common Maintenance Tasks For Electric Vehicles You Should Know About", category: "EVs" },
-  { id: 21, "title": "How Regenerative Braking Works In An Electric Vehicle System", category: "EVs" },
-  { id: 16, title: "Advanced OBD2 Diagnostics: Understanding Live Data And Freeze Frame Information", category: "OBD2" },
+  // Engine
+  { id: 1, title: "Advanced Guide to Diagnosing Your Car Engine Performance", category: "Engine" },
+  { id: 2, title: "Fixing Common Car Engine Overheating Causes and Issues", category: "Engine" },
+  // Sensors
+  { id: 3, title: "How to Correctly Test and Replace a Faulty Sensor", category: "Sensors" },
+  { id: 4, title: "The Ultimate Guide to Your Vehicle's Oxygen Sensors", category: "Sensors" },
+  // OBD2
+  { id: 5, title: "Decoding the Most Common On-Board-Diagnostics Two Error Codes", category: "OBD2" },
+  { id: 6, title: "A Beginner's Complete Guide to Using OBD2 Scanners", category: "OBD2" },
+  // Alerts
+  { id: 7, title: "What to Do When Dashboard Warning Lights Turn On", category: "Alerts" },
+  { id: 8, title: "Understanding Your Car's Most Important Dashboard Warning Alerts", category: "Alerts" },
+  // Apps
+  { id: 9, title: "Top Car Diagnostic Mobile Apps for Android & iOS", category: "Apps" },
+  { id: 10, title: "How Car Diagnostic Apps Can Save You Big Money", category: "Apps" },
+  // Maintenance
+  { id: 11, title: "Essential DIY Car Maintenance Tips for Every Single Owner", category: "Maintenance" },
+  { id: 12, title: "A Complete Seasonal Car Maintenance Checklist for Vehicles", category: "Maintenance" },
+  // Fuel
+  { id: 13, title: "How to Maximize Your Car's Fuel Economy Greatly", category: "Fuel" },
+  { id: 14, title: "Troubleshooting Common Fuel System Problems in Modern Day Cars", category: "Fuel" },
+  // EVs
+  { id: 15, title: "A Guide to Electric Vehicle Battery Health Maintenance", category: "EVs" },
+  { id: 16, title: "Everything to Know About Electric Vehicle Charging at Home", category: "EVs" },
+  // Trends
+  { id: 17, title: "The Future of Automotive Technology and AI Diagnostics", category: "Trends" },
+  { id: 18, title: "Exploring the Latest Innovations in Connected Car Technologies", category: "Trends" },
 ];
 
 const articlesFilePath = path.join(process.cwd(), 'src', 'lib', 'articles.json');
@@ -51,7 +66,7 @@ async function generateAndCacheArticles(): Promise<Article[]> {
 
       const [{ summary, content }, imageUrl] = await Promise.all([
         generateArticle({ topic: topic.title }),
-        getImageForQuery(topic.category)
+        getImageForQuery(topic.title)
       ]);
 
       articles.push({
