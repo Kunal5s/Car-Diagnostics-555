@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { MotionWrapper } from "@/components/motion-wrapper";
 import { MotionGrid } from "@/components/motion-grid";
-import { getHomepageArticles, getArticles } from "@/lib/data";
+import { getHomepageArticles } from "@/lib/data";
 
 
 export const metadata: Metadata = {
@@ -174,12 +174,12 @@ export default async function HomePage() {
           </MotionWrapper>
           <MotionWrapper delay={0.2}>
             <p className="text-lg md:text-xl text-primary-foreground/80 max-w-3xl mx-auto mb-8">
-              Detect engine problems instantly using artificial intelligence. See our setup guide to get started.
+              Detect engine problems instantly using artificial intelligence. Fast, reliable, and always available.
             </p>
           </MotionWrapper>
           <MotionWrapper delay={0.4}>
             <Button size="lg" variant="secondary" asChild>
-              <Link href="/settings">View Setup Instructions</Link>
+              <Link href="/blog">Explore Articles</Link>
             </Button>
           </MotionWrapper>
         </div>
