@@ -21,21 +21,25 @@ export default function GenerateArticlesPage() {
 
     try {
       const result = await populateAllArticles();
-      if (result.success) {
+      if (result.errors.length > 0) {
         toast({
-          title: 'Success!',
-          description: `${result.articlesGenerated} articles have been successfully generated and saved. Your website content is now live. Please refresh the homepage.`,
-          duration: 10000,
+            variant: "default",
+            title: 'Generation Complete with Some Errors',
+            description: `Generated ${result.articlesGenerated}/${result.totalArticles} articles. ${result.errors.length} errors occurred. Check server logs for details.`,
+            duration: 15000,
         });
       } else {
-        // This case might not be hit if errors are thrown, but kept for safety.
-        throw new Error(result.error || 'An unknown error occurred.');
+         toast({
+            title: 'Success!',
+            description: `All ${result.totalArticles} articles have been successfully generated and saved. Your website content is now live.`,
+            duration: 10000,
+        });
       }
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Generation Failed',
-        description: `An error occurred: ${error.message}. Please check your API keys and server logs.`,
+        title: 'Generation Failed Critically',
+        description: `A critical error occurred: ${error.message}. The process could not complete. Please check server logs.`,
         duration: 15000,
       });
     } finally {

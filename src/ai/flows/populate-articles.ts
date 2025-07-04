@@ -23,46 +23,54 @@ export interface Article {
 
 export async function populateAllArticles(): Promise<{
   success: boolean;
-  articlesGenerated?: number;
-  error?: string;
+  articlesGenerated: number;
+  totalArticles: number;
+  errors: string[];
 }> {
   console.log("Starting batch generation of all articles. This will take a long time.");
   const articles: Article[] = [];
   const articlesFilePath = path.join(process.cwd(), 'src', 'lib', 'articles.json');
+  const errors: string[] = [];
+  let successfulGenerations = 0;
 
   for (const topic of allArticleTopics) {
     // Wait for a few seconds to respect API rate limits. 15 reqs/min -> 4s per request. Let's do 6s to be safe.
     await new Promise(resolve => setTimeout(resolve, 6000));
     console.log(`- Processing topic: "${topic.title}"`);
 
-    let articleData: GenerateArticleOutput;
-    let imageUrl: string;
+    let articleData: GenerateArticleOutput | null = null;
+    let imageUrl: string = 'https://placehold.co/600x400.png';
 
     try {
       console.log(`  - Generating article content...`);
       articleData = await generateArticle({ topic: topic.title });
     } catch (e: any) {
-      console.error(`  - CRITICAL: Failed to generate article content for topic: ${topic.title}`, e.message);
-      // Stop the entire process if a single article fails to generate.
-      throw new Error(`Failed on topic "${topic.title}": ${e.message}`);
+      const errorMessage = `Content generation failed for "${topic.title}": ${e.message}`;
+      console.error(`  - ERROR: ${errorMessage}`);
+      errors.push(errorMessage);
     }
 
     try {
       console.log(`  - Fetching image for: ${topic.title}`);
-      // Use the specific article title for a more relevant image query.
       imageUrl = await getImageForQuery(topic.title);
-    } catch (e: any)      {
-      console.error(`  - CRITICAL: Failed to fetch image for topic: ${topic.title}`, e.message);
-       // Stop the entire process if an image fails to fetch.
-       throw new Error(`Failed to fetch image for "${topic.title}": ${e.message}`);
+    } catch (e: any) {
+      const errorMessage = `Image fetch failed for "${topic.title}": ${e.message}`;
+      console.error(`  - ERROR: ${errorMessage}`);
+      // It's okay to have an image error but still save the article, so we just log it.
+      errors.push(errorMessage);
+    }
+    
+    // Only count as successful if the content was generated.
+    if (articleData) {
+        successfulGenerations++;
     }
 
     articles.push({
       id: topic.id,
       title: topic.title,
       category: topic.category,
-      summary: articleData.summary,
-      content: articleData.content,
+      summary: articleData?.summary ?? "Error: Failed to generate article summary.",
+      content: articleData?.content ?? "# Content Generation Failed\n\nThis article could not be generated. This may be due to API rate limits or a content policy violation. Please check the server logs.",
       imageUrl,
       slug: `${slugify(topic.title)}-${topic.id}`,
     });
@@ -70,11 +78,12 @@ export async function populateAllArticles(): Promise<{
 
   try {
     await fs.writeFile(articlesFilePath, JSON.stringify(articles, null, 2));
-    console.log(`SUCCESS: Saved ${articles.length} generated articles to cache file: ${articlesFilePath}`);
-    return { success: true, articlesGenerated: articles.length };
+    const resultMessage = `Wrote ${articles.length} articles to cache. Successful content generations: ${successfulGenerations}/${allArticleTopics.length}.`;
+    console.log(resultMessage);
+    return { success: true, articlesGenerated: successfulGenerations, totalArticles: allArticleTopics.length, errors };
   } catch (error: any) {
-    console.error("CRITICAL: Failed to write final articles cache file:", error);
-    // This is a critical failure, throw it so the client knows.
-    throw new Error(`Failed to write articles.json: ${error.message}`);
+    const criticalError = `CRITICAL: Failed to write final articles cache file: ${error.message}`;
+    console.error(criticalError);
+    throw new Error(criticalError);
   }
 }
