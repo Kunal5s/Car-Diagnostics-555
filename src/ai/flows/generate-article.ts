@@ -8,14 +8,14 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit/zod';
+import {z} from 'zod';
 
-export const GenerateArticleInputSchema = z.object({
+const GenerateArticleInputSchema = z.object({
   topic: z.string().describe('The topic of the article to generate.'),
 });
 export type GenerateArticleInput = z.infer<typeof GenerateArticleInputSchema>;
 
-export const GenerateArticleOutputSchema = z.object({
+const GenerateArticleOutputSchema = z.object({
   summary: z
     .string()
     .describe('A short, SEO-friendly summary of the article (around 160 characters).'),
