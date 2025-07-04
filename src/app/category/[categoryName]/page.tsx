@@ -1,7 +1,7 @@
 import { ArticleGrid } from "@/components/article-grid";
-import { Search } from "@/components/search";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getArticles } from "@/lib/data";
-import { categories } from "@/lib/definitions";
+import { categories, categoryDetails } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
 
@@ -30,47 +30,41 @@ export async function generateStaticParams() {
 }
 
 export default async function CategoryPage({ 
-  params, 
-  searchParams 
+  params
 }: { 
   params: { categoryName: string }; 
-  searchParams?: { q?: string };
 }) {
   const categoryName = decodeURIComponent(params.categoryName);
-  const searchTerm = searchParams?.q || "";
+  const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === categoryName);
 
-  if (!categories.map(c => c.toLowerCase()).includes(categoryName.toLowerCase())) {
+  if (!categoryInfo) {
     notFound();
   }
   
   const allArticles = await getArticles();
+  
   const articlesForCategory = allArticles.filter(
     (article) => article.category.toLowerCase() === categoryName.toLowerCase()
   );
 
-  const filteredArticles = articlesForCategory.filter(
-    (article) => article.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  const formattedCategoryName = categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: categoryInfo.name },
+  ];
 
   return (
-    <div className="container mx-auto px-4">
-       <section className="py-12 text-center md:py-20">
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-primary md:text-6xl">
-          {formattedCategoryName}
+    <div className="container mx-auto px-4 py-12">
+      <Breadcrumbs items={breadcrumbItems} />
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-extrabold tracking-tight text-primary lg:text-5xl">
+          {categoryInfo.name} Articles
         </h1>
-        <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-          Articles in the {formattedCategoryName} category.
+        <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
+          {categoryInfo.description}
         </p>
-        <div className="mx-auto max-w-2xl">
-          <Search />
-        </div>
-      </section>
+      </div>
 
-      <section className="py-12">
-        <ArticleGrid articles={filteredArticles} />
-      </section>
+      <ArticleGrid articles={articlesForCategory} />
     </div>
   );
 }

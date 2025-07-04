@@ -69,6 +69,21 @@ const generateArticleFlow = ai.defineFlow(
       throw new Error(`AI failed to generate valid content for topic: "${input.topic}". The output was empty or incomplete.`);
     }
 
+    // Basic validation to ensure the AI is following the rules.
+    if (!output.content.trim().startsWith('# ')) {
+        throw new Error('Generated content does not start with an H1 heading.');
+    }
+    if ((output.content.match(/## /g) || []).length < 5) {
+        throw new Error('Generated content does not have at least five H2 headings.');
+    }
+     if ((output.content.match(/### /g) || []).length < 10) {
+        throw new Error('Generated content does not have at least ten H3 headings.');
+    }
+    if (output.content.split(' ').length < 1000) { // A proxy for word count
+        throw new Error('Generated content is shorter than the required minimum length.');
+    }
+
+
     return output;
   }
 );

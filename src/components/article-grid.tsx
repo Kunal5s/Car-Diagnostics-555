@@ -1,5 +1,7 @@
 import { Article } from "@/lib/data";
 import { ArticleCard } from "./article-card";
+import { Card, CardContent } from "./ui/card";
+import { Loader2 } from "lucide-react";
 
 interface ArticleGridProps {
   articles: Article[];
@@ -8,9 +10,14 @@ interface ArticleGridProps {
 export function ArticleGrid({ articles }: ArticleGridProps) {
   if (articles.length === 0) {
     return (
-      <div className="py-16 text-center text-muted-foreground">
-        <p>No articles found. Try a different search or category.</p>
-      </div>
+      <Card className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground shadow-none border-dashed">
+        <CardContent className="p-6">
+            <Loader2 className="mx-auto h-10 w-10 animate-spin text-primary mb-4" />
+            <p className="font-semibold text-lg text-foreground mb-2">Content is being generated...</p>
+            <p>This is a one-time process for the entire site and may take up to 10 minutes.</p>
+            <p>This page will update automatically once content is available.</p>
+        </CardContent>
+      </Card>
     );
   }
 

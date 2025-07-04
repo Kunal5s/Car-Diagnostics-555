@@ -1,7 +1,7 @@
 'use server';
 /**
  * @fileOverview A flow to generate and populate all 54 articles for the website.
- * This is a long-running, one-time process that should be manually triggered from the admin panel.
+ * This is a long-running, one-time process that should be manually triggered.
  */
 
 import { generateArticle, type GenerateArticleOutput } from '@/ai/flows/generate-article';
@@ -23,50 +23,35 @@ export interface Article {
 
 const FAILED_GENERATION_TEXT = "Content Generation Failed";
 
-export async function populateAllArticles(): Promise<{
-  success: boolean;
-  articlesGenerated: number;
-  totalArticles: number;
-  errors: string[];
-}> {
+export async function populateAllArticles(): Promise<void> {
   console.log("Starting batch generation of all articles. This will take a long time.");
   const articles: Article[] = [];
   const articlesFilePath = path.join(process.cwd(), 'src', 'lib', 'articles.json');
-  const errors: string[] = [];
-  let successfulGenerations = 0;
-
+  
   for (const topic of allArticleTopics) {
     // Wait for 10 seconds to respect API rate limits.
     await new Promise(resolve => setTimeout(resolve, 10000));
-    console.log(`- Processing topic: "${topic.title}"`);
+    console.log(`[populate] - Processing topic: "${topic.title}"`);
 
     let articleData: GenerateArticleOutput | null = null;
     let imageUrl: string = 'https://placehold.co/600x400.png';
 
     try {
-      console.log(`  - Generating article content...`);
+      console.log(`[populate]   - Generating article content...`);
       articleData = await generateArticle({ topic: topic.title });
     } catch (e: any) {
       const errorMessage = `Content generation failed for "${topic.title}": ${e.message}`;
-      console.error(`  - ERROR: ${errorMessage}`);
-      errors.push(errorMessage);
+      console.error(`[populate]   - ERROR: ${errorMessage}`);
     }
 
     try {
-      console.log(`  - Fetching image for: ${topic.title}`);
+      console.log(`[populate]   - Fetching image for: ${topic.title}`);
       imageUrl = await getImageForQuery(topic.title);
     } catch (e: any) {
       const errorMessage = `Image fetch failed for "${topic.title}": ${e.message}`;
-      console.error(`  - ERROR: ${errorMessage}`);
-      // It's okay to have an image error but still save the article, so we just log it.
-      errors.push(errorMessage);
+      console.error(`[populate]   - ERROR: ${errorMessage}`);
     }
     
-    // Only count as successful if the content was generated.
-    if (articleData) {
-        successfulGenerations++;
-    }
-
     articles.push({
       id: topic.id,
       title: topic.title,
@@ -80,14 +65,9 @@ export async function populateAllArticles(): Promise<{
 
   try {
     await fs.writeFile(articlesFilePath, JSON.stringify(articles, null, 2));
-    const resultMessage = `Wrote ${articles.length} articles to cache. Successful content generations: ${successfulGenerations}/${allArticleTopics.length}.`;
-    console.log(resultMessage);
-    return { success: true, articlesGenerated: successfulGenerations, totalArticles: allArticleTopics.length, errors };
+    console.log(`[populate] Wrote ${articles.length} articles to cache.`);
   } catch (error: any) {
-    const criticalError = `CRITICAL: Failed to write final articles cache file: ${error.message}`;
+    const criticalError = `[populate] CRITICAL: Failed to write final articles cache file: ${error.message}`;
     console.error(criticalError);
-    // Even if writing fails, we return the errors that happened during generation.
-    errors.push(criticalError);
-    return { success: false, articlesGenerated: successfulGenerations, totalArticles: allArticleTopics.length, errors };
   }
 }

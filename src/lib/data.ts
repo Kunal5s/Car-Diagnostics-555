@@ -1,38 +1,78 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import type { Article } from './definitions';
+import { populateAllArticles } from '@/ai/flows/populate-articles';
 
 const articlesFilePath = path.join(process.cwd(), 'src', 'lib', 'articles.json');
-let cachedArticles: Article[] | null = null;
+const lockFilePath = path.join(process.cwd(), 'generating.lock');
 
-/**
- * Retrieves articles from the local cache file.
- * This function does not trigger generation; generation is handled on the admin panel.
- */
-export async function getArticles(): Promise<Article[]> {
-  // If articles are already cached in memory, return them.
-  if (cachedArticles) {
-    return cachedArticles;
+let memoryCache: Article[] | null = null;
+let isGenerationRunning = false;
+
+// This function starts the one-time generation process.
+async function manageArticleGeneration() {
+  // 1. Check if generation is already running.
+  if (isGenerationRunning) return;
+  
+  // 2. Check for a lock file in case of server restart during generation.
+  try {
+    await fs.access(lockFilePath);
+    console.log('[data.ts] Generation lock file found. Assuming process is running.');
+    isGenerationRunning = true;
+    return;
+  } catch {
+    // No lock file, continue.
   }
 
+  // 3. Check if articles.json already has significant content.
   try {
-    // Ensure the cache directory exists
-    await fs.mkdir(path.dirname(articlesFilePath), { recursive: true });
-    // Check if the file exists, if not, create it with an empty array.
-    await fs.access(articlesFilePath).catch(() => fs.writeFile(articlesFilePath, '[]', 'utf-8'));
-    
-    const fileContents = await fs.readFile(articlesFilePath, 'utf-8');
-
-    if (fileContents && fileContents.trim() !== '[]' && fileContents.trim() !== '') {
-      const articles: Article[] = JSON.parse(fileContents);
-      cachedArticles = articles;
-      return cachedArticles;
+    const stats = await fs.stat(articlesFilePath);
+    if (stats.size > 100) { // > 100 bytes is a safe bet for existing content
+      console.log('[data.ts] Articles already exist. Skipping generation.');
+      return;
     }
-  } catch (error) {
-    // This might happen if the file is corrupted.
-    console.error("Could not read articles.json cache. It might be corrupted.", error);
+  } catch {
+    // File probably doesn't exist, which is fine. Continue to generation.
   }
   
-  // Return empty array if cache is not found, empty, or corrupt.
-  return [];
+  // 4. If we're here, we need to generate.
+  isGenerationRunning = true;
+  console.log('[data.ts] Starting one-time article generation in the background.');
+  
+  try {
+    await fs.writeFile(lockFilePath, 'locked'); // Create lock file
+    await populateAllArticles(); // Run the full, robust generation process
+  } catch (error) {
+    console.error('[data.ts] A critical error occurred during article generation:', error);
+  } finally {
+    await fs.unlink(lockFilePath).catch(err => console.error("Could not remove lock file", err)); // Remove lock
+    console.log('[data.ts] Article generation process finished.');
+    isGenerationRunning = false;
+    memoryCache = null; // Clear memory cache to force re-read from disk on next request
+  }
+}
+
+// Fire-and-forget the generation process when the server starts.
+// This is non-blocking.
+manageArticleGeneration();
+
+export async function getArticles(): Promise<Article[]> {
+  // Serve from memory if possible for performance
+  if (memoryCache) {
+    return memoryCache;
+  }
+  
+  try {
+    const fileContents = await fs.readFile(articlesFilePath, 'utf-8');
+    const articles = JSON.parse(fileContents);
+    // Only cache if the file is not empty
+    if (articles.length > 0) {
+        memoryCache = articles;
+    }
+    return articles;
+  } catch (error) {
+    // This is expected if the file doesn't exist yet while generation is running.
+    // The UI will show a loading/generation message.
+    return [];
+  }
 }
