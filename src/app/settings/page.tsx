@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { KeyRound, AlertTriangle } from 'lucide-react';
+import { KeyRound, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
   title: 'Setup Instructions - Car Diagnostics AI',
-  description: 'Instructions for setting up the required Google AI API key for all generative features.',
+  description: 'Instructions for setting up the required API keys for all generative features.',
 };
 
 export default function SettingsPage() {
@@ -16,9 +16,9 @@ export default function SettingsPage() {
       
       <Alert variant="destructive" className="mb-8">
         <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Action Required for All AI Features</AlertTitle>
+        <AlertTitle>Action Required for Full AI Features</AlertTitle>
         <AlertDescription>
-          This application uses the Google AI platform (Gemini) for real-time article and image generation. Please follow the step below to enable all features.
+          This application uses the Google AI platform for article generation and Pexels for image fetching. Please follow the steps below to enable all features.
         </AlertDescription>
       </Alert>
 
@@ -30,7 +30,7 @@ export default function SettingsPage() {
                   <CardTitle>Add Your Google AI API Key</CardTitle>
               </div>
             <CardDescription>
-              All AI features, including text and image generation, are powered by Google's Gemini models. This requires a free API key.
+              All AI article generation is powered by Google's Gemini models. This requires a free API key.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -67,16 +67,56 @@ export default function SettingsPage() {
                   </a>. The free tier is generous and suitable for development.
               </p>
             </div>
-
-             <Alert>
-              <KeyRound className="h-4 w-4" />
-              <AlertTitle>Important: Restart Required!</AlertTitle>
-              <AlertDescription>
-                After creating or updating your `.env` file, you must stop and restart your development server for the changes to take effect.
-              </AlertDescription>
-            </Alert>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+              <div className='flex items-center gap-2'>
+                   <ImageIcon className="h-6 w-6" />
+                  <CardTitle>Add Your Pexels API Key</CardTitle>
+              </div>
+            <CardDescription>
+              All images are fetched from Pexels. This requires a free API key from Pexels.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <h3 className="font-semibold">1. Add Your Key to `.env`</h3>
+              <p className="text-sm text-muted-foreground">
+                Open your `.env` file and add the following line, replacing `YOUR_PEXELS_KEY_HERE` with your actual Pexels API key.
+              </p>
+              <pre className="mt-2 w-full rounded-md bg-muted p-4">
+                <code className="text-sm text-muted-foreground">
+                  PEXELS_API_KEY="YOUR_PEXELS_KEY_HERE"
+                </code>
+              </pre>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="font-semibold">2. Get Your Free Pexels Key</h3>
+              <p className="text-sm text-muted-foreground">
+                  You can get a free API key by signing up on the{' '}
+                  <a
+                    href="https://www.pexels.com/api/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Pexels API website
+                  </a>.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Alert>
+          <KeyRound className="h-4 w-4" />
+          <AlertTitle>Important: Restart Required!</AlertTitle>
+          <AlertDescription>
+            After creating or updating your `.env` file, you must stop and restart your development server for the changes to take effect.
+          </AlertDescription>
+        </Alert>
       </div>
     </MotionWrapper>
   );
