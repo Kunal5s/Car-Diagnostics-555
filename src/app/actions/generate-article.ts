@@ -14,16 +14,18 @@ const generateArticleFlow = ai.defineFlow(
     outputSchema: ArticleResponseSchema,
   },
   async (topic) => {
-    const prompt = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: "${topic}".
+    const prompt = `You are a world-class automotive writer and SEO expert. Your task is to write an exceptionally detailed, comprehensive, and engaging article on the topic: "${topic}".
 
-The article MUST be at least 1200 words long.
+The article MUST be at least 1600 words long.
 
 Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
-- The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the content.
-- You MUST include multiple H2 (##) headings to structure the main sections of the article.
+- The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). This must be the very first line.
+- You MUST include multiple H2 (##) headings for the main sections.
 - Within each H2 section, you MUST use several H3 (###) headings to break down the content into sub-sections.
-- Use standard paragraph formatting for the body text. Do not skip headings or use them out of order. This structure is critical for readability and SEO.
-- Do not include any other text or explanations. Your entire response should be only the markdown content of the article.`;
+- For even deeper nesting and detail, you MUST use H4 (####), H5 (#####), and H6 (######) headings where appropriate.
+- This hierarchical heading structure (H1 -> H2 -> H3 -> H4 -> H5 -> H6) is MANDATORY. Do not skip heading levels.
+- Use standard paragraph formatting for the body text.
+- Do not include any other text, introductory phrases, or explanations outside of the Markdown content itself. Your entire response must be only the article.`;
     
     const { output } = await ai.generate({
         prompt: prompt,
@@ -45,7 +47,6 @@ Your response MUST be in well-structured Markdown format. The structure is absol
     return output;
   }
 );
-
 
 export async function generateArticleAction(topic: string): Promise<string> {
   try {

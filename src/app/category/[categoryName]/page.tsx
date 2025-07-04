@@ -4,8 +4,7 @@ import { categories, categoryDetails } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
 import { MotionWrapper } from "@/components/motion-wrapper";
-import { generateTopicsAction } from '@/app/actions/generate-topics';
-import { generateImageAction } from '@/app/actions/generate-image';
+import { getArticlesByCategory } from "@/lib/data";
 
 export async function generateMetadata({ params }: { params: { categoryName: string } }): Promise<Metadata> {
   const categoryName = decodeURIComponent(params.categoryName);
@@ -43,14 +42,7 @@ export default async function CategoryPage({
     notFound();
   }
   
-  const topics = await generateTopicsAction(categoryName, 6);
-
-  const articlesForCategory = await Promise.all(
-    topics.map(async (topic) => {
-      const imageUrl = await generateImageAction(`${topic.title} ${topic.category}`);
-      return { ...topic, imageUrl };
-    })
-  );
+  const articlesForCategory = await getArticlesByCategory(categoryInfo.name);
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
