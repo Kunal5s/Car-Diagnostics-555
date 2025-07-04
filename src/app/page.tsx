@@ -16,28 +16,28 @@ export default function HomePage() {
     <>
       <CategoryNav categories={categories} />
       <div className="container mx-auto px-4">
-        <section className="py-12 text-center md:py-16">
-          <h1 className="text-4xl font-extrabold tracking-tight text-primary lg:text-5xl">
-            Explore Automotive <span className="text-accent">Categories</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
-            Discover AI-curated content across all aspects of automotive diagnostics and technology.
-          </p>
-        </section>
-
-        <section className="pb-12">
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
-            {categoryDetails.map((category) => (
-              <CategoryCard key={category.name} category={category} />
-            ))}
-          </div>
-        </section>
-
-        <section className="border-t py-12">
+        <section className="py-12">
           <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-primary lg:text-4xl">
             Trending Articles
           </h2>
           <ArticleGrid articles={trendingArticles} />
+        </section>
+
+        <section className="border-t py-12 md:py-16">
+          <div className="text-center">
+            <h1 className="text-4xl font-extrabold tracking-tight text-primary lg:text-5xl">
+              Explore Automotive <span className="text-accent">Categories</span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
+              Discover AI-curated content across all aspects of automotive diagnostics and technology.
+            </p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-3">
+            {categoryDetails.map((category) => (
+              <CategoryCard key={category.name} category={category} />
+            ))}
+          </div>
         </section>
       </div>
     </>

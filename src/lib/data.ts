@@ -93,7 +93,7 @@ export const categoryDetails: CategoryInfo[] = [
     description: 'Electric vehicle technology',
     icon: Zap,
     href: '/category/evs',
-    color: 'bg-yellow-500',
+    color: 'bg-amber-500',
     iconColor: 'text-white',
   },
   {
