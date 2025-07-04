@@ -23,11 +23,11 @@ export async function getArticles(): Promise<Article[]> {
     const fileContents = await fs.readFile(articlesFilePath, 'utf-8');
     
     // Check if the file has content. An empty file is valid but should fall back.
-    if (fileContents && fileContents.trim() !== '[]') {
+    if (fileContents && fileContents.trim() !== '[]' && fileContents.trim() !== '') {
       const articles: Article[] = JSON.parse(fileContents);
       
       // If parsing is successful and gives an array, cache and return it.
-      if (Array.isArray(articles)) {
+      if (Array.isArray(articles) && articles.length > 0) {
         console.log(`Loaded ${articles.length} generated articles from file.`);
         cachedArticles = articles;
         return cachedArticles;
