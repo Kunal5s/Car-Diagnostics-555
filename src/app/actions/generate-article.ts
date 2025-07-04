@@ -60,7 +60,6 @@ export async function generateArticleAction(topic: string): Promise<string> {
 
   } catch (error: any) {
     console.error(`An error occurred during article generation for topic "${topic}":`, error);
-    // Return a user-friendly error message in markdown format.
-    return `## Article Generation Failed\n\nWe're sorry, but there was an error generating the article for "${topic}". This might be due to a temporary issue with the AI service or a missing API key. Please ensure your Google AI API key is configured correctly on the [Setup Page](/settings) and try again.`;
+    return `## Article Generation Failed\n\nWe're sorry, but there was an error generating the article for "${topic}". This might be due to a temporary issue with the AI service or a missing API key. Please check your setup and try again.`;
   }
 }
