@@ -89,14 +89,19 @@ export default function ArticlePage() {
     return <ArticleLoadingSkeleton />;
   }
 
-  if (error || !articleTopic) {
+  if (error || !articleContent) {
     return (
       <article className="container mx-auto max-w-4xl px-4 py-12">
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: articleTopic?.category || 'Category', href: `/category/${articleTopic?.category.toLowerCase()}` },
+          { label: articleTopic?.title || 'Article' },
+        ]} />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error Generating Article</AlertTitle>
           <AlertDescription>
-            {error || 'The requested article could not be found.'}
+            {error || 'The requested article could not be generated at this time. Please try again later.'}
           </AlertDescription>
         </Alert>
       </article>
@@ -128,6 +133,7 @@ export default function ArticlePage() {
           className="rounded-lg object-cover"
           sizes="100vw"
           priority
+          data-ai-hint={`${articleTopic.category.toLowerCase()}`}
         />
       </div>
       <div className="prose prose-lg dark:prose-invert max-w-none">

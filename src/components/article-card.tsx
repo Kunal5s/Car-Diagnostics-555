@@ -21,12 +21,12 @@ export function ArticleCard({ article }: ArticleCardProps) {
       <CardHeader className="p-0">
         <div className="relative h-48 w-full">
           <Image
-            src={"https://placehold.co/600x400.png"}
+            src={`https://picsum.photos/seed/${article.id}/600/400`}
             alt={article.title}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            data-ai-hint="car engine diagnostics"
+            data-ai-hint={article.category.toLowerCase()}
           />
         </div>
       </CardHeader>
