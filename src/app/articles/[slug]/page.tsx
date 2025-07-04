@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { notFound } from 'next/navigation';
+import React, { useEffect, useState, useMemo } from 'react';
+import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -13,10 +13,6 @@ import { generateImageAction } from '@/app/actions/generate-image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-
-interface ArticlePageProps {
-  params: { slug: string };
-}
 
 function ArticleLoadingSkeleton() {
   return (
@@ -39,16 +35,29 @@ function ArticleLoadingSkeleton() {
   )
 }
 
-export default function ArticlePage({ params }: ArticlePageProps) {
+export default function ArticlePage() {
+  const params = useParams();
+  const slug = params.slug as string;
+
   const [articleContent, setArticleContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const articleTopic = allArticleTopics.find((a) => a.slug === params.slug);
+  const articleTopic = useMemo(() => {
+    if (!slug) return undefined;
+    return allArticleTopics.find((a) => a.slug === slug);
+  }, [slug]);
 
   useEffect(() => {
-    if (!articleTopic) return;
+    if (slug && !articleTopic) {
+      notFound();
+      return;
+    }
+    
+    if (!articleTopic) {
+      return;
+    }
 
     const fetchContent = async () => {
       setIsLoading(true);
@@ -75,10 +84,14 @@ export default function ArticlePage({ params }: ArticlePageProps) {
     };
 
     fetchContent();
-  }, [articleTopic]);
-
+  }, [slug, articleTopic]);
+  
   if (!articleTopic) {
-    notFound();
+    return (
+        <article className="container mx-auto max-w-4xl px-4 py-12">
+            <ArticleLoadingSkeleton />
+        </article>
+      )
   }
 
   const breadcrumbItems = [
