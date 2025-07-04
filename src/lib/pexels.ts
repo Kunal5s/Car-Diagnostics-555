@@ -1,12 +1,14 @@
 import { createClient } from 'pexels';
 
-const pexelsClient = createClient(process.env.PEXELS_API_KEY || '');
+const pexelsClient = process.env.PEXELS_API_KEY
+  ? createClient(process.env.PEXELS_API_KEY)
+  : null;
 
 const placeholderImage = 'https://placehold.co/600x400.png';
 
 export async function getImageForQuery(query: string): Promise<string> {
-  if (!process.env.PEXELS_API_KEY) {
-    console.warn("Pexels API key not found. Returning placeholder image.");
+  if (!pexelsClient) {
+    console.warn("Pexels API key not found or client not initialized. Returning placeholder image.");
     return placeholderImage;
   }
   try {
