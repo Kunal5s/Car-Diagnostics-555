@@ -23,7 +23,8 @@ async function readArticles(): Promise<Article[]> {
     if (!fileContents.trim()) return [];
     return JSON.parse(fileContents);
   } catch (error) {
-    return []; // If file doesn't exist or is corrupt, start fresh.
+    // If file doesn't exist or is corrupt, start fresh.
+    return [];
   }
 }
 
