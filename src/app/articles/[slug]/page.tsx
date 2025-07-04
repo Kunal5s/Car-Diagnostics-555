@@ -44,6 +44,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     { label: article.title },
   ];
 
+  // Remove H1 from markdown content as it's already in the header
+  const contentWithoutTitle = article.content.replace(/^# .*\n\n?/, '');
+
   return (
     <MotionWrapper className="container mx-auto max-w-4xl px-4 py-12">
         <article>
@@ -65,7 +68,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 />
             </div>
             <div className="prose prose-lg dark:prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>
             </div>
         </article>
     </MotionWrapper>
