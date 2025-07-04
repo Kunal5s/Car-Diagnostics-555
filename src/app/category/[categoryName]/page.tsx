@@ -5,16 +5,7 @@ import { categories } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
 
-interface CategoryPageProps {
-  params: {
-    categoryName: string;
-  };
-  searchParams?: {
-    q?: string;
-  };
-}
-
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { categoryName: string } }): Promise<Metadata> {
   const categoryName = decodeURIComponent(params.categoryName);
   const formattedCategoryName = categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
 
@@ -38,7 +29,13 @@ export async function generateStaticParams() {
     }));
 }
 
-export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
+export default async function CategoryPage({ 
+  params, 
+  searchParams 
+}: { 
+  params: { categoryName: string }; 
+  searchParams?: { q?: string };
+}) {
   const categoryName = decodeURIComponent(params.categoryName);
   const searchTerm = searchParams?.q || "";
 
