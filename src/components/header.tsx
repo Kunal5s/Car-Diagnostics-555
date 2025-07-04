@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Car } from "lucide-react";
 import { CategoryNav } from "./category-nav";
-import { categories } from "@/lib/data";
+import { categories } from "@/lib/definitions";
 
 export function Header() {
   return (

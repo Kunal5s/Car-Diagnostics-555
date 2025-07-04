@@ -1,6 +1,7 @@
 import { ArticleGrid } from "@/components/article-grid";
 import { Search } from "@/components/search";
-import { getArticles, categories } from "@/lib/data";
+import { getArticles } from "@/lib/data";
+import { categories } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
 

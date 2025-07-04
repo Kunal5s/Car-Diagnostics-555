@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArticleGrid } from "@/components/article-grid";
-import { getArticles, categoryDetails } from "@/lib/data";
+import { getArticles } from "@/lib/data";
+import { categoryDetails } from "@/lib/definitions";
 import { CategoryCard } from "@/components/category-card";
 import {
   Car,

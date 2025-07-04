@@ -1,18 +1,8 @@
 import { slugify } from "./utils";
-import {
-  Car,
-  Cog,
-  Fuel,
-  Cpu,
-  AlertTriangle,
-  Smartphone,
-  Wrench,
-  Zap,
-  TrendingUp,
-  type LucideIcon,
-} from 'lucide-react';
 import { generateArticle } from "@/ai/flows/generate-article";
 import { getImageForQuery } from "./pexels";
+import { promises as fs } from 'fs';
+import path from 'path';
 
 export interface Article {
   id: number;
@@ -30,90 +20,6 @@ interface ArticleTopic {
   category: string;
 }
 
-export interface CategoryInfo {
-  name: string;
-  description: string;
-  icon: LucideIcon;
-  href: string;
-  color: string;
-  iconColor: string;
-}
-
-export const categoryDetails: CategoryInfo[] = [
-  {
-    name: 'Engine',
-    description: 'Engine diagnostics & performance',
-    icon: Car,
-    href: '/category/engine',
-    color: 'bg-green-500',
-    iconColor: 'text-white',
-  },
-  {
-    name: 'Sensors',
-    description: 'Automotive sensors & monitoring',
-    icon: Cpu,
-    href: '/category/sensors',
-    color: 'bg-blue-500',
-    iconColor: 'text-white',
-  },
-  {
-    name: 'OBD2',
-    description: 'OBD2 diagnostics & scanning',
-    icon: Wrench,
-    href: '/category/obd2',
-    color: 'bg-purple-500',
-    iconColor: 'text-white',
-  },
-  {
-    name: 'Alerts',
-    description: 'Warning systems & alerts',
-    icon: AlertTriangle,
-    href: '/category/alerts',
-    color: 'bg-red-500',
-    iconColor: 'text-white',
-  },
-  {
-    name: 'Apps',
-    description: 'Diagnostic mobile apps',
-    icon: Smartphone,
-    href: '/category/apps',
-    color: 'bg-indigo-500',
-    iconColor: 'text-white',
-  },
-  {
-    name: 'Maintenance',
-    description: 'Vehicle maintenance tips',
-    icon: Cog,
-    href: '/category/maintenance',
-    color: 'bg-teal-500',
-    iconColor: 'text-white',
-  },
-  {
-    name: 'Fuel',
-    description: 'Fuel systems & efficiency',
-    icon: Fuel,
-    href: '/category/fuel',
-    color: 'bg-orange-500',
-    iconColor: 'text-white',
-  },
-  {
-    name: 'EVs',
-    description: 'Electric vehicle technology',
-    icon: Zap,
-    href: '/category/evs',
-    color: 'bg-amber-500',
-    iconColor: 'text-white',
-  },
-  {
-    name: 'Trends',
-    description: 'Latest automotive trends',
-    icon: TrendingUp,
-    href: '/category/trends',
-    color: 'bg-pink-500',
-    iconColor: 'text-white',
-  },
-];
-
 const articleTopics: ArticleTopic[] = [
   { id: 1, title: "Understanding Why Your Modern Car Engine Misfires And How To Fix", category: "Engine" },
   { id: 2, title: "The Ultimate Guide to Diagnosing Your Car's Overheating Engine Issues", category: "Engine" },
@@ -129,63 +35,78 @@ const articleTopics: ArticleTopic[] = [
   { id: 16, title: "Advanced OBD2 Diagnostics: Understanding Live Data And Freeze Frame Information", category: "OBD2" },
 ];
 
+const articlesFilePath = path.join(process.cwd(), 'src', 'lib', 'articles.json');
 let cachedArticles: Article[] | null = null;
+
+async function generateAndCacheArticles(): Promise<Article[]> {
+  console.log("Generating articles and fetching images for the first time. This may take a while...");
+
+  const articles: Article[] = [];
+  for (const topic of articleTopics) {
+    try {
+      console.log(`- Generating article for: "${topic.title}"`);
+      // Wait for 5 seconds between requests to respect the free tier rate limit (15 requests/minute).
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
+      const [{ summary, content }, imageUrl] = await Promise.all([
+        generateArticle({ topic: topic.title }),
+        getImageForQuery(topic.category)
+      ]);
+
+      articles.push({
+        id: topic.id,
+        title: topic.title,
+        category: topic.category,
+        summary,
+        content,
+        imageUrl,
+        slug: `${slugify(topic.title)}-${topic.id}`
+      });
+    } catch (e) {
+      console.error(`Failed to generate article for topic: ${topic.title}`, e);
+      // Return a fallback article so the site doesn't crash
+      articles.push({
+        id: topic.id,
+        title: topic.title,
+        category: topic.category,
+        summary: "Could not load article summary.",
+        content: "There was an error generating this article. Please try again later.",
+        imageUrl: 'https://placehold.co/600x400.png',
+        slug: `${slugify(topic.title)}-${topic.id}`
+      });
+    }
+  }
+
+  try {
+    await fs.writeFile(articlesFilePath, JSON.stringify(articles, null, 2));
+    console.log(`Saved ${articles.length} generated articles to cache file: ${articlesFilePath}`);
+  } catch (error) {
+    console.error("Failed to write articles cache file:", error);
+  }
+  
+  console.log("Finished generating articles and fetching images.");
+  return articles;
+}
+
 
 export async function getArticles(): Promise<Article[]> {
   if (cachedArticles) {
     return cachedArticles;
   }
 
-  console.log("Generating articles and fetching images for the first time...");
+  try {
+    const data = await fs.readFile(articlesFilePath, 'utf-8');
+    const articles = JSON.parse(data);
+    if (articles && articles.length > 0) {
+      console.log("Loaded articles from file cache.");
+      cachedArticles = articles;
+      return cachedArticles;
+    }
+  } catch (error) {
+    // If file doesn't exist or is empty, we'll generate the articles.
+    console.log("Article cache not found or is empty.");
+  }
 
-  const articles: Article[] = await Promise.all(
-    articleTopics.map(async (topic) => {
-      try {
-        const [{ summary, content }, imageUrl] = await Promise.all([
-          generateArticle({ topic: topic.title }),
-          getImageForQuery(topic.category)
-        ]);
-
-        return {
-          id: topic.id,
-          title: topic.title,
-          category: topic.category,
-          summary,
-          content,
-          imageUrl,
-          slug: `${slugify(topic.title)}-${topic.id}`
-        };
-      } catch (e) {
-        console.error(`Failed to generate article for topic: ${topic.title}`, e);
-        // Return a fallback article so the site doesn't crash
-        return {
-          id: topic.id,
-          title: topic.title,
-          category: topic.category,
-          summary: "Could not load article summary.",
-          content: "There was an error generating this article. Please try again later.",
-          imageUrl: 'https://placehold.co/600x400.png',
-          slug: `${slugify(topic.title)}-${topic.id}`
-        };
-      }
-    })
-  );
-
-  cachedArticles = articles;
-  console.log("Finished generating articles and fetching images.");
-  return articles;
+  cachedArticles = await generateAndCacheArticles();
+  return cachedArticles;
 }
-
-
-export const categories = [
-  "All",
-  "Engine",
-  "Sensors",
-  "OBD2",
-  "Alerts",
-  "Apps",
-  "Maintenance",
-  "Fuel",
-  "EVs",
-  "Trends",
-];

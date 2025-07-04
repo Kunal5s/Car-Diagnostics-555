@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import type { CategoryInfo } from '@/lib/data';
+import type { CategoryInfo } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
 
 interface CategoryCardProps {
