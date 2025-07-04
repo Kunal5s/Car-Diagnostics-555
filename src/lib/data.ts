@@ -1,23 +1,19 @@
 import articlesData from './articles.json';
-import { categories } from "./definitions";
-import type { Article } from "./definitions";
-
-// The full type for an article, including the content.
-// This is now safe to use because we are not making network requests.
-interface FullArticle extends Article {
-    content: string;
-}
+import { categories, categoryDetails } from "./definitions";
+import type { Article as ArticleTopic, FullArticle } from "./definitions";
 
 const articles: FullArticle[] = articlesData as FullArticle[];
 
 /**
- * Gets the current time slot of the day, from 0 to 4.
- * This is used to rotate content and simulate 5 refreshes per day.
- * @returns The current time slot (0-4).
+ * Gets the current time slot of the day, from 0 to 7.
+ * This is used to rotate content and simulate 8 refreshes per day (every 3 hours).
+ * This corresponds to refreshes at 12, 3, 6, 9 (AM/PM).
+ * @returns The current time slot (0-7).
  */
 function getCurrentTimeSlot(): number {
     const hours = new Date().getUTCHours(); // Use UTC for global consistency
-    return Math.floor(hours / (24 / 5)); // 24 hours / 5 slots
+    // 8 slots in 24 hours means a new slot every 3 hours.
+    return Math.floor(hours / 3);
 }
 
 /**
@@ -33,23 +29,20 @@ function rotateArray<T>(arr: T[], count: number): T[] {
 }
 
 
-export async function getArticles(): Promise<Article[]> {
+export async function getArticles(): Promise<ArticleTopic[]> {
   const slot = getCurrentTimeSlot();
   // Rotate the entire list for the /blog page to show a different order.
-  return rotateArray(articles, slot * 6); // Rotate by a larger amount for variety
+  return rotateArray(articles, slot * 9); // Rotate by a larger amount for variety
 }
 
-export async function getHomepageArticles(): Promise<Article[]> {
+export async function getHomepageArticles(): Promise<ArticleTopic[]> {
     const slot = getCurrentTimeSlot();
-    const homepageArticles: Article[] = [];
+    const homepageArticles: ArticleTopic[] = [];
   
-    // Filter non-"All" categories
-    const articleCategories = categories.filter(c => c !== "All");
-  
-    articleCategories.forEach(category => {
-      // Get all articles for the current category
-      const categoryArticles = articles.filter(a => a.category === category);
-      
+    // We want to feature one article from each category on the homepage.
+    // The specific article from each category will change based on the time slot.
+    categoryDetails.forEach(category => {
+      const categoryArticles = articles.filter(a => a.category === category.name);
       if (categoryArticles.length > 0) {
         // Rotate the articles for this category based on the time slot
         const rotated = rotateArray(categoryArticles, slot);
@@ -58,19 +51,20 @@ export async function getHomepageArticles(): Promise<Article[]> {
       }
     });
   
+    // This will return one article per category, for a total of 9 on the homepage grid.
     return homepageArticles;
 }
 
-export async function getArticlesByCategory(categoryName: string): Promise<Article[]> {
+export async function getArticlesByCategory(categoryName: string): Promise<ArticleTopic[]> {
     const lowerCategoryName = categoryName.toLowerCase();
     
     if (lowerCategoryName === 'all') {
-      return getArticles(); // Return the time-rotated list for 'All'
+      return getArticles();
     }
     
+    // For a specific category page, we always want to show all articles in that category.
+    // The rotation just changes the display order for freshness.
     const categoryArticles = articles.filter(article => article.category.toLowerCase() === lowerCategoryName);
-    
-    // For a specific category, rotate its articles based on the time slot to keep it fresh
     const slot = getCurrentTimeSlot();
     return rotateArray(categoryArticles, slot);
 }
