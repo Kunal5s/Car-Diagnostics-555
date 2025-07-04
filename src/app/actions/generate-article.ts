@@ -1,18 +1,20 @@
 'use server';
 
+import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-const OLLAMA_API_URL = 'http://localhost:11434/api/generate';
-
-const OllamaResponseSchema = z.object({
-    model: z.string(),
-    created_at: z.string(),
-    response: z.string(), // This is the markdown string
-    done: z.boolean(),
+const ArticleResponseSchema = z.object({
+    response: z.string().describe('The markdown content of the article.'),
 });
 
-export async function generateArticleAction(topic: string): Promise<string> {
-  const prompt = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: "${topic}".
+const generateArticleFlow = ai.defineFlow(
+  {
+    name: 'generateArticleFlow',
+    inputSchema: z.string(),
+    outputSchema: ArticleResponseSchema,
+  },
+  async (topic) => {
+    const prompt = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: "${topic}".
 
 The article MUST be at least 1200 words long.
 
@@ -22,37 +24,42 @@ Your response MUST be in well-structured Markdown format. The structure is absol
 - Within each H2 section, you MUST use several H3 (###) headings to break down the content into sub-sections.
 - Use standard paragraph formatting for the body text. Do not skip headings or use them out of order. This structure is critical for readability and SEO.
 - Do not include any other text or explanations. Your entire response should be only the markdown content of the article.`;
-
-  try {
-    const response = await fetch(OLLAMA_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'mistral',
+    
+    const { output } = await ai.generate({
         prompt: prompt,
-        stream: false,
-      }),
+        model: 'googleai/gemini-1.5-flash-latest',
+        output: {
+            schema: ArticleResponseSchema
+        },
+        config: {
+            safetySettings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+            ]
+        }
     });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Ollama API error:", errorText);
-        throw new Error(`Ollama API request failed with status ${response.status}`);
+    
+    if (!output) {
+      throw new Error('AI failed to generate a response.');
     }
+    
+    return output;
+  }
+);
 
-    const ollamaData = await response.json();
-    const validatedOllamaResponse = OllamaResponseSchema.parse(ollamaData);
 
-    if (!validatedOllamaResponse.response) {
+export async function generateArticleAction(topic: string): Promise<string> {
+  try {
+    const result = await generateArticleFlow(topic);
+
+    if (!result || !result.response) {
       throw new Error('Failed to generate article: AI returned empty content.');
     }
 
-    return validatedOllamaResponse.response;
+    return result.response;
 
   } catch (error: any) {
     console.error(`An error occurred during article generation for topic "${topic}":`, error);
-    return `## Article Generation Failed\n\nWe're sorry, but there was an error generating the article for "${topic}". Please ensure your local Ollama server is running and try again. For setup instructions, please visit the [Setup Page](/settings).`;
+    // Return a user-friendly error message in markdown format.
+    return `## Article Generation Failed\n\nWe're sorry, but there was an error generating the article for "${topic}". This might be due to a temporary issue with the AI service or a missing API key. Please ensure your Google AI API key is configured correctly on the [Setup Page](/settings) and try again.`;
   }
 }

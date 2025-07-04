@@ -18,7 +18,7 @@ export function ArticleGrid({ articles }: ArticleGridProps) {
             <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-4" />
             <p className="font-semibold text-lg text-foreground mb-2">Could Not Generate Topics</p>
             <p className="max-w-md mx-auto">
-              This can happen if the local Ollama AI server is not running or if there's a network issue. Please ensure the setup is correct.
+              This can happen if the AI service is temporarily unavailable or if the required API key is missing. Please check your setup and try again.
             </p>
             <Button asChild className="mt-6">
                 <Link href="/settings">View Setup Instructions</Link>
