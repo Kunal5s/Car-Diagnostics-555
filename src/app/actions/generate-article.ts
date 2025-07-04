@@ -1,103 +1,60 @@
-
 'use server';
 
+import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-const ArticleSchema = z.object({
-  content: z.string(),
+const GenerateArticleOutputSchema = z.object({
+  content: z.string().describe(
+    'The full article content in Markdown format. The content must be well-structured with a single H1 heading for the title, multiple H2 headings for main sections, and H3 headings for sub-sections. The article MUST be at least 1500 words long.'
+  ),
 });
 
-/**
- * Generates an article using a resilient, multi-model approach.
- * It will try multiple AI models in sequence if one is rate-limited or fails.
- * @param topic The topic for the article.
- * @returns The generated article content or an error message.
- */
-export async function generateArticleAction(topic: string): Promise<{ content: string; error?: string }> {
-  const models = [
-    { name: 'openrouter/cypher-alpha:free' },
-    { name: 'meta-llama/llama-4-scout:free' },
-  ];
+const generateArticleFlow = ai.defineFlow(
+  {
+    name: 'generateArticleFlow',
+    inputSchema: z.string(),
+    outputSchema: GenerateArticleOutputSchema,
+  },
+  async (topic) => {
+    const llmResponse = await ai.generate({
+      model: 'googleai/gemini-1.5-pro-latest',
+      prompt: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: "${topic}".
 
-  // Shuffle models to balance the load and not always hit the same one first.
-  const shuffledModels = models.sort(() => 0.5 - Math.random());
+      The article MUST be at least 1500 words long.
 
-  for (const model of shuffledModels) {
-    const { name: modelName } = model;
-    // Use the single, correct API key from environment variables for all models.
-    const apiKey = process.env.OPENROUTER_API_KEY;
+      Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
+      - The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the content.
+      - You MUST include multiple H2 (##) headings to structure the main sections of the article.
+      - Within each H2 section, you MUST use several H3 (###) headings to break down the content into sub-sections.
+      - Use standard paragraph formatting for the body text. Do not skip headings or use them out of order. This structure is critical for readability and SEO.
 
-    if (!apiKey) {
-      console.warn(`OPENROUTER_API_KEY is not configured. Skipping article generation.`);
-      // If no key, no point in trying other models.
-      break; 
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second timeout
-
-    try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://cardiagnostics.ai',
-          'X-Title': 'Car Diagnostics AI',
+      IMPORTANT: The final output must conform to the specified JSON schema, with the 'content' field containing the full article in the structured Markdown format described above.`,
+      config: {
+        output: {
+          format: 'json',
+          schema: GenerateArticleOutputSchema,
         },
-        body: JSON.stringify({
-          model: modelName,
-          messages: [
-            {
-              role: 'user',
-              content: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: "${topic}". The article MUST be at least 1500 words long. The article must be well-structured with proper paragraphs. Format the entire response in Markdown, adhering to the following strict structure: 1. A single H1 heading for the main title. 2. Multiple H2 headings for the main sections. 3. Under each H2, use several H3 headings for sub-sections. 4. Use standard paragraph formatting for the body text. Do not skip headings or use them out of order. This structure is critical for readability and SEO.`,
-            },
-          ],
-        }),
-        signal: controller.signal,
-        next: { revalidate: 300 }, // Cache for 5 minutes
-      });
+        // Increased temperature for more creative and varied writing
+        temperature: 0.7, 
+      },
+    });
 
-      clearTimeout(timeoutId);
-
-      // If rate-limited, log it and try the next model in the loop.
-      if (response.status === 429) {
-          console.warn(`Model ${modelName} is rate-limited. Trying next available model for article generation.`);
-          continue;
-      }
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`OpenRouter API error (model: ${modelName}, status: ${response.status}):`, errorText);
-        continue;
-      }
-
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
-
-      if (!content || content.trim().length < 200) {
-        console.error(`Invalid or insufficient content from OpenRouter API (model: ${modelName}):`, data);
-        continue;
-      }
-      
-      // If we get here, the request was successful. Return the content.
-      console.log(`Successfully generated article using model: ${modelName}`);
-      return { content };
-
-    } catch (error: any) {
-      clearTimeout(timeoutId);
-      if (error.name === 'AbortError') {
-        console.error(`Article generation with model ${modelName} timed out. Trying next model.`);
-      } else {
-        console.error(`An error occurred during article generation with model ${modelName}:`, error);
-      }
-      // On any error (timeout, network, etc.), continue to the next model.
-      continue;
+    const output = llmResponse.output();
+    if (!output || !output.content) {
+      throw new Error('Failed to generate article: AI returned invalid or empty content.');
     }
+    return output;
   }
-  
-  // If the loop completes, all models have failed.
-  const finalError = 'All our AI models are currently busy or unavailable. Please try again in a few moments.';
-  console.error(finalError);
-  return { content: '', error: finalError };
+);
+
+
+export async function generateArticleAction(topic: string): Promise<{ content: string; error?: string }> {
+  try {
+    const result = await generateArticleFlow(topic);
+    return { content: result.content };
+  } catch (error: any) {
+    console.error(`An error occurred during article generation for topic "${topic}":`, error);
+    const finalError = 'Our AI is currently busy or unable to generate this article. Please try again in a few moments.';
+    return { content: '', error: finalError };
+  }
 }
