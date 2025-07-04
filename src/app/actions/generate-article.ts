@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -14,25 +15,22 @@ const ArticleSchema = z.object({
  */
 export async function generateArticleAction(topic: string): Promise<{ content: string; error?: string }> {
   const models = [
-    {
-      name: 'openrouter/cypher-alpha:free',
-      apiKey: process.env.OPENROUTER_API_KEY,
-    },
-    {
-      name: 'meta-llama/llama-4-scout:free',
-      apiKey: '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',
-    },
+    { name: 'openrouter/cypher-alpha:free' },
+    { name: 'meta-llama/llama-4-scout:free' },
   ];
 
   // Shuffle models to balance the load and not always hit the same one first.
   const shuffledModels = models.sort(() => 0.5 - Math.random());
 
   for (const model of shuffledModels) {
-    const { name: modelName, apiKey } = model;
+    const { name: modelName } = model;
+    // Use the single, correct API key from environment variables for all models.
+    const apiKey = process.env.OPENROUTER_API_KEY;
 
     if (!apiKey) {
-      console.warn(`API key for model ${modelName} is not configured. Skipping.`);
-      continue;
+      console.warn(`OPENROUTER_API_KEY is not configured. Skipping article generation.`);
+      // If no key, no point in trying other models.
+      break; 
     }
 
     const controller = new AbortController();
