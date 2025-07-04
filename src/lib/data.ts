@@ -1,3 +1,4 @@
+
 import { slugify } from "./utils";
 import { generateArticle } from "@/ai/flows/generate-article";
 import { getImageForQuery } from "./pexels";
@@ -155,44 +156,35 @@ async function generateAndCacheArticles(): Promise<Article[]> {
 
 
 async function loadArticles(): Promise<Article[]> {
-  const CACHE_TTL_MINUTES = 5;
-
   if (cachedArticles) {
     return cachedArticles;
   }
   
   try {
-    const stats = await fs.stat(articlesFilePath);
-    const lastModified = new Date(stats.mtime);
-    const now = new Date();
-    const diffMinutes = (now.getTime() - lastModified.getTime()) / (1000 * 60);
-
-    if (diffMinutes < CACHE_TTL_MINUTES) {
-      const data = await fs.readFile(articlesFilePath, 'utf-8');
-      const articles = JSON.parse(data);
-      if (articles && articles.length > 0) {
-        // Check if the content is still the error message
-        const hasErrors = articles.some((a: Article) => a.content.includes("error generating this article"));
-        if (!hasErrors) {
-          console.log("Loaded articles from valid file cache.");
-          cachedArticles = articles;
-          return cachedArticles;
-        } else {
-            console.log("Cache contains errors. Regenerating...");
-        }
+    const data = await fs.readFile(articlesFilePath, 'utf-8');
+    const articles: Article[] = JSON.parse(data);
+    
+    // Check if the file is valid and doesn't contain errors
+    if (articles && articles.length > 0) {
+      const hasErrors = articles.some((a) => a.content.includes("error generating this article"));
+      if (!hasErrors) {
+        console.log("Loaded articles from valid and permanent file cache.");
+        cachedArticles = articles;
+        return cachedArticles;
+      } else {
+        console.log("Cache file contains errors. Will attempt to regenerate.");
       }
-    } else {
-      console.log(`Article cache is older than ${CACHE_TTL_MINUTES} minutes. Regenerating...`);
     }
   } catch (error) {
-    // If file doesn't exist or there was an error reading it, generate new articles.
-    console.log("Article cache not found or is invalid. Generating new articles.");
+    // If file doesn't exist or there's an error reading/parsing it, we'll generate new ones.
+    console.log("Article cache not found or is invalid. Generating new articles for the first time.");
   }
 
   // If we reach here, it means we need to generate articles.
+  // This will now only happen if the cache is missing or corrupt.
   const newArticles = await generateAndCacheArticles();
   cachedArticles = newArticles;
-  return cachedArticles;
+  return newArticles;
 }
 
 export async function getArticles(): Promise<Article[]> {
