@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal, KeyRound } from 'lucide-react';
+import { Terminal, KeyRound, AlertTriangle } from 'lucide-react';
 import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
@@ -13,6 +13,15 @@ export default function SettingsPage() {
   return (
     <MotionWrapper className="container mx-auto max-w-2xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">API Key Setup</h1>
+      
+      <Alert variant="destructive" className="mb-8">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Action Required</AlertTitle>
+        <AlertDescription>
+          The AI features of this application will not work without a valid Google AI API key. Please follow the steps below to add your key. The site will show an error until a key is provided.
+        </AlertDescription>
+      </Alert>
+
       <p className="mb-8 text-lg text-muted-foreground">
         To enable the powerful AI article and image generation features across the site, you need to provide a Google AI API key.
       </p>

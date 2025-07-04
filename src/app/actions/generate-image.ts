@@ -19,7 +19,17 @@ export async function generateImageAction(query: string): Promise<{ imageUrl: st
       prompt: imagePrompt,
       config: {
         // Image generation requires specifying both IMAGE and TEXT as response modalities.
-        responseModalities: ['IMAGE', 'TEXT'], 
+        responseModalities: ['IMAGE', 'TEXT'],
+        safetySettings: [
+            {
+              category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+              threshold: 'BLOCK_NONE',
+            },
+            {
+              category: 'HARM_CATEGORY_HATE_SPEECH',
+              threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+            },
+          ],
       },
     });
     

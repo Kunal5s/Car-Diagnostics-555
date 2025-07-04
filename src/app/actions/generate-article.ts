@@ -35,7 +35,17 @@ const generateArticleFlow = ai.defineFlow(
           schema: GenerateArticleOutputSchema,
         },
         // Increased temperature for more creative and varied writing
-        temperature: 0.7, 
+        temperature: 0.7,
+        safetySettings: [
+          {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_NONE',
+          },
+          {
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+          },
+        ],
       },
     });
 
@@ -54,7 +64,7 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
     return { content: result.content };
   } catch (error: any) {
     console.error(`An error occurred during article generation for topic "${topic}":`, error);
-    const finalError = 'Our AI is currently busy or unable to generate this article. Please try again in a few moments.';
+    const finalError = 'Our AI is currently busy or unable to generate this article. This may be due to a missing or invalid API key. Please check your settings and try again.';
     return { content: '', error: finalError };
   }
 }

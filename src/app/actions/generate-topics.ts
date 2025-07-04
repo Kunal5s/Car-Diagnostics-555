@@ -5,8 +5,8 @@ import { z } from 'zod';
 import type { ArticleTopic } from '@/lib/definitions';
 
 const TopicSchema = z.object({
-  title: z.string().describe("A unique, engaging, 9-word article title about an automotive topic."),
-  category: z.string().describe("The most relevant category for the article title (e.g., 'Engine', 'EVs')."),
+  title: z.string().describe("A compelling, short article title about an automotive topic."),
+  category: z.string().describe("The most relevant category for the article title (e.g., 'Engine', 'EVs', 'Maintenance')."),
 });
 
 const TopicsResponseSchema = z.object({
@@ -25,20 +25,33 @@ const generateTopicsFlow = ai.defineFlow(
   async ({ subject, count }) => {
     const llmResponse = await ai.generate({
       model: 'googleai/gemini-1.5-pro-latest',
-      prompt: `You are an expert automotive content strategist. Your task is to generate a list of unique and compelling article topics. The response must be a JSON object with a single key "topics", which is an array of objects. Each object must have a "title" (a string) and a "category" (a relevant string like "Engine" or "EVs"). The response must be only the JSON object itself, without any surrounding text or markdown.
+      prompt: `You are an automotive content strategist. Generate ${count} compelling and distinct article topics about "${subject}".
 
-      Generate ${count} unique, engaging, and highly specific article titles about "${subject}". Each title MUST be exactly 9 words long. Do not repeat topics. Focus on providing real value to a car owner. For each title, assign the most appropriate category.`,
+      For each topic, provide a short, catchy title and its most relevant category (e.g., 'Engine', 'EVs', 'Maintenance').
+
+      Your response MUST be a valid JSON object following this structure: { "topics": [{"title": "...", "category": "..."}, ...] }.
+      Do not include any other text or markdown formatting outside of the JSON object.`,
       config: {
         output: {
           format: 'json',
           schema: TopicsResponseSchema,
         },
+        safetySettings: [
+            {
+              category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+              threshold: 'BLOCK_NONE',
+            },
+            {
+              category: 'HARM_CATEGORY_HATE_SPEECH',
+              threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+            },
+          ],
       },
     });
 
     const structuredResponse = llmResponse.output();
-    if (!structuredResponse) {
-      throw new Error('Failed to generate topics: AI returned no structured output.');
+    if (!structuredResponse || !structuredResponse.topics || structuredResponse.topics.length === 0) {
+      throw new Error('Failed to generate topics: AI returned invalid or empty topic list.');
     }
     return structuredResponse;
   }
@@ -46,31 +59,41 @@ const generateTopicsFlow = ai.defineFlow(
 
 
 export async function generateTopicsAction(subject: string, count: number = 6): Promise<ArticleTopic[]> {
-  try {
-    const result = await generateTopicsFlow({ subject, count });
-    
-    // The flow returns the structured data directly.
-    // We just need to add the dynamic 'id' and 'slug' for front-end use.
-    return result.topics.map((topic, index) => {
-      const slugData = {
-          title: topic.title,
-          category: topic.category,
-          // Add a nonce to ensure slug is unique even for identical titles
-          nonce: Math.floor(Math.random() * 100000) 
-      };
-      // Create a URL-safe base64 slug
-      const slug = Buffer.from(JSON.stringify(slugData)).toString('base64url');
+  const MAX_RETRIES = 3;
+  let lastError: any = null;
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const result = await generateTopicsFlow({ subject, count });
       
-      return {
-        // Use a random ID for the key prop in React
-        id: Math.floor(Math.random() * 100000) + index, 
-        slug: slug,
-        ...topic,
-      };
-    });
-  } catch (error) {
-    console.error(`An error occurred during topic generation for subject "${subject}":`, error);
-    // Return an empty array to prevent the page from crashing.
-    return [];
+      // Success, process and return the topics
+      return result.topics.map((topic, index) => {
+        const slugData = {
+            title: topic.title,
+            category: topic.category,
+            // Add a nonce to ensure slug is unique even for identical titles
+            nonce: Math.floor(Math.random() * 100000) 
+        };
+        // Create a URL-safe base64 slug
+        const slug = Buffer.from(JSON.stringify(slugData)).toString('base64url');
+        
+        return {
+          id: Math.floor(Math.random() * 100000) + index, 
+          slug: slug,
+          ...topic,
+        };
+      });
+    } catch (error: any) {
+      lastError = error;
+      console.error(`Topic generation attempt ${attempt} failed for subject "${subject}":`, error.message);
+      if (attempt < MAX_RETRIES) {
+        // Wait for 1 second before retrying
+        await new Promise(res => setTimeout(res, 1000));
+      }
+    }
   }
+
+  // If all retries fail, throw the last captured error to the boundary
+  console.error(`All ${MAX_RETRIES} topic generation attempts failed for subject "${subject}".`, lastError);
+  throw new Error('Failed to generate dynamic content. This might be due to a missing or invalid API key or a temporary service issue.');
 }
