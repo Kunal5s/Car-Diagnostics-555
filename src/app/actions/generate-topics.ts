@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -47,6 +48,9 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
       console.warn(`API key for model ${modelName} is not configured. Skipping.`);
       continue;
     }
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20-second timeout
   
     try {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -57,6 +61,7 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
         },
         body: JSON.stringify({
           model: modelName,
+          response_format: { type: "json_object" },
           messages: [
             {
               role: "system",
@@ -68,8 +73,11 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
             },
           ],
         }),
+        signal: controller.signal,
         next: { revalidate: 300 }, // Cache for 5 minutes
       });
+      
+      clearTimeout(timeoutId);
 
       // If rate-limited, log it and try the next model in the loop.
       if (response.status === 429) {
@@ -91,6 +99,8 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
           continue;
       }
       
+      // The 'response_format: { type: "json_object" }' should ensure valid JSON,
+      // but we'll keep the matcher as a fallback for models that don't fully respect it.
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         content = jsonMatch[0];
@@ -121,8 +131,13 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
       });
 
     } catch (error: any) {
-      console.error(`An error occurred during topic generation for subject "${subject}" (model: ${modelName}):`, error.message);
-      // On network error, etc., continue to the next model.
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        console.error(`Topic generation with model ${modelName} timed out. Trying next model.`);
+      } else {
+        console.error(`An error occurred during topic generation for subject "${subject}" (model: ${modelName}):`, error.message);
+      }
+      // On any error (timeout, network, etc.), continue to the next model.
       continue;
     }
   }
