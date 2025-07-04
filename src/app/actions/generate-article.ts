@@ -32,7 +32,7 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
         messages: [
           {
             role: "user",
-            content: `Write a 1200-word SEO-friendly article using H1, H2, and H3 headings on the topic: ${topic}`
+            content: `You are an expert automotive writer and SEO specialist. Write a detailed, comprehensive, and SEO-friendly article of at least 1500 words on the topic: "${topic}". The article MUST be structured with proper headings for maximum readability and SEO value. You must use a main H1 heading for the title, multiple H2 headings for primary sections, and H3, H4, H5, and H6 headings for sub-sections as appropriate. This hierarchical heading structure is mandatory.`
           }
         ]
       })

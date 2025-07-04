@@ -9,8 +9,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { allArticleTopics } from '@/lib/definitions';
 import { generateArticleAction } from '@/app/actions/generate-article';
+import { generateImageAction } from '@/app/actions/generate-image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface ArticlePageProps {
@@ -40,6 +41,7 @@ function ArticleLoadingSkeleton() {
 
 export default function ArticlePage({ params }: ArticlePageProps) {
   const [articleContent, setArticleContent] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,24 +50,31 @@ export default function ArticlePage({ params }: ArticlePageProps) {
   useEffect(() => {
     if (!articleTopic) return;
 
-    const fetchArticle = async () => {
+    const fetchContent = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const result = await generateArticleAction(articleTopic.title);
-        if (result.error) {
-          setError(result.error);
+        const [articleResult, imageResult] = await Promise.all([
+          generateArticleAction(articleTopic.title),
+          generateImageAction(`${articleTopic.title} ${articleTopic.category}`)
+        ]);
+
+        if (articleResult.error) {
+          setError(articleResult.error);
         } else {
-          setArticleContent(result.content);
+          setArticleContent(articleResult.content);
         }
+        
+        setImageUrl(imageResult.imageUrl);
+
       } catch (e) {
-        setError('An unexpected error occurred while fetching the article.');
+        setError('An unexpected error occurred while fetching the article content.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchArticle();
+    fetchContent();
   }, [articleTopic]);
 
   if (!articleTopic) {
@@ -101,13 +110,12 @@ export default function ArticlePage({ params }: ArticlePageProps) {
           </header>
           <div className="relative mb-8 h-64 w-full md:h-96">
             <Image
-              src="https://placehold.co/600x400.png"
+              src={imageUrl || "https://placehold.co/600x400.png"}
               alt={articleTopic.title}
               fill
               className="rounded-lg object-cover"
               sizes="100vw"
               priority
-              data-ai-hint="car engine diagnostics"
             />
           </div>
           <div className="prose prose-lg dark:prose-invert max-w-none">
