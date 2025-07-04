@@ -1,41 +1,45 @@
 import { ArticleGrid } from "@/components/article-grid";
+import { CategoryCard } from "@/components/category-card";
 import { CategoryNav } from "@/components/category-nav";
-import { Search } from "@/components/search";
-import { articles, categories } from "@/lib/data";
+import { articles, categories, categoryDetails } from "@/lib/data";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Car Diagnostics AI - Your Vehicle Health Partner",
-  description: "Explore articles on engine health, sensors, OBD2, maintenance tips, and the latest EV trends. Your go-to resource for car diagnostics.",
+  title: "Explore Automotive Categories - Car Diagnostics AI",
+  description: "Discover AI-curated content across all aspects of automotive diagnostics and technology. Browse categories like Engine, Sensors, OBD2, and more.",
 };
 
-export default function HomePage({
-  searchParams,
-}: {
-  searchParams?: { q?: string };
-}) {
-  const searchTerm = searchParams?.q || "";
-  const filteredArticles = articles.filter((article) =>
-    article.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+export default function HomePage() {
+  const trendingArticles = articles.slice(0, 6);
 
   return (
-    <div className="container mx-auto px-4">
-      <section className="py-12 text-center md:py-20">
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-primary md:text-6xl">
-          CarDiagnosticsBrainAI
-        </h1>
-        <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-          Your intelligent assistant for vehicle diagnostics and maintenance.
-        </p>
-        <div className="mx-auto max-w-2xl">
-          <Search />
-        </div>
-      </section>
-
+    <>
       <CategoryNav categories={categories} />
-      
-      <ArticleGrid articles={filteredArticles} />
-    </div>
+      <div className="container mx-auto px-4">
+        <section className="py-12 text-center md:py-16">
+          <h1 className="text-4xl font-extrabold tracking-tight text-primary lg:text-5xl">
+            Explore Automotive <span className="text-accent">Categories</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
+            Discover AI-curated content across all aspects of automotive diagnostics and technology.
+          </p>
+        </section>
+
+        <section className="pb-12">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
+            {categoryDetails.map((category) => (
+              <CategoryCard key={category.name} category={category} />
+            ))}
+          </div>
+        </section>
+
+        <section className="border-t py-12">
+          <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-primary lg:text-4xl">
+            Trending Articles
+          </h2>
+          <ArticleGrid articles={trendingArticles} />
+        </section>
+      </div>
+    </>
   );
 }

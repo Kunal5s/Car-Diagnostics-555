@@ -1,4 +1,16 @@
 import { slugify } from "./utils";
+import {
+  Car,
+  Cog,
+  Fuel,
+  Cpu,
+  AlertTriangle,
+  Smartphone,
+  Wrench,
+  Zap,
+  TrendingUp,
+  type LucideIcon,
+} from 'lucide-react';
 
 export interface Article {
   id: number;
@@ -9,6 +21,91 @@ export interface Article {
   imageUrl: string;
   slug: string;
 }
+
+export interface CategoryInfo {
+  name: string;
+  description: string;
+  icon: LucideIcon;
+  href: string;
+  color: string;
+  iconColor: string;
+}
+
+export const categoryDetails: CategoryInfo[] = [
+  {
+    name: 'Engine',
+    description: 'Engine diagnostics & performance',
+    icon: Car,
+    href: '/category/engine',
+    color: 'bg-green-500',
+    iconColor: 'text-white',
+  },
+  {
+    name: 'Sensors',
+    description: 'Automotive sensors & monitoring',
+    icon: Cpu,
+    href: '/category/sensors',
+    color: 'bg-blue-500',
+    iconColor: 'text-white',
+  },
+  {
+    name: 'OBD2',
+    description: 'OBD2 diagnostics & scanning',
+    icon: Wrench,
+    href: '/category/obd2',
+    color: 'bg-purple-500',
+    iconColor: 'text-white',
+  },
+  {
+    name: 'Alerts',
+    description: 'Warning systems & alerts',
+    icon: AlertTriangle,
+    href: '/category/alerts',
+    color: 'bg-red-500',
+    iconColor: 'text-white',
+  },
+  {
+    name: 'Apps',
+    description: 'Diagnostic mobile apps',
+    icon: Smartphone,
+    href: '/category/apps',
+    color: 'bg-indigo-500',
+    iconColor: 'text-white',
+  },
+  {
+    name: 'Maintenance',
+    description: 'Vehicle maintenance tips',
+    icon: Cog,
+    href: '/category/maintenance',
+    color: 'bg-teal-500',
+    iconColor: 'text-white',
+  },
+  {
+    name: 'Fuel',
+    description: 'Fuel systems & efficiency',
+    icon: Fuel,
+    href: '/category/fuel',
+    color: 'bg-orange-500',
+    iconColor: 'text-white',
+  },
+  {
+    name: 'EVs',
+    description: 'Electric vehicle technology',
+    icon: Zap,
+    href: '/category/evs',
+    color: 'bg-yellow-500',
+    iconColor: 'text-white',
+  },
+  {
+    name: 'Trends',
+    description: 'Latest automotive trends',
+    icon: TrendingUp,
+    href: '/category/trends',
+    color: 'bg-pink-500',
+    iconColor: 'text-white',
+  },
+];
+
 
 const loremIpsum = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue. Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh. Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam. Sorbi et per. Nam acnunc. Aenean vel massa quis mauris vehicula lacinia. Quisque tincidunt scelerisque libero. Duis risus. Pellentesque commodo, ipsum eu eleifend assa, enim id lorem. Aliquam erat volutpat. In id velit quis magna pres. Cras suscipit, urna at aliquam rhoncus, urna quam viverra nisi, in interdum massa nibh nec erat.
 
