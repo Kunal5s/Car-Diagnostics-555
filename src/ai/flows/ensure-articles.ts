@@ -11,6 +11,9 @@ import { slugify } from '@/lib/utils';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+// Simple in-memory lock to prevent parallel generation runs from exceeding API rate limits.
+let isGenerationInProgress = false;
+
 export interface Article {
   id: number;
   title: string;
@@ -45,82 +48,98 @@ async function readCachedArticles(): Promise<Article[]> {
 }
 
 export async function ensureCategoryArticles(categoryName: string): Promise<Article[]> {
-  console.log(`[ensure-articles] Starting process for category: ${categoryName}`);
-  
-  const topicsForCategory = allArticleTopics.filter(
-    (topic) => topic.category.toLowerCase() === categoryName.toLowerCase()
-  );
-
-  if (topicsForCategory.length === 0) {
-    console.warn(`[ensure-articles] No topics found for category: ${categoryName}`);
-    return [];
+  // If a generation process is already running, skip this request and return what's in the cache.
+  // This prevents multiple parallel requests from overwhelming the API.
+  if (isGenerationInProgress) {
+    console.log("[ensure-articles] Generation is already in progress. Skipping new request.");
+    return readCachedArticles().then(articles => 
+        articles.filter(a => a.category.toLowerCase() === categoryName.toLowerCase())
+    );
   }
 
-  let allCachedArticles = await readCachedArticles();
+  // Set the lock to indicate that generation is starting.
+  isGenerationInProgress = true;
+  console.log(`[ensure-articles] Lock acquired. Starting process for category: ${categoryName}`);
   
-  const articlesToGenerate = topicsForCategory.filter((topic) => {
-      const slug = `${slugify(topic.title)}-${topic.id}`;
-      const existingArticle = allCachedArticles.find(a => a.slug === slug);
-      if (!existingArticle || existingArticle.content.includes(FAILED_GENERATION_TEXT)) {
-          if (!existingArticle) {
-              console.log(`[ensure-articles] Article for topic "${topic.title}" not found. Queued for generation.`);
-          } else {
-              console.log(`[ensure-articles] Article for topic "${topic.title}" contains failed content. Queued for regeneration.`);
-          }
-          return true;
-      }
-      return false;
-  });
+  try {
+    const topicsForCategory = allArticleTopics.filter(
+      (topic) => topic.category.toLowerCase() === categoryName.toLowerCase()
+    );
 
-  if (articlesToGenerate.length > 0) {
-    console.log(`[ensure-articles] Found ${articlesToGenerate.length} missing or failed articles for "${categoryName}". Starting generation...`);
-    const newlyGeneratedArticles: Article[] = [];
-
-    // Filter out the failed articles that are about to be regenerated from the main cache
-    const validCachedArticles = allCachedArticles.filter(a => !articlesToGenerate.some(t => `${slugify(t.title)}-${t.id}` === a.slug));
-
-    for (const topic of articlesToGenerate) {
-      // Respect API rate limits. 15 reqs/min -> 4s per request. Let's do 5s to be safe.
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      console.log(`[ensure-articles] - Generating article for topic: "${topic.title}"`);
-
-      let articleData: GenerateArticleOutput | null = null;
-      let imageUrl: string = 'https://placehold.co/600x400.png';
-
-      try {
-        articleData = await generateArticle({ topic: topic.title });
-      } catch (e: any) {
-        console.error(`[ensure-articles]   - ERROR: Content generation failed for "${topic.title}": ${e.message}`);
-      }
-      
-      try {
-        imageUrl = await getImageForQuery(topic.title);
-      } catch (e: any) {
-        console.error(`[ensure-articles]   - ERROR: Image fetch failed for "${topic.title}": ${e.message}`);
-      }
-      
-      newlyGeneratedArticles.push({
-        id: topic.id,
-        title: topic.title,
-        category: topic.category,
-        summary: articleData?.summary ?? "Error: Failed to generate summary.",
-        content: articleData?.content ?? `# ${FAILED_GENERATION_TEXT}\n\nThis article could not be generated due to an API error. Please check the server logs.`,
-        imageUrl,
-        slug: `${slugify(topic.title)}-${topic.id}`,
-      });
+    if (topicsForCategory.length === 0) {
+      console.warn(`[ensure-articles] No topics found for category: ${categoryName}`);
+      return [];
     }
 
-    const updatedArticles = [...validCachedArticles, ...newlyGeneratedArticles];
-    try {
-      await fs.writeFile(articlesFilePath, JSON.stringify(updatedArticles, null, 2));
-      console.log(`[ensure-articles] Successfully generated ${newlyGeneratedArticles.length} articles and updated cache.`);
-    } catch (error: any) {
-      console.error(`[ensure-articles] CRITICAL: Failed to write final articles cache file: ${error.message}`);
-    }
+    let allCachedArticles = await readCachedArticles();
     
-    return updatedArticles.filter(a => a.category.toLowerCase() === categoryName.toLowerCase());
-  } else {
-    console.log(`[ensure-articles] All articles for "${categoryName}" are already cached and valid.`);
-    return allCachedArticles.filter(a => a.category.toLowerCase() === categoryName.toLowerCase());
+    const articlesToGenerate = topicsForCategory.filter((topic) => {
+        const slug = `${slugify(topic.title)}-${topic.id}`;
+        const existingArticle = allCachedArticles.find(a => a.slug === slug);
+        if (!existingArticle || existingArticle.content.includes(FAILED_GENERATION_TEXT)) {
+            if (!existingArticle) {
+                console.log(`[ensure-articles] Article for topic "${topic.title}" not found. Queued for generation.`);
+            } else {
+                console.log(`[ensure-articles] Article for topic "${topic.title}" contains failed content. Queued for regeneration.`);
+            }
+            return true;
+        }
+        return false;
+    });
+
+    if (articlesToGenerate.length > 0) {
+      console.log(`[ensure-articles] Found ${articlesToGenerate.length} missing or failed articles for "${categoryName}". Starting generation...`);
+      const newlyGeneratedArticles: Article[] = [];
+
+      const validCachedArticles = allCachedArticles.filter(a => !articlesToGenerate.some(t => `${slugify(t.title)}-${t.id}` === a.slug));
+
+      for (const topic of articlesToGenerate) {
+        // Increased delay to be safer with API rate limits (10 reqs/min).
+        await new Promise(resolve => setTimeout(resolve, 6000));
+        console.log(`[ensure-articles] - Generating article for topic: "${topic.title}"`);
+
+        let articleData: GenerateArticleOutput | null = null;
+        let imageUrl: string = 'https://placehold.co/600x400.png';
+
+        try {
+          articleData = await generateArticle({ topic: topic.title });
+        } catch (e: any) {
+          console.error(`[ensure-articles]   - ERROR: Content generation failed for "${topic.title}": ${e.message}`);
+        }
+        
+        try {
+          imageUrl = await getImageForQuery(topic.title);
+        } catch (e: any) {
+          console.error(`[ensure-articles]   - ERROR: Image fetch failed for "${topic.title}": ${e.message}`);
+        }
+        
+        newlyGeneratedArticles.push({
+          id: topic.id,
+          title: topic.title,
+          category: topic.category,
+          summary: articleData?.summary ?? "Error: Failed to generate summary.",
+          content: articleData?.content ?? `# ${FAILED_GENERATION_TEXT}\n\nThis article could not be generated due to an API error. Please check the server logs.`,
+          imageUrl,
+          slug: `${slugify(topic.title)}-${topic.id}`,
+        });
+      }
+
+      const updatedArticles = [...validCachedArticles, ...newlyGeneratedArticles];
+      try {
+        await fs.writeFile(articlesFilePath, JSON.stringify(updatedArticles, null, 2));
+        console.log(`[ensure-articles] Successfully generated ${newlyGeneratedArticles.length} articles and updated cache.`);
+      } catch (error: any) {
+        console.error(`[ensure-articles] CRITICAL: Failed to write final articles cache file: ${error.message}`);
+      }
+      
+      return updatedArticles.filter(a => a.category.toLowerCase() === categoryName.toLowerCase());
+    } else {
+      console.log(`[ensure-articles] All articles for "${categoryName}" are already cached and valid.`);
+      return allCachedArticles.filter(a => a.category.toLowerCase() === categoryName.toLowerCase());
+    }
+  } finally {
+    // Release the lock once the process is complete (or has failed).
+    isGenerationInProgress = false;
+    console.log("[ensure-articles] Process finished. Lock released.");
   }
 }
