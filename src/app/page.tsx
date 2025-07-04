@@ -115,19 +115,43 @@ const testimonials = [
 const faqItems = [
   {
     question: "What is Car Diagnostics BrainAi?",
-    answer: "Car Diagnostics BrainAi is an AI-powered tool that helps you diagnose vehicle problems quickly and accurately. It reads your car's computer system, analyzes fault codes, and provides easy-to-understand reports and repair suggestions.",
+    answer: "BrainAi is an AI tool that scans your car for faults. It decodes complex error codes into simple reports and suggests potential fixes, making car care easy and understandable.",
   },
   {
-    question: "Is it safe for my vehicle?",
-    answer: "Yes, absolutely. BrainAi uses industry-standard, read-only communication protocols to interact with your car's On-Board Diagnostics (OBD2) port. It cannot make any changes to your vehicle's software or settings, ensuring it's completely safe.",
+    question: "Do I need special tools to use BrainAi?",
+    answer: "No tools are required! You can use your phone's camera for a quick scan. For deeper insights, you can connect an optional standard OBD2 scanner to the app.",
   },
   {
-    question: "What cars does it work with?",
-    answer: "BrainAi is compatible with most gasoline vehicles manufactured since 1996 and diesel vehicles since 2004, as they are equipped with an OBD2 port. This includes a wide range of sedans, SUVs, trucks, and EVs.",
+    question: "What problems can BrainAi detect?",
+    answer: "BrainAi identifies thousands of issues, from engine misfires and sensor failures to transmission warnings. It helps you catch problems early to avoid costly future repairs and breakdowns.",
   },
   {
-    question: "Is BrainAi better than a human mechanic?",
-    answer: "BrainAi is a powerful diagnostic assistant, not a replacement for a skilled mechanic. It empowers you with data and insights to have more informed conversations with repair professionals, helps you avoid unnecessary repairs, and allows you to handle minor fixes yourself.",
+    question: "Is my vehicle compatible with BrainAi?",
+    answer: "Our system works with most cars, trucks, and SUVs manufactured after 1996, including gasoline, diesel, and electric vehicles. Check your car's compatibility on our website.",
+  },
+  {
+    question: "How accurate are the AI diagnostics?",
+    answer: "Our AI uses a massive vehicle database for highly accurate reports. It analyzes error codes and symptoms to provide reliable insights, helping you understand your car's health better.",
+  },
+  {
+    question: "Can BrainAi help me save money?",
+    answer: "Yes! By pinpointing exact issues, BrainAi helps you avoid unnecessary diagnostic fees and repairs. Informed car owners make smarter, more cost-effective decisions about their vehicle's maintenance.",
+  },
+  {
+    question: "Is my personal and vehicle data secure?",
+    answer: "Absolutely. Your privacy is a top priority. All data is encrypted and handled with strict security protocols. We do not share your information without your explicit consent.",
+  },
+  {
+    question: "How do Smart Fix suggestions work?",
+    answer: "After a diagnosis, BrainAi provides estimated repair costs and DIY guides for simple fixes. This feature empowers you to handle minor issues yourself and save on labor costs.",
+  },
+  {
+    question: "Can I use BrainAi for regular maintenance?",
+    answer: "Definitely. BrainAi is perfect for proactive vehicle care. It helps you track your car's health over time and stay ahead of potential issues before they become serious problems.",
+  },
+  {
+    question: "Does this replace my mechanic?",
+    answer: "BrainAi is a powerful diagnostic partner, not a replacement for a skilled mechanic. It gives you the data needed for informed conversations and faster, more accurate professional repairs.",
   },
 ];
 
@@ -148,7 +172,7 @@ export default async function HomePage() {
             Detect engine problems instantly using artificial intelligence. No tools required.
           </p>
           <Button size="lg" variant="secondary" asChild>
-            <Link href="#">Start Free Scan</Link>
+            <Link href="/settings">Start Free Scan</Link>
           </Button>
         </div>
       </section>
