@@ -22,12 +22,11 @@ export default async function BlogPage() {
     { label: "Blog" },
   ];
   
-  // Generate topics from all categories to create a diverse list
-  const allGeneratedTopics = (await Promise.all(
-      categories
-        .filter(c => c !== "All")
-        .map(category => generateTopicsAction(category, 3)) // 3 topics per category
-  )).flat();
+  // This reduces N API calls to a single one, making it much less likely to hit a rate limit.
+  const allGeneratedTopics = await generateTopicsAction(
+    "a diverse range of automotive subjects including Engine, Sensors, OBD2, Maintenance, and EVs",
+    18
+  );
 
 
   // Fetch all images in parallel for the generated topics

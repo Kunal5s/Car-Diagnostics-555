@@ -47,7 +47,11 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
 
     if (!response.ok) {
         const errorText = await response.text();
-        console.error("OpenRouter API error:", errorText);
+        console.error(`OpenRouter API error (status ${response.status}):`, errorText);
+        if (response.status === 429) {
+          // Provide a user-friendly message for rate limiting
+          throw new Error('Our AI is currently busy generating new content. Please try again in a few moments.');
+        }
         throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
@@ -67,6 +71,7 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
       return { content: '', error: 'The request to generate the article took too long and timed out. Please try again.' };
     }
     console.error("An error occurred during article generation:", error);
+    // Pass the specific, user-friendly error message to the UI
     return { content: '', error: error.message || 'An unexpected error occurred while generating the article.' };
   }
 }
