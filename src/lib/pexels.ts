@@ -12,7 +12,8 @@ export async function getImageForQuery(query: string): Promise<string> {
     return placeholderImage;
   }
   try {
-    const response = await pexelsClient.photos.search({ query: `${query} automotive`, per_page: 1 });
+    // Make query more specific to get better results
+    const response = await pexelsClient.photos.search({ query: `${query} automotive technology`, per_page: 1 });
     if ('photos' in response && response.photos.length > 0) {
       return response.photos[0].src.large;
     }

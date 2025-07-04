@@ -33,14 +33,19 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateArticleOutputSchema},
   prompt: `You are an expert automotive writer and SEO specialist. Write a detailed, comprehensive, and engaging article about the following topic: '{{{topic}}}'.
 
-The article should be well-structured, unique, and at least 1700 words long.
+The article must be at least 1700 words long.
 
-Start with a compelling introduction. Use Markdown for formatting. The main title should be an H1 heading (#). Use H2 (##), H3 (###), and even H4-H6 for subheadings to organize the content logically and create a deep structure. Conclude with a useful summary paragraph.
+Your response must be in Markdown format. The structure is critical.
+- The main title of the article must be an H1 heading (#).
+- Use multiple H2 (##) headings for main sections.
+- Under each H2, use several H3 (###) headings for sub-sections.
+- If needed, you can use H4, H5, and H6 for deeper nesting.
+- This hierarchical heading structure is mandatory.
+- Start with a compelling introduction and end with a useful summary paragraph.
 
-IMPORTANT: The output format for the article content MUST be Markdown.
+IMPORTANT: The output format for the article content MUST be well-structured Markdown with the specified headings.
 
-Provide a concise, SEO-friendly summary for the article (around 160 characters).
-Also provide the full article content as Markdown.`,
+Also provide a concise, SEO-friendly summary for the article (around 160 characters).`,
 });
 
 const generateArticleFlow = ai.defineFlow(
