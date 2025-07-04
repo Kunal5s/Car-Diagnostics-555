@@ -31,30 +31,29 @@ const prompt = ai.definePrompt({
   name: 'articleGeneratorPrompt',
   input: {schema: GenerateArticleInputSchema},
   output: {schema: GenerateArticleOutputSchema},
-  prompt: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: '{{{topic}}}'.
+  prompt: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the following topic: '{{{topic}}}'.
 
-This is a strict and non-negotiable set of rules. You MUST follow them precisely.
+You must follow this set of non-negotiable rules precisely. Failure to comply will result in an unacceptable output.
 
-**RULE 1: WORD COUNT**
-The article's total word count MUST be exactly 1600 words. Not 1500, not 1800. Exactly 1600 words.
+**RULE 1: ARTICLE LENGTH (MANDATORY)**
+The article's total word count MUST be AT LEAST 1700 words. A shorter article is not acceptable. Aim for depth and comprehensiveness.
 
-**RULE 2: MARKDOWN STRUCTURE (MANDATORY)**
-Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
-- The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). This MUST be the very first line of the content.
-- You MUST include at least five (5) H2 (##) headings to structure the main sections of the article.
-- Within EACH H2 section, you MUST use at least two (2) H3 (###) headings to break down the content into sub-sections.
-- You may use H4, H5, and H6 headings for deeper nesting, but the H1, H2, and H3 structure is not optional.
-- The use of this hierarchical heading structure (H1 -> H2 -> H3 etc.) is MANDATORY and must be followed strictly.
-- Start the article with a compelling introduction (immediately following the H1 heading) and conclude with a useful summary paragraph.
+**RULE 2: MARKDOWN STRUCTURE (MANDATORY AND STRICT)**
+The entire response body MUST be in well-structured Markdown format. This structure is critical for SEO and readability, and you MUST adhere to it.
+- **H1 Heading:** The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). This MUST be the very first line of the content. There can only be ONE H1 heading.
+- **H2 Headings:** You MUST include at least five (5) H2 (##) headings to structure the main sections of the article.
+- **H3 Headings:** Within EACH H2 section, you MUST use at least two (2) H3 (###) headings to break down the content into more specific sub-sections.
+- **Deeper Headings:** You may use H4, H5, and H6 headings for deeper nesting where appropriate, but the H1, H2, and H3 structure is the minimum requirement and is not optional.
+- **Content Flow:** Start the article with a compelling introduction (immediately following the H1 heading) and conclude with a useful summary paragraph.
 
-**RULE 3: CONTENT RELEVANCE**
-The entire article must be 100% focused on the provided topic: '{{{topic}}}'. Do not deviate from this topic.
+**RULE 3: CONTENT RELEVANCE (MANDATORY)**
+The entire article must be 100% focused on the provided topic: '{{{topic}}}'. Do not include any unrelated information.
 
-**RULE 4: SUMMARY**
-In addition to the article, you must provide a concise, SEO-friendly summary for the article (approximately 160 characters).
+**RULE 4: SEO SUMMARY (MANDATORY)**
+In addition to the full article, you must provide a concise, SEO-friendly summary for the article (approximately 160 characters). This summary is for metadata purposes.
 
 **FINAL INSTRUCTION:**
-The final output must conform to the specified JSON schema, with the 'content' field containing the full 1600-word article in the structured Markdown format described above, and the 'summary' field containing the short summary. Failure to follow these rules will result in an invalid response.`,
+The final output must strictly conform to the specified JSON schema. The 'content' field must contain the full 1700+ word article in the structured Markdown format described above, and the 'summary' field must contain the short summary. Adhere to all rules strictly.`,
 });
 
 const generateArticleFlow = ai.defineFlow(
@@ -65,8 +64,8 @@ const generateArticleFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input);
-    if (!output) {
-      throw new Error('Failed to generate article content.');
+    if (!output || !output.content || !output.summary) {
+      throw new Error(`AI failed to generate valid content for topic: "${input.topic}". The output was empty or incomplete.`);
     }
     return output;
   }

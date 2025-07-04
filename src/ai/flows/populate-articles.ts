@@ -1,9 +1,7 @@
 'use server';
 /**
  * @fileOverview A flow to generate and populate all 54 articles for the website.
- * This is a long-running, one-time process that should be manually triggered.
- *
- * - populateAllArticles - The function that orchestrates the generation and saving of all articles.
+ * This is a long-running, one-time process that should be manually triggered from the admin panel.
  */
 
 import { generateArticle, type GenerateArticleOutput } from '@/ai/flows/generate-article';
@@ -37,32 +35,26 @@ export async function populateAllArticles(): Promise<{
     await new Promise(resolve => setTimeout(resolve, 6000));
     console.log(`- Processing topic: "${topic.title}"`);
 
-    let articleData: GenerateArticleOutput = {
-      summary: "Could not load article summary.",
-      content: "There was an error generating this article. Please try again later.",
-    };
-    let imageUrl = 'https://placehold.co/600x400.png';
+    let articleData: GenerateArticleOutput;
+    let imageUrl: string;
 
     try {
       console.log(`  - Generating article content...`);
-      const generatedData = await generateArticle({ topic: topic.title });
-      if (generatedData) {
-        articleData = generatedData;
-      }
+      articleData = await generateArticle({ topic: topic.title });
     } catch (e: any) {
-      console.error(`  - Failed to generate article content for topic: ${topic.title}`, e.message);
-      // We still push the article with an error message in the content.
+      console.error(`  - CRITICAL: Failed to generate article content for topic: ${topic.title}`, e.message);
+      // Stop the entire process if a single article fails to generate.
+      throw new Error(`Failed on topic "${topic.title}": ${e.message}`);
     }
 
     try {
       console.log(`  - Fetching image for: ${topic.title}`);
-      // Use a more specific query for better images
-      const fetchedImageUrl = await getImageForQuery(`${topic.title} car automotive technology`);
-      if (fetchedImageUrl) {
-        imageUrl = fetchedImageUrl;
-      }
-    } catch (e: any) {
-      console.error(`  - Failed to fetch image for topic: ${topic.title}`, e.message);
+      // Use the specific article title for a more relevant image query.
+      imageUrl = await getImageForQuery(topic.title);
+    } catch (e: any)      {
+      console.error(`  - CRITICAL: Failed to fetch image for topic: ${topic.title}`, e.message);
+       // Stop the entire process if an image fails to fetch.
+       throw new Error(`Failed to fetch image for "${topic.title}": ${e.message}`);
     }
 
     articles.push({
@@ -82,6 +74,7 @@ export async function populateAllArticles(): Promise<{
     return { success: true, articlesGenerated: articles.length };
   } catch (error: any) {
     console.error("CRITICAL: Failed to write final articles cache file:", error);
-    return { success: false, error: `Failed to write to articles.json: ${error.message}` };
+    // This is a critical failure, throw it so the client knows.
+    throw new Error(`Failed to write articles.json: ${error.message}`);
   }
 }
