@@ -151,6 +151,23 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Trending Articles Section */}
+      <section className="py-12 bg-secondary/50">
+        <div className="container mx-auto px-4">
+          <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-primary lg:text-4xl">
+            From Our Knowledge Base
+          </h2>
+          <ArticleGrid articles={trendingArticles} />
+          <div className="text-center mt-8">
+            <Button asChild variant="outline">
+              <Link href="/blog">
+                Explore All Articles <ChevronRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
@@ -262,23 +279,6 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Trending Articles Section */}
-      <section className="py-12 bg-secondary/50">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-primary lg:text-4xl">
-            From Our Knowledge Base
-          </h2>
-          <ArticleGrid articles={trendingArticles} />
-          <div className="text-center mt-8">
-            <Button asChild variant="outline">
-              <Link href="/blog">
-                Explore All Articles <ChevronRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
           </div>
         </div>
       </section>
