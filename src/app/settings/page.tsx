@@ -4,8 +4,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Settings - Car Diagnostics AI',
-  description: 'Manage your API keys and application settings for Car Diagnostics AI.',
+  title: 'API Key Setup - Car Diagnostics AI',
+  description: 'Instructions for setting up the required API keys for Car Diagnostics AI content generation features.',
 };
 
 export default function SettingsPage() {
@@ -13,14 +13,14 @@ export default function SettingsPage() {
     <div className="container mx-auto max-w-2xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">API Key Setup</h1>
       <p className="mb-8 text-lg text-muted-foreground">
-        To enable the article and image generation features, you need to provide API keys from Google and Pexels.
+        To enable the article and image generation features, you need to provide API keys from Google and Pexels. These keys are used by the server for content generation.
       </p>
       
       <Card>
         <CardHeader>
           <CardTitle>Required API Keys</CardTitle>
           <CardDescription>
-            Follow these steps to securely add your API keys to the project. These keys are used by the server and are essential for content generation.
+            Follow these steps to securely add your API keys to the project.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -74,9 +74,9 @@ export default function SettingsPage() {
 
            <Alert>
             <Terminal className="h-4 w-4" />
-            <AlertTitle>Restart Required!</AlertTitle>
+            <AlertTitle>Important: Restart Required!</AlertTitle>
             <AlertDescription>
-              After saving your `.env` file, you must restart the application for the new keys to be loaded.
+              After creating or updating your `.env` file, you must restart your application for the changes to take effect.
             </AlertDescription>
           </Alert>
 
