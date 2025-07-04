@@ -15,6 +15,7 @@ export function Footer() {
     { href: '/privacy-policy', label: 'Privacy Policy' },
     { href: '/terms-of-service', label: 'Terms of Service' },
     { href: '/disclaimer', label: 'Disclaimer' },
+    { href: '/admin/generate', label: 'Admin' },
   ];
 
   const socialLinks = [
