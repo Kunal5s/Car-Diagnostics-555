@@ -3,6 +3,7 @@ import { allArticleTopics } from "@/lib/definitions";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MotionWrapper } from "@/components/motion-wrapper";
+import { generateImageAction } from "@/app/actions/generate-image";
 
 export const metadata: Metadata = {
   title: 'All Articles - Car Diagnostics AI',
@@ -15,7 +16,14 @@ export default async function BlogPage() {
     { label: "Blog" },
   ];
   
-  const articles = allArticleTopics;
+  const articleTopics = allArticleTopics;
+
+  const articles = await Promise.all(
+    articleTopics.map(async (article) => {
+      const { imageUrl } = await generateImageAction(`${article.title} ${article.category}`);
+      return { ...article, imageUrl };
+    })
+  );
 
   return (
     <div className="container mx-auto px-4 py-12">

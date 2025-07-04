@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 interface ArticleCardProps {
-  article: ArticleTopic;
+  article: ArticleTopic & { imageUrl: string };
 }
 
 export function ArticleCard({ article }: ArticleCardProps) {
@@ -21,7 +21,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
       <CardHeader className="p-0">
         <div className="relative h-48 w-full">
           <Image
-            src={`https://picsum.photos/seed/${article.id}/600/400`}
+            src={article.imageUrl || `https://placehold.co/600x400.png`}
             alt={article.title}
             fill
             className="object-cover"

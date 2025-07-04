@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { MotionWrapper } from "@/components/motion-wrapper";
 import { MotionGrid } from "@/components/motion-grid";
+import { generateImageAction } from "@/app/actions/generate-image";
 
 export const metadata: Metadata = {
   title: "AI Car Diagnostics Made Easy with BrainAi - Engine Fault Scan",
@@ -158,7 +159,14 @@ const faqItems = [
 
 
 export default async function HomePage() {
-  const trendingArticles = allArticleTopics.slice(0, 6);
+  const trendingArticleTopics = allArticleTopics.slice(0, 6);
+  
+  const trendingArticles = await Promise.all(
+    trendingArticleTopics.map(async (article) => {
+      const { imageUrl } = await generateImageAction(`${article.title} ${article.category}`);
+      return { ...article, imageUrl };
+    })
+  );
 
   return (
     <div className="flex flex-col">
