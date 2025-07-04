@@ -3,27 +3,20 @@ import { allArticleTopics } from "@/lib/definitions";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MotionWrapper } from "@/components/motion-wrapper";
-import { generateImageAction } from "@/app/actions/generate-image";
 
 export const metadata: Metadata = {
   title: 'All Articles - Car Diagnostics AI',
   description: 'Browse all our articles on car diagnostics, maintenance, and technology.',
 };
 
-export default async function BlogPage() {
+export default function BlogPage() {
   const breadcrumbItems = [
     { label: "Home", href: "/" },
     { label: "Blog" },
   ];
   
-  const articleTopics = allArticleTopics;
-
-  const articles = await Promise.all(
-    articleTopics.map(async (article) => {
-      const { imageUrl } = await generateImageAction(`${article.title} ${article.category}`);
-      return { ...article, imageUrl };
-    })
-  );
+  // We pass the topics without images. The ArticleCard component will fetch them.
+  const articles = allArticleTopics;
 
   return (
     <div className="container mx-auto px-4 py-12">

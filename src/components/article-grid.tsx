@@ -5,7 +5,7 @@ import { AlertCircle } from "lucide-react";
 import { MotionGrid } from "./motion-grid";
 
 interface ArticleGridProps {
-  articles: (ArticleTopic & { imageUrl: string })[];
+  articles: ArticleTopic[];
 }
 
 export function ArticleGrid({ articles }: ArticleGridProps) {

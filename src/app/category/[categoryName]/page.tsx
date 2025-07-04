@@ -4,7 +4,6 @@ import { allArticleTopics, categories, categoryDetails } from "@/lib/definitions
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
 import { MotionWrapper } from "@/components/motion-wrapper";
-import { generateImageAction } from "@/app/actions/generate-image";
 
 export async function generateMetadata({ params }: { params: { categoryName: string } }): Promise<Metadata> {
   const categoryName = decodeURIComponent(params.categoryName);
@@ -46,13 +45,6 @@ export default async function CategoryPage({
     (article) => article.category.toLowerCase() === categoryName.toLowerCase()
   );
 
-  const articlesWithImages = await Promise.all(
-    articlesForCategory.map(async (article) => {
-      const { imageUrl } = await generateImageAction(`${article.title} ${article.category}`);
-      return { ...article, imageUrl };
-    })
-  );
-
   const breadcrumbItems = [
     { label: "Home", href: "/" },
     { label: categoryInfo.name },
@@ -71,8 +63,8 @@ export default async function CategoryPage({
           </p>
         </div>
       </MotionWrapper>
-
-      <ArticleGrid articles={articlesWithImages} />
+      {/* We pass articles without images; ArticleCard will fetch them on the client */}
+      <ArticleGrid articles={articlesForCategory} />
     </div>
   );
 }

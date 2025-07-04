@@ -15,9 +15,18 @@ import { AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MotionWrapper } from '@/components/motion-wrapper';
 
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+interface CachedArticle {
+  content: string;
+  imageUrl: string;
+  timestamp: number;
+}
+
 function ArticleLoadingSkeleton() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12 space-y-8">
+      <Skeleton className="h-8 w-1/3" />
       <Skeleton className="h-12 w-3/4" />
       <div className="relative mb-8 h-64 w-full md:h-96">
         <Skeleton className="h-full w-full rounded-lg" />
@@ -61,6 +70,25 @@ export default function ArticlePage() {
     const fetchContent = async () => {
       setIsLoading(true);
       setError(null);
+      
+      const cacheKey = `article_${slug}`;
+      try {
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          const { content, imageUrl, timestamp }: CachedArticle = JSON.parse(cachedData);
+          if (Date.now() - timestamp < CACHE_DURATION) {
+            setArticleContent(content);
+            setImageUrl(imageUrl);
+            setIsLoading(false);
+            console.log("Loaded from cache");
+            return;
+          }
+           console.log("Cache expired, fetching new content");
+        }
+      } catch (e) {
+          console.error("Could not read from cache", e);
+      }
+      
       try {
         const [articleResult, imageResult] = await Promise.all([
           generateArticleAction(articleTopic.title),
@@ -74,6 +102,19 @@ export default function ArticlePage() {
         }
         
         setImageUrl(imageResult.imageUrl);
+        
+        if (!articleResult.error && articleResult.content) {
+            try {
+                const newCacheData: CachedArticle = {
+                    content: articleResult.content,
+                    imageUrl: imageResult.imageUrl,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(cacheKey, JSON.stringify(newCacheData));
+            } catch (e) {
+                console.error("Could not write to cache", e);
+            }
+        }
 
       } catch (e) {
         setError('An unexpected error occurred while fetching the article content.');
