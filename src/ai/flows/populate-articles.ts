@@ -57,7 +57,7 @@ export async function populateAllArticles(): Promise<{
     try {
       console.log(`  - Fetching image for: ${topic.title}`);
       // Use a more specific query for better images
-      const fetchedImageUrl = await getImageForQuery(`${topic.title} car automotive`);
+      const fetchedImageUrl = await getImageForQuery(`${topic.title} car automotive technology`);
       if (fetchedImageUrl) {
         imageUrl = fetchedImageUrl;
       }
