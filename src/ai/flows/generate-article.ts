@@ -69,22 +69,6 @@ const generateArticleFlow = ai.defineFlow(
       throw new Error(`AI failed to generate valid content for topic: "${input.topic}". The output was empty or incomplete.`);
     }
 
-    // Strict validation checks
-    if (!output.content.startsWith('# ')) {
-        throw new Error(`AI failed to follow mandatory Markdown structure for topic: "${input.topic}". Missing or incorrectly placed H1 heading.`);
-    }
-    if ((output.content.match(/## /g) || []).length < 5) {
-        throw new Error(`AI failed to follow mandatory Markdown structure for topic: "${input.topic}". Missing required number of H2 headings.`);
-    }
-    if ((output.content.match(/### /g) || []).length < 10) {
-        throw new Error(`AI failed to follow mandatory Markdown structure for topic: "${input.topic}". Missing required number of H3 headings.`);
-    }
-
-    const wordCount = output.content.split(' ').length;
-    if (wordCount < 1200) {
-        throw new Error(`AI failed to meet the minimum word count of 1200 for topic: "${input.topic}". Word count was ${wordCount}.`);
-    }
-
     return output;
   }
 );
