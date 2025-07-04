@@ -31,21 +31,21 @@ const prompt = ai.definePrompt({
   name: 'articleGeneratorPrompt',
   input: {schema: GenerateArticleInputSchema},
   output: {schema: GenerateArticleOutputSchema},
-  prompt: `You are an expert automotive writer and SEO specialist. Write a detailed, comprehensive, and engaging article about the following topic: '{{{topic}}}'.
+  prompt: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: '{{{topic}}}'.
 
-The article must be at least 1700 words long.
+The article MUST be at least 1700 words long.
 
-Your response must be in Markdown format. The structure is critical.
-- The main title of the article must be an H1 heading (#).
-- Use multiple H2 (##) headings for main sections.
-- Under each H2, use several H3 (###) headings for sub-sections.
-- If needed, you can use H4, H5, and H6 for deeper nesting.
-- This hierarchical heading structure is mandatory.
-- Start with a compelling introduction and end with a useful summary paragraph.
+Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
+- The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the content.
+- You MUST include multiple H2 (##) headings to structure the main sections of the article.
+- Within each H2 section, you MUST use several H3 (###) headings to break down the content into sub-sections.
+- For even deeper nesting where necessary, you can use H4, H5, and H6 headings.
+- The use of this hierarchical heading structure (H1 -> H2 -> H3 etc.) is MANDATORY and must be followed strictly.
+- Start the article with a compelling introduction (immediately following the H1 heading) and conclude with a useful summary paragraph.
 
-IMPORTANT: The output format for the article content MUST be well-structured Markdown with the specified headings.
+In addition to the article, you must provide a concise, SEO-friendly summary for the article (approximately 160 characters).
 
-Also provide a concise, SEO-friendly summary for the article (around 160 characters).`,
+IMPORTANT: The final output must conform to the specified JSON schema, with the 'content' field containing the full article in the structured Markdown format described above. Failure to follow the Markdown structure will result in an invalid response.`,
 });
 
 const generateArticleFlow = ai.defineFlow(

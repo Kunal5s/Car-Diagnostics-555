@@ -99,38 +99,47 @@ async function generateAndCacheArticles(): Promise<Article[]> {
 
   const articles: Article[] = [];
   for (const topic of articleTopics) {
-    try {
-      console.log(`- Generating article for: "${topic.title}"`);
-      // Wait for 6 seconds between requests to respect the free tier rate limit (15 requests/minute).
-      await new Promise(resolve => setTimeout(resolve, 6000));
-
-      const [{ summary, content }, imageUrl] = await Promise.all([
-        generateArticle({ topic: topic.title }),
-        getImageForQuery(`${topic.title} ${topic.category}`)
-      ]);
-
-      articles.push({
-        id: topic.id,
-        title: topic.title,
-        category: topic.category,
-        summary,
-        content,
-        imageUrl,
-        slug: `${slugify(topic.title)}-${topic.id}`
-      });
-    } catch (e) {
-      console.error(`Failed to generate article for topic: ${topic.title}`, e);
-      // Return a fallback article so the site doesn't crash
-      articles.push({
-        id: topic.id,
-        title: topic.title,
-        category: topic.category,
+    // Wait for 6 seconds between requests to respect the free tier rate limit.
+    await new Promise(resolve => setTimeout(resolve, 6000));
+    console.log(`- Processing topic: "${topic.title}"`);
+    
+    let articleData = {
         summary: "Could not load article summary.",
         content: "There was an error generating this article. Please try again later.",
-        imageUrl: 'https://placehold.co/600x400.png',
-        slug: `${slugify(topic.title)}-${topic.id}`
-      });
+    };
+    let imageUrl = 'https://placehold.co/600x400.png';
+
+    try {
+        console.log(`  - Generating article content...`);
+        const generatedData = await generateArticle({ topic: topic.title });
+        if (generatedData) {
+            articleData = generatedData;
+        }
+    } catch (e) {
+        console.error(`  - Failed to generate article content for topic: ${topic.title}`, e);
+        // Keep default error content if generation fails
     }
+
+    try {
+        console.log(`  - Fetching image...`);
+        const fetchedImageUrl = await getImageForQuery(`${topic.title} ${topic.category}`);
+        if(fetchedImageUrl) {
+            imageUrl = fetchedImageUrl;
+        }
+    } catch(e) {
+        console.error(`  - Failed to fetch image for topic: ${topic.title}`, e);
+        // Keep default placeholder image if fetch fails
+    }
+
+    articles.push({
+        id: topic.id,
+        title: topic.title,
+        category: topic.category,
+        summary: articleData.summary,
+        content: articleData.content,
+        imageUrl,
+        slug: `${slugify(topic.title)}-${topic.id}`
+    });
   }
 
   try {
@@ -162,9 +171,15 @@ async function loadArticles(): Promise<Article[]> {
       const data = await fs.readFile(articlesFilePath, 'utf-8');
       const articles = JSON.parse(data);
       if (articles && articles.length > 0) {
-        console.log("Loaded articles from valid file cache.");
-        cachedArticles = articles;
-        return cachedArticles;
+        // Check if the content is still the error message
+        const hasErrors = articles.some((a: Article) => a.content.includes("error generating this article"));
+        if (!hasErrors) {
+          console.log("Loaded articles from valid file cache.");
+          cachedArticles = articles;
+          return cachedArticles;
+        } else {
+            console.log("Cache contains errors. Regenerating...");
+        }
       }
     } else {
       console.log(`Article cache is older than ${CACHE_TTL_MINUTES} minutes. Regenerating...`);
