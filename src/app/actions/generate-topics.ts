@@ -1,4 +1,3 @@
-
 'use server';
 
 import { z } from 'zod';
@@ -20,13 +19,13 @@ const TopicsResponseSchema = z.object({
 });
 
 /**
- * Generates a list of unique article topics for a given subject using OpenRouter, with model balancing.
- * @param subject The automotive subject (e.g., "Engine", "EVs", "a diverse range of topics").
+ * Generates a list of unique article topics using a resilient, multi-model approach.
+ * It will try multiple AI models in sequence if one is rate-limited or fails.
+ * @param subject The automotive subject (e.g., "Engine", "EVs").
  * @param count The number of topics to generate.
  * @returns A promise that resolves to an array of topic objects.
  */
 export async function generateTopicsAction(subject: string, count: number = 6): Promise<ArticleTopic[]> {
-  // Balance the load between two different free models on OpenRouter.
   const models = [
     {
       name: 'openrouter/cypher-alpha:free',
@@ -38,84 +37,97 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
     },
   ];
 
-  // Randomly select one of the models to use for this request.
-  const selectedModel = models[Math.floor(Math.random() * models.length)];
-  const { name: modelName, apiKey } = selectedModel;
+  // Shuffle models to balance the load and not always hit the same one first.
+  const shuffledModels = models.sort(() => 0.5 - Math.random());
 
-  if (!apiKey) {
-    console.error(`OpenRouter API key for model ${modelName} is not configured.`);
-    return []; // Return empty array to prevent page crash.
+  for (const model of shuffledModels) {
+    const { name: modelName, apiKey } = model;
+
+    if (!apiKey) {
+      console.warn(`API key for model ${modelName} is not configured. Skipping.`);
+      continue;
+    }
+  
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert automotive content strategist. Your task is to generate a list of unique and compelling article topics. The response must be a JSON object with a single key "topics", which is an array of objects. Each object in the array must have a "title" and a "category". The category MUST be one of the following: ${validCategories.map(c => `"${c}"`).join(', ')}. Do not include any other text, explanation, or markdown formatting in your response. The JSON object must look like this: {"topics": [{"title": "...", "category": "..."}]}`
+            },
+            {
+              role: "user",
+              content: `Generate ${count} unique, engaging, and highly specific article titles about "${subject}". Each title MUST be exactly 9 words long. Do not repeat topics. Focus on providing real value to a car owner. For each title, assign the most appropriate category from the allowed list.`
+            },
+          ],
+        }),
+        next: { revalidate: 300 }, // Cache for 5 minutes
+      });
+
+      // If rate-limited, log it and try the next model in the loop.
+      if (response.status === 429) {
+          console.warn(`Model ${modelName} is rate-limited. Trying next available model.`);
+          continue;
+      }
+
+      if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`OpenRouter API error (model: ${modelName}):`, errorText);
+          continue; // Try next model on other errors too.
+      }
+
+      const data = await response.json();
+      let content = data.choices?.[0]?.message?.content;
+      
+      if (!content) {
+          console.error(`No content in API response for topic generation (model: ${modelName})`);
+          continue;
+      }
+      
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        content = jsonMatch[0];
+      }
+      
+      const parsed = TopicsResponseSchema.safeParse(JSON.parse(content));
+
+      if (!parsed.success) {
+        console.error(`Failed to parse topics from API response (model: ${modelName}):`, parsed.error);
+        continue;
+      }
+      
+      // If we get here, the request was successful. Return the topics.
+      console.log(`Successfully generated topics using model: ${modelName}`);
+      return parsed.data.topics.map((topic, index) => {
+        const slugData = {
+            title: topic.title,
+            category: topic.category,
+            nonce: Math.floor(Math.random() * 100000)
+        };
+        const slug = Buffer.from(JSON.stringify(slugData)).toString('base64url');
+        
+        return {
+          id: Math.floor(Math.random() * 100000) + index,
+          slug: slug,
+          ...topic,
+        };
+      });
+
+    } catch (error: any) {
+      console.error(`An error occurred during topic generation for subject "${subject}" (model: ${modelName}):`, error.message);
+      // On network error, etc., continue to the next model.
+      continue;
+    }
   }
   
-  try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: modelName,
-        messages: [
-          {
-            role: "system",
-            content: `You are an expert automotive content strategist. Your task is to generate a list of unique and compelling article topics. The response must be a JSON object with a single key "topics", which is an array of objects. Each object in the array must have a "title" and a "category". The category MUST be one of the following: ${validCategories.map(c => `"${c}"`).join(', ')}. Do not include any other text, explanation, or markdown formatting in your response. The JSON object must look like this: {"topics": [{"title": "...", "category": "..."}]}`
-          },
-          {
-            role: "user",
-            content: `Generate ${count} unique, engaging, and highly specific article titles about "${subject}". Each title MUST be exactly 9 words long. Do not repeat topics. Focus on providing real value to a car owner. For each title, assign the most appropriate category from the allowed list.`
-          },
-        ],
-      }),
-      next: { revalidate: 300 }, // Cache for 5 minutes
-    });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`OpenRouter API error (model: ${modelName}):`, errorText);
-        return []; // Do not throw, return empty array to prevent page crash
-    }
-
-    const data = await response.json();
-    let content = data.choices?.[0]?.message?.content;
-    
-    if (!content) {
-        console.error(`No content in API response for topic generation (model: ${modelName})`);
-        return [];
-    }
-    
-    // Sometimes the API wraps the JSON in markdown backticks, so we clean it.
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      content = jsonMatch[0];
-    }
-    
-    const parsed = TopicsResponseSchema.safeParse(JSON.parse(content));
-
-    if (!parsed.success) {
-      console.error(`Failed to parse topics from API response (model: ${modelName}):`, parsed.error);
-      return [];
-    }
-
-    // Helper function to map topics and create slugs
-    return parsed.data.topics.map((topic, index) => {
-      const slugData = {
-          title: topic.title,
-          category: topic.category,
-          nonce: Math.floor(Math.random() * 100000)
-      };
-      // Encode topic data into a URL-safe Base64 slug
-      const slug = Buffer.from(JSON.stringify(slugData)).toString('base64url');
-      
-      return {
-        id: Math.floor(Math.random() * 100000) + index,
-        slug: slug,
-        ...topic, // includes title and category from the AI
-      };
-    });
-
-  } catch (error: any) {
-    console.error(`An error occurred during topic generation for subject "${subject}" (model: ${modelName}):`, error.message);
-    return [];
-  }
+  // If the loop completes without a successful return, all models have failed.
+  console.error("All available AI models failed to generate topics. Returning an empty array.");
+  return [];
 }
