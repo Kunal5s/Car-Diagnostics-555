@@ -54,9 +54,9 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
 
-    if (!content) {
-        console.error("Invalid response structure from OpenRouter API:", data);
-        throw new Error("Failed to parse article content from the API response.");
+    if (!content || content.trim().length < 200) {
+        console.error("Invalid or insufficient content from OpenRouter API:", data);
+        throw new Error("The AI failed to generate a complete article. Please try again or select a different topic.");
     }
     
     return { content };
