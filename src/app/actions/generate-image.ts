@@ -2,52 +2,68 @@
 
 /**
  * Fetches an image URL from Pexels based on a query using Next.js's caching.
+ * This version is optimized to avoid rate-limiting by caching API responses
+ * and selecting a random image from a batch.
  * @param query The search term for the image.
- * @returns The URL of the first matching image or a placeholder.
+ * @returns The URL of a matching image or a placeholder.
  */
-export async function generateImageAction(query: string): Promise<{ imageUrl: string; error?: string }> {
+export async function generateImageAction(query: string): Promise<{ imageUrl:string; error?: string }> {
   const apiKey = process.env.PEXELS_API_KEY;
 
   if (!apiKey) {
     console.error("Pexels API key is not configured.");
-    return { imageUrl: 'https://placehold.co/600x400.png', error: "The image service is not configured correctly." };
+    return { imageUrl: 'https://placehold.co/600x400.png', error: "Image service not configured." };
   }
 
-  try {
-    // Fetch a random page to ensure image uniqueness on revalidation
-    const randomPage = Math.floor(Math.random() * 50) + 1; // 1 to 50
-    const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1&page=${randomPage}`, {
-      headers: {
-        Authorization: apiKey,
-      },
-      next: { revalidate: 300 }, // Cache for 5 minutes
-    });
-
-    if (!response.ok) {
-        throw new Error(`Pexels API request failed with status ${response.status}`);
-    }
-
-    const data = await response.json();
+  // Helper function to perform the fetch and handle responses.
+  // By making the fetch URL deterministic (no random page number), we allow Next.js to cache it.
+  const fetchAndSelectImage = async (searchQuery: string): Promise<string | null> => {
+    const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(searchQuery)}&per_page=15`;
     
-    if (data.photos && data.photos.length > 0) {
-      return { imageUrl: data.photos[0].src.large };
-    } else {
-      console.warn(`No image found on Pexels for query: "${query}" on page ${randomPage}. Trying again with a broader query.`);
-      // Fallback to a more generic query if the specific one fails
-      const fallbackResponse = await fetch(`https://api.pexels.com/v1/search?query=car%20engine%20mechanic&per_page=1&page=${randomPage}`, {
-          headers: { Authorization: apiKey },
-          next: { revalidate: 300 },
+    try {
+      const response = await fetch(url, {
+        headers: { Authorization: apiKey },
+        next: { revalidate: 300 }, // Cache the result for 5 minutes
       });
-      if (fallbackResponse.ok) {
-          const fallbackData = await fallbackResponse.json();
-          if (fallbackData.photos && fallbackData.photos.length > 0) {
-              return { imageUrl: fallbackData.photos[0].src.large };
-          }
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          console.warn(`Pexels API rate limit hit for query: "${searchQuery}".`);
+        } else {
+          console.error(`Pexels API request failed with status ${response.status} for query: "${searchQuery}"`);
+        }
+        return null; // Indicate failure to the caller
       }
-      return { imageUrl: 'https://placehold.co/600x400.png' };
+
+      const data = await response.json();
+
+      if (data.photos && data.photos.length > 0) {
+        // Randomly pick one from the fetched photos to ensure variety on the front-end
+        const randomIndex = Math.floor(Math.random() * data.photos.length);
+        return data.photos[randomIndex].src.large;
+      }
+      
+      return null; // No photos found
+    } catch (error) {
+      console.error(`Error fetching from Pexels API with url: ${url}`, error);
+      return null; // Indicate failure
     }
-  } catch (error: any) {
-    console.error("An error occurred while fetching an image from Pexels:", error);
-    return { imageUrl: 'https://placehold.co/600x400.png', error: `An unexpected error occurred while fetching the image: ${error.message}` };
+  };
+
+  let imageUrl = await fetchAndSelectImage(query);
+
+  if (imageUrl) {
+    return { imageUrl };
   }
+  
+  // If the first attempt fails (e.g., no results or rate limited), try a more generic fallback.
+  console.warn(`No image found for query: "${query}". Trying fallback.`);
+  imageUrl = await fetchAndSelectImage("car engine mechanic");
+
+  if (imageUrl) {
+    return { imageUrl };
+  }
+
+  // If all else fails, return a placeholder.
+  return { imageUrl: 'https://placehold.co/600x400.png' };
 }
