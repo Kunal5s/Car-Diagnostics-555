@@ -1,8 +1,4 @@
-import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
-
-export const ai = genkit({
-  plugins: [googleAI({apiKey: process.env.GOOGLE_API_KEY})],
-  // Use a fast and capable model from the Gemini 1.5 family.
-  model: 'googleai/gemini-1.5-flash-latest',
-});
+// This file is intentionally left blank.
+// The previous Genkit implementation has been replaced with a direct API call
+// to OpenRouter via a Next.js Server Action as per the user's request.
+// This ensures compatibility with both Firebase and Vercel environments.

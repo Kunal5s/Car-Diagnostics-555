@@ -10,6 +10,7 @@ import {
   TrendingUp,
   type LucideIcon,
 } from 'lucide-react';
+import { slugify } from './utils';
 
 export interface Article {
   id: number;
@@ -26,6 +27,7 @@ export interface ArticleTopic {
   id: number;
   title: string;
   category: string;
+  slug: string;
 }
 
 export interface CategoryInfo {
@@ -125,7 +127,7 @@ export const categories = [
   "Trends",
 ];
 
-export const allArticleTopics: ArticleTopic[] = [
+const topics: Omit<ArticleTopic, 'slug'>[] = [
   // Engine (6 articles)
   { id: 1, title: "Resolving Common Engine Performance Issues in Modern Vehicles", category: "Engine" },
   { id: 2, title: "A Comprehensive Guide to Fixing an Overheating Engine", category: "Engine" },
@@ -190,3 +192,8 @@ export const allArticleTopics: ArticleTopic[] = [
   { id: 53, title: "How V2X Communication is Making Roads Safer for Everyone", category: "Trends" },
   { id: 54, title: "The Role of Big Data Analytics in Modern Vehicles", category: "Trends" }
 ];
+
+export const allArticleTopics: ArticleTopic[] = topics.map(topic => ({
+  ...topic,
+  slug: `${slugify(topic.title)}-${topic.id}`
+}));

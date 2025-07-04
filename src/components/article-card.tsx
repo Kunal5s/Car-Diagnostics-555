@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Article } from "@/lib/data";
+import { ArticleTopic } from "@/lib/definitions";
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 interface ArticleCardProps {
-  article: Article;
+  article: ArticleTopic;
 }
 
 export function ArticleCard({ article }: ArticleCardProps) {
@@ -21,7 +21,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
       <CardHeader className="p-0">
         <div className="relative h-48 w-full">
           <Image
-            src={article.imageUrl}
+            src={"https://placehold.co/600x400.png"}
             alt={article.title}
             fill
             className="object-cover"

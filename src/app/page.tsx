@@ -10,8 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArticleGrid } from "@/components/article-grid";
-import { getArticles } from "@/lib/data";
-import { categoryDetails } from "@/lib/definitions";
+import { allArticleTopics, categoryDetails } from "@/lib/definitions";
 import { CategoryCard } from "@/components/category-card";
 import {
   Car,
@@ -157,8 +156,7 @@ const faqItems = [
 
 
 export default async function HomePage() {
-  const allArticles = await getArticles();
-  const trendingArticles = allArticles.slice(0, 6);
+  const trendingArticles = allArticleTopics.slice(0, 6);
 
   return (
     <div className="flex flex-col">
@@ -172,7 +170,7 @@ export default async function HomePage() {
             Detect engine problems instantly using artificial intelligence. No tools required.
           </p>
           <Button size="lg" variant="secondary" asChild>
-            <Link href="/settings">Start Free Scan</Link>
+            <Link href="/blog">Start Free Scan</Link>
           </Button>
         </div>
       </section>

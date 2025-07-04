@@ -1,5 +1,5 @@
 import { ArticleGrid } from "@/components/article-grid";
-import { getArticles } from "@/lib/data";
+import { allArticleTopics } from "@/lib/definitions";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
@@ -14,7 +14,7 @@ export default async function BlogPage() {
     { label: "Blog" },
   ];
   
-  const articles = await getArticles();
+  const articles = allArticleTopics;
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -24,7 +24,7 @@ export default async function BlogPage() {
                 All Articles
             </h1>
             <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
-                Explore our comprehensive library of automotive articles. Use the admin panel to generate full content.
+                Explore our comprehensive library of automotive articles. Click any topic to generate the full content.
             </p>
         </div>
         <ArticleGrid articles={articles} />
