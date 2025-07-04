@@ -20,6 +20,9 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
     return { content: '', error: "The service is not configured correctly. Missing API Key." };
   }
   
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second timeout
+
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -32,12 +35,15 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
         messages: [
           {
             role: "user",
-            content: `Write a comprehensive, SEO-friendly article of at least 500 words on the topic: "${topic}". Use a clear structure with a main H1 title, multiple H2 subheadings for major sections, and H3 headings as needed for further detail. Format the entire response in Markdown.`
+            content: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: "${topic}". The article MUST be at least 1500 words long. The article must be well-structured with proper paragraphs. Format the entire response in Markdown, adhering to the following strict structure: 1. A single H1 heading for the main title. 2. Multiple H2 headings for the main sections. 3. Under each H2, use several H3 headings for sub-sections. 4. Use standard paragraph formatting for the body text. Do not skip headings or use them out of order. This structure is critical for readability and SEO.`
           },
         ],
       }),
+      signal: controller.signal,
       next: { revalidate: 300 }, // Cache for 5 minutes
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
         const errorText = await response.text();
@@ -56,6 +62,10 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
     return { content };
 
   } catch (error: any) {
+    if (error.name === 'AbortError') {
+      console.error("Article generation timed out after 60 seconds.");
+      return { content: '', error: 'The request to generate the article took too long and timed out. Please try again.' };
+    }
     console.error("An error occurred during article generation:", error);
     return { content: '', error: error.message || 'An unexpected error occurred while generating the article.' };
   }
