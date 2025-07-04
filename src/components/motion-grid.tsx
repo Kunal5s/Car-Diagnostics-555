@@ -2,6 +2,12 @@
 
 import React from 'react';
 import { motion, type Variants } from 'framer-motion';
+import { cn } from '@/lib/utils';
+
+interface MotionGridProps {
+    children: React.ReactNode;
+    className?: string;
+}
 
 // Animate the container as a single block to improve performance
 const containerVariants: Variants = {
@@ -10,7 +16,7 @@ const containerVariants: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.5,
+      duration: 0.4,
       ease: 'easeOut',
     },
   },
@@ -20,7 +26,7 @@ const containerVariants: Variants = {
 export function MotionGrid({ children, className }: MotionGridProps) {
   return (
     <motion.div
-      className={className}
+      className={cn(className)}
       variants={containerVariants}
       initial="hidden"
       whileInView="visible"

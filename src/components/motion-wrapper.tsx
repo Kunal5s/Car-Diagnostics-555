@@ -16,10 +16,10 @@ export function MotionWrapper({
   className,
   variants,
   delay = 0,
-  duration = 0.5,
+  duration = 0.4,
 }: MotionWrapperProps) {
   const defaultVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 15 },
     visible: {
       opacity: 1,
       y: 0,
