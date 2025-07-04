@@ -19,8 +19,8 @@ interface ArticleCardProps {
 export function ArticleCard({ article }: ArticleCardProps) {
   const imageUrl = article.imageUrl;
   
-  // Pass title and category as search params to the article page
-  const articleUrl = `/articles/${article.slug}?title=${encodeURIComponent(article.title)}&category=${encodeURIComponent(article.category)}`;
+  // The URL now only contains the self-contained slug.
+  const articleUrl = `/articles/${article.slug}`;
 
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">

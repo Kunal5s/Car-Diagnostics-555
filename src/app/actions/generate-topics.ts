@@ -1,5 +1,5 @@
 'use server';
-import { slugify } from '@/lib/utils';
+
 import { z } from 'zod';
 import type { ArticleTopic } from '@/lib/definitions';
 
@@ -69,12 +69,22 @@ export async function generateTopicsAction(category: string, count: number = 6):
       return [];
     }
 
-    return parsed.data.topics.map((topic, index) => ({
-      ...topic,
-      id: Math.floor(Math.random() * 100000) + index,
-      slug: `${slugify(topic.title)}-${Math.floor(Math.random() * 100000)}`,
-      category: category,
-    }));
+    return parsed.data.topics.map((topic, index) => {
+      const slugData = {
+          title: topic.title,
+          category: category,
+          nonce: Math.floor(Math.random() * 100000)
+      };
+      // Encode topic data into a URL-safe Base64 slug
+      const slug = Buffer.from(JSON.stringify(slugData)).toString('base64url');
+      
+      return {
+        ...topic,
+        id: Math.floor(Math.random() * 100000) + index,
+        slug: slug,
+        category: category,
+      };
+    });
 
   } catch (error: any) {
     console.error(`An error occurred during topic generation for category "${category}":`, error.message);

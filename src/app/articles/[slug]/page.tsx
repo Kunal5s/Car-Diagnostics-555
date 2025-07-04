@@ -12,29 +12,44 @@ import { AlertCircle } from 'lucide-react';
 import { MotionWrapper } from '@/components/motion-wrapper';
 import type { Metadata } from 'next';
 
-export async function generateMetadata({ searchParams }: { params: { slug: string }, searchParams: { [key: string]: string | string[] | undefined } }): Promise<Metadata> {
-  const title = searchParams?.title as string;
-  const category = searchParams?.category as string;
+function decodeSlug(slug: string): { title: string; category: string } | null {
+  try {
+    const decodedSlug = Buffer.from(slug, 'base64url').toString('utf-8');
+    const slugData = JSON.parse(decodedSlug);
+    if (typeof slugData.title === 'string' && typeof slugData.category === 'string') {
+      return { title: slugData.title, category: slugData.category };
+    }
+    return null;
+  } catch (error) {
+    // This can happen if the slug is not valid base64 or JSON
+    console.error("Failed to decode or parse slug:", error);
+    return null;
+  }
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const slugData = decodeSlug(params.slug);
   
-  if (!title) {
+  if (!slugData) {
     return {
       title: 'Article Not Found'
     }
   }
+  const { title, category } = slugData;
   return {
     title: `${title} - Car Diagnostics AI`,
     description: `An in-depth article on ${title}, covering ${category || 'automotive'} diagnostics and maintenance tips.`,
   }
 }
 
-export default async function ArticlePage({ params, searchParams }: { params: { slug: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
-  const title = searchParams?.title as string;
-  const category = searchParams?.category as string;
+export default async function ArticlePage({ params }: { params: { slug: string }}) {
+  const slugData = decodeSlug(params.slug);
 
-  if (!title || !category) {
+  if (!slugData) {
     notFound();
   }
   
+  const { title, category } = slugData;
   const articleTopic = { title, category, slug: params.slug };
 
   // Fetch data on the server
@@ -53,8 +68,8 @@ export default async function ArticlePage({ params, searchParams }: { params: { 
       <article className="container mx-auto max-w-4xl px-4 py-12">
         <Breadcrumbs items={[
           { label: 'Home', href: '/' },
-          { label: articleTopic.category, href: `/category/${articleTopic.category.toLowerCase()}` },
-          { label: articleTopic.title },
+          { label: "Articles" },
+          { label: "Error" },
         ]} />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
