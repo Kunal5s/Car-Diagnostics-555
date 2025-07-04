@@ -3,6 +3,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { allArticleTopics, categories, categoryDetails } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
+import { MotionWrapper } from "@/components/motion-wrapper";
 
 export async function generateMetadata({ params }: { params: { categoryName: string } }): Promise<Metadata> {
   const categoryName = decodeURIComponent(params.categoryName);
@@ -51,15 +52,17 @@ export default async function CategoryPage({
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <Breadcrumbs items={breadcrumbItems} />
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-extrabold tracking-tight text-primary lg:text-5xl">
-          {categoryInfo.name} Articles
-        </h1>
-        <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
-          {categoryInfo.description}
-        </p>
-      </div>
+      <MotionWrapper>
+        <Breadcrumbs items={breadcrumbItems} />
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-extrabold tracking-tight text-primary lg:text-5xl">
+            {categoryInfo.name} Articles
+          </h1>
+          <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
+            {categoryInfo.description}
+          </p>
+        </div>
+      </MotionWrapper>
 
       <ArticleGrid articles={articlesForCategory} />
     </div>

@@ -13,6 +13,7 @@ import { generateImageAction } from '@/app/actions/generate-image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MotionWrapper } from '@/components/motion-wrapper';
 
 function ArticleLoadingSkeleton() {
   return (
@@ -51,7 +52,6 @@ export default function ArticlePage() {
 
   useEffect(() => {
     if (!articleTopic) {
-      // If the slug is present but we can't find a topic, it's a 404.
       if (slug) {
         notFound();
       }
@@ -116,16 +116,20 @@ export default function ArticlePage() {
 
   return (
     <article className="container mx-auto max-w-4xl px-4 py-12">
-      <Breadcrumbs items={breadcrumbItems} />
-      <header className="mb-8">
-        <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
-          {articleTopic.title}
-        </h1>
-        <div className="text-sm text-muted-foreground">
-          <Badge variant="secondary">{articleTopic.category}</Badge>
-        </div>
-      </header>
-      <div className="relative mb-8 h-64 w-full md:h-96">
+      <MotionWrapper>
+        <Breadcrumbs items={breadcrumbItems} />
+      </MotionWrapper>
+      <MotionWrapper delay={0.1}>
+        <header className="mb-8">
+          <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
+            {articleTopic.title}
+          </h1>
+          <div className="text-sm text-muted-foreground">
+            <Badge variant="secondary">{articleTopic.category}</Badge>
+          </div>
+        </header>
+      </MotionWrapper>
+      <MotionWrapper delay={0.2} className="relative mb-8 h-64 w-full md:h-96">
         <Image
           src={imageUrl || "https://placehold.co/600x400.png"}
           alt={articleTopic.title}
@@ -135,10 +139,10 @@ export default function ArticlePage() {
           priority
           data-ai-hint={`${articleTopic.category.toLowerCase()}`}
         />
-      </div>
-      <div className="prose prose-lg dark:prose-invert max-w-none">
+      </MotionWrapper>
+      <MotionWrapper delay={0.3} className="prose prose-lg dark:prose-invert max-w-none">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{articleContent}</ReactMarkdown>
-      </div>
+      </MotionWrapper>
     </article>
   );
 }

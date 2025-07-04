@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
   title: 'Contact Us - Car Diagnostics AI',
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-12">
+    <MotionWrapper className="container mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">Contact Us</h1>
       <div className="prose prose-lg dark:prose-invert max-w-none space-y-6">
         <p>
@@ -40,6 +41,6 @@ export default function ContactPage() {
         </div>
 
       </div>
-    </div>
+    </MotionWrapper>
   );
 }

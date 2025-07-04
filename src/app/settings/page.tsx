@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
+import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
   title: 'API Key Setup - Car Diagnostics AI',
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function SettingsPage() {
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-12">
+    <MotionWrapper className="container mx-auto max-w-2xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">API Key Setup</h1>
       <p className="mb-8 text-lg text-muted-foreground">
         To enable the article and image generation features, you need to provide API keys from OpenRouter and Pexels. These keys are stored on the server and used for content generation.
@@ -82,6 +83,6 @@ export default function SettingsPage() {
 
         </CardContent>
       </Card>
-    </div>
+    </MotionWrapper>
   );
 }

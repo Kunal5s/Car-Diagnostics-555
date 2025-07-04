@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
   title: 'About Us - Car Diagnostics AI',
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-12">
+    <MotionWrapper className="container mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">About Car Diagnostics AI</h1>
       <div className="prose prose-lg dark:prose-invert max-w-none space-y-6">
         <p>
@@ -23,6 +24,6 @@ export default function AboutPage() {
           Thank you for trusting Car Diagnostics AI. We're excited to be on this journey with you, helping you keep your car running smoothly and safely for years to come.
         </p>
       </div>
-    </div>
+    </MotionWrapper>
   );
 }
