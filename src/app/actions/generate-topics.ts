@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -19,17 +20,31 @@ const TopicsResponseSchema = z.object({
 });
 
 /**
- * Generates a list of unique article topics for a given subject using OpenRouter.
+ * Generates a list of unique article topics for a given subject using OpenRouter, with model balancing.
  * @param subject The automotive subject (e.g., "Engine", "EVs", "a diverse range of topics").
  * @param count The number of topics to generate.
  * @returns A promise that resolves to an array of topic objects.
  */
 export async function generateTopicsAction(subject: string, count: number = 6): Promise<ArticleTopic[]> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  // Balance the load between two different free models on OpenRouter.
+  const models = [
+    {
+      name: 'openrouter/cypher-alpha:free',
+      apiKey: process.env.OPENROUTER_API_KEY,
+    },
+    {
+      name: 'meta-llama/llama-4-scout:free',
+      apiKey: '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',
+    },
+  ];
+
+  // Randomly select one of the models to use for this request.
+  const selectedModel = models[Math.floor(Math.random() * models.length)];
+  const { name: modelName, apiKey } = selectedModel;
 
   if (!apiKey) {
-    console.error("OpenRouter API key is not configured.");
-    return [];
+    console.error(`OpenRouter API key for model ${modelName} is not configured.`);
+    return []; // Return empty array to prevent page crash.
   }
   
   try {
@@ -40,7 +55,7 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openrouter/cypher-alpha:free",
+        model: modelName,
         messages: [
           {
             role: "system",
@@ -57,15 +72,15 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
 
     if (!response.ok) {
         const errorText = await response.text();
-        console.error("OpenRouter API error:", errorText);
-        throw new Error(`API request failed with status ${response.status}`);
+        console.error(`OpenRouter API error (model: ${modelName}):`, errorText);
+        return []; // Do not throw, return empty array to prevent page crash
     }
 
     const data = await response.json();
     let content = data.choices?.[0]?.message?.content;
     
     if (!content) {
-        console.error("No content in API response for topic generation");
+        console.error(`No content in API response for topic generation (model: ${modelName})`);
         return [];
     }
     
@@ -78,7 +93,7 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
     const parsed = TopicsResponseSchema.safeParse(JSON.parse(content));
 
     if (!parsed.success) {
-      console.error("Failed to parse topics from API response:", parsed.error);
+      console.error(`Failed to parse topics from API response (model: ${modelName}):`, parsed.error);
       return [];
     }
 
@@ -100,7 +115,7 @@ export async function generateTopicsAction(subject: string, count: number = 6): 
     });
 
   } catch (error: any) {
-    console.error(`An error occurred during topic generation for subject "${subject}":`, error.message);
+    console.error(`An error occurred during topic generation for subject "${subject}" (model: ${modelName}):`, error.message);
     return [];
   }
 }
