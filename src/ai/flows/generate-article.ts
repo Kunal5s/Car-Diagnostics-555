@@ -64,9 +64,19 @@ const generateArticleFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input);
+    
     if (!output || !output.content || !output.summary) {
       throw new Error(`AI failed to generate valid content for topic: "${input.topic}". The output was empty or incomplete.`);
     }
+
+    if (!output.content.includes('## ') || !output.content.includes('### ')) {
+        throw new Error(`AI failed to follow mandatory Markdown structure for topic: "${input.topic}". Missing H2 or H3 headings.`);
+    }
+
+    if (output.content.split(' ').length < 1500) {
+        throw new Error(`AI failed to meet the minimum word count for topic: "${input.topic}".`);
+    }
+
     return output;
   }
 );
