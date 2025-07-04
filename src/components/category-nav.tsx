@@ -27,7 +27,7 @@ export function CategoryNav({ categories, className }: CategoryNavProps) {
   const activeCategory = getActiveCategory();
 
   return (
-    <nav className={cn("-mb-px flex space-x-2 overflow-x-auto whitespace-nowrap scrollbar-hide", className)}>
+    <nav className={cn("flex space-x-2 overflow-x-auto whitespace-nowrap scrollbar-hide py-3", className)}>
       {categories.map((category) => {
         const href =
           category === "All"
@@ -39,10 +39,11 @@ export function CategoryNav({ categories, className }: CategoryNavProps) {
         return (
           <Link href={href} key={category} passHref>
             <Button
-              variant="ghost"
+              variant={isActive ? "default" : "outline"}
+              size="default"
               className={cn(
-                "whitespace-nowrap rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground hover:text-primary",
-                isActive && "border-primary text-primary"
+                "whitespace-nowrap rounded-lg shadow-sm",
+                !isActive && "bg-card hover:bg-accent hover:text-accent-foreground"
               )}
               aria-current={isActive ? "page" : undefined}
             >
