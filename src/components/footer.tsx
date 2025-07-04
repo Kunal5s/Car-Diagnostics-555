@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { SVGProps } from 'react';
-import { Car, Mail, Phone, MapPin, Database, Heart, Twitter, Linkedin } from 'lucide-react';
+import { Car, Mail, Phone, MapPin, Heart, Twitter, Linkedin } from 'lucide-react';
 
 const PinterestIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" {...props}>
@@ -27,7 +27,6 @@ export function Footer() {
     { icon: Mail, text: 'info@cardiagnosticsbrainai.com', href: 'mailto:info@cardiagnosticsbrainai.com' },
     { icon: Phone, text: '+1 (555) 123-4567', href: 'tel:+15551234567' },
     { icon: MapPin, text: 'San Francisco, CA' },
-    { icon: Database, text: 'Cache Management' },
   ];
 
   return (

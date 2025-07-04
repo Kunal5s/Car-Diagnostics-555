@@ -70,7 +70,9 @@ export default function CategoryPage({ params, searchParams }: CategoryPageProps
 
       <CategoryNav categories={categories} />
       
-      <ArticleGrid articles={filteredArticles} />
+      <section className="py-12">
+        <ArticleGrid articles={filteredArticles} />
+      </section>
     </div>
   );
 }
