@@ -20,7 +20,7 @@ interface ArticleTopic {
   category: string;
 }
 
-const articleTopics: ArticleTopic[] = [
+const allArticleTopics: ArticleTopic[] = [
   // Engine (6 articles)
   { id: 1, title: "Diagnosing and Fixing Common Modern Car Engine Performance Issues", category: "Engine" },
   { id: 2, title: "Step-by-Step Guide to Resolving Your Car Engine Overheating", category: "Engine" },
@@ -85,6 +85,9 @@ const articleTopics: ArticleTopic[] = [
   { id: 53, title: "Vehicle-to-Everything (V2X) Communication and the Future of Driving", category: "Trends" },
   { id: 54, title: "Understanding the Role of Big Data in Modern Vehicles", category: "Trends" }
 ];
+
+// We will only generate a subset of articles on the first run to avoid timeouts.
+const articleTopics = allArticleTopics.slice(0, 12);
 
 
 const articlesFilePath = path.join(process.cwd(), 'src', 'lib', 'articles.json');
@@ -165,14 +168,15 @@ async function loadArticles(): Promise<Article[]> {
       }
     } else {
       console.log(`Article cache is older than ${CACHE_TTL_MINUTES} minutes. Regenerating...`);
-      await fs.unlink(articlesFilePath); // Delete stale cache
     }
   } catch (error) {
     // If file doesn't exist or there was an error reading it, generate new articles.
     console.log("Article cache not found or is invalid. Generating new articles.");
   }
 
-  cachedArticles = await generateAndCacheArticles();
+  // If we reach here, it means we need to generate articles.
+  const newArticles = await generateAndCacheArticles();
+  cachedArticles = newArticles;
   return cachedArticles;
 }
 
