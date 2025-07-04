@@ -17,8 +17,8 @@ export function CategoryCard({ category }: CategoryCardProps) {
             <div className={cn("mb-4 flex h-14 w-14 items-center justify-center rounded-lg", color)}>
                 <Icon className={cn("h-7 w-7 transition-transform duration-300 group-hover:scale-110", iconColor)} />
             </div>
-            <h3 className="mb-2 text-lg font-bold">{name}</h3>
-            <p className="mb-4 text-sm text-muted-foreground">{description}</p>
+            <h3 className="mb-2 text-lg font-bold text-primary">{name}</h3>
+            <p className="mb-4 flex-grow text-sm text-muted-foreground">{description}</p>
             <div className="mt-auto pt-4">
               <Button asChild variant="link" className="p-0 text-primary">
                   <Link href={href}>

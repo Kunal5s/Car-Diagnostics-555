@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArticleGrid } from "@/components/article-grid";
-import { articles } from "@/lib/data";
+import { articles, categoryDetails } from "@/lib/data";
+import { CategoryCard } from "@/components/category-card";
 import {
   Car,
   Truck,
@@ -171,8 +172,23 @@ export default function HomePage() {
         </div>
       </section>
       
+      {/* Explore Categories Section */}
+      <section className="py-16 md:py-24 bg-secondary/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-primary">Explore Automotive Categories</h2>
+            <p className="text-muted-foreground mt-2">Find articles and advice on specific car systems and topics.</p>
+          </div>
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {categoryDetails.map((category) => (
+              <CategoryCard key={category.name} category={category} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Real-Time Error Code Example Section */}
-      <section className="bg-secondary/50 py-12">
+      <section className="bg-background py-12">
         <div className="container mx-auto px-4 text-center">
             <p className="text-sm uppercase tracking-widest text-muted-foreground mb-2">Real-Time Error Code Diagnostics</p>
             <div className="bg-card inline-flex items-center gap-4 p-4 rounded-lg shadow-md border">

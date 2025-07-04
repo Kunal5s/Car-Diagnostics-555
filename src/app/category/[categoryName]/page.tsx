@@ -1,5 +1,4 @@
 import { ArticleGrid } from "@/components/article-grid";
-import { CategoryNav } from "@/components/category-nav";
 import { Search } from "@/components/search";
 import { articles, categories } from "@/lib/data";
 import { notFound } from "next/navigation";
@@ -68,8 +67,6 @@ export default function CategoryPage({ params, searchParams }: CategoryPageProps
         </div>
       </section>
 
-      <CategoryNav categories={categories} />
-      
       <section className="py-12">
         <ArticleGrid articles={filteredArticles} />
       </section>

@@ -1,5 +1,9 @@
+"use client"
+
 import Link from "next/link";
 import { Car } from "lucide-react";
+import { CategoryNav } from "./category-nav";
+import { categories } from "@/lib/data";
 
 export function Header() {
   return (
@@ -9,6 +13,11 @@ export function Header() {
           <Car className="h-6 w-6 text-primary" />
           <span className="font-bold">CarDiagnosticsBrainAI</span>
         </Link>
+      </div>
+      <div className="border-t">
+        <div className="container">
+           <CategoryNav categories={categories} />
+        </div>
       </div>
     </header>
   );
