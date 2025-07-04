@@ -27,15 +27,21 @@ const FAILED_GENERATION_TEXT = "Content Generation Failed";
 async function readCachedArticles(): Promise<Article[]> {
   try {
     await fs.mkdir(path.dirname(articlesFilePath), { recursive: true });
-    await fs.access(articlesFilePath).catch(() => fs.writeFile(articlesFilePath, '[]'));
+    await fs.access(articlesFilePath).catch(() => fs.writeFile(articlesFilePath, '[]', 'utf-8'));
     const fileContents = await fs.readFile(articlesFilePath, 'utf-8');
-    if (fileContents) {
+    if (fileContents.trim()) {
       return JSON.parse(fileContents);
     }
   } catch (error) {
-    console.error("Error reading or creating article cache file:", error);
+    console.error("Error reading or parsing article cache file. It might be corrupted. Resetting it.", error);
+    // If parsing fails, the file is corrupt. Overwrite with a valid empty array to self-heal.
+    try {
+        await fs.writeFile(articlesFilePath, '[]', 'utf-8');
+    } catch (writeError) {
+        console.error("Failed to reset corrupted articles.json", writeError);
+    }
   }
-  return [];
+  return []; // Return empty array if file was empty, non-existent, or corrupt.
 }
 
 export async function ensureCategoryArticles(categoryName: string): Promise<Article[]> {
