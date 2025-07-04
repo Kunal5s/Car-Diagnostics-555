@@ -1,11 +1,11 @@
-
 import { ArticleGrid } from "@/components/article-grid";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { categories, categoryDetails } from "@/lib/definitions";
-import { getArticlesByCategory } from "@/lib/data";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
 import { MotionWrapper } from "@/components/motion-wrapper";
+import { generateTopicsAction } from '@/app/actions/generate-topics';
+import { generateImageAction } from '@/app/actions/generate-image';
 
 export async function generateMetadata({ params }: { params: { categoryName: string } }): Promise<Metadata> {
   const categoryName = decodeURIComponent(params.categoryName);
@@ -43,7 +43,14 @@ export default async function CategoryPage({
     notFound();
   }
   
-  const articlesForCategory = await getArticlesByCategory(categoryName);
+  const topics = await generateTopicsAction(categoryName, 6);
+
+  const articlesForCategory = await Promise.all(
+    topics.map(async (topic) => {
+      const imageUrl = await generateImageAction(`${topic.title} ${topic.category}`);
+      return { ...topic, imageUrl };
+    })
+  );
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -67,5 +74,3 @@ export default async function CategoryPage({
     </div>
   );
 }
-
-    

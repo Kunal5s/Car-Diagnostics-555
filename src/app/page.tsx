@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import type { Metadata } from "next";
 import {
@@ -11,9 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArticleGrid } from "@/components/article-grid";
-import { categoryDetails, type Article } from "@/lib/definitions";
+import { categoryDetails } from "@/lib/definitions";
 import { CategoryCard } from "@/components/category-card";
-import { getArticles } from "@/lib/data";
 import {
   Car,
   Truck,
@@ -32,6 +30,8 @@ import {
 } from "lucide-react";
 import { MotionWrapper } from "@/components/motion-wrapper";
 import { MotionGrid } from "@/components/motion-grid";
+import { generateTopicsAction } from '@/app/actions/generate-topics';
+import { generateImageAction } from '@/app/actions/generate-image';
 
 export const metadata: Metadata = {
   title: "AI Car Diagnostics Made Easy with BrainAi - Engine Fault Scan",
@@ -160,8 +160,14 @@ const faqItems = [
 
 
 export default async function HomePage() {
-  const allArticles = await getArticles();
-  const trendingArticles = allArticles.slice(0, 6);
+  const topics = await generateTopicsAction("General Automotive Topics", 6);
+
+  const trendingArticles = await Promise.all(
+    topics.map(async (topic) => {
+      const imageUrl = await generateImageAction(topic.title);
+      return { ...topic, imageUrl };
+    })
+  );
 
   return (
     <div className="flex flex-col">
@@ -175,12 +181,12 @@ export default async function HomePage() {
           </MotionWrapper>
           <MotionWrapper delay={0.2}>
             <p className="text-lg md:text-xl text-primary-foreground/80 max-w-3xl mx-auto mb-8">
-              Detect engine problems instantly using artificial intelligence. No tools required.
+              Detect engine problems instantly using artificial intelligence. See our setup guide to get started.
             </p>
           </MotionWrapper>
           <MotionWrapper delay={0.4}>
             <Button size="lg" variant="secondary" asChild>
-              <Link href="/blog">Start Free Scan</Link>
+              <Link href="/settings">View Setup Instructions</Link>
             </Button>
           </MotionWrapper>
         </div>
@@ -360,5 +366,3 @@ export default async function HomePage() {
     </div>
   );
 }
-
-    

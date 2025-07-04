@@ -1,9 +1,9 @@
-
 import { ArticleGrid } from "@/components/article-grid";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MotionWrapper } from "@/components/motion-wrapper";
-import { getArticles } from "@/lib/data";
+import { generateTopicsAction } from '@/app/actions/generate-topics';
+import { generateImageAction } from '@/app/actions/generate-image';
 
 export const metadata: Metadata = {
   title: 'All Articles - Car Diagnostics AI',
@@ -16,7 +16,14 @@ export default async function BlogPage() {
     { label: "Blog" },
   ];
   
-  const allArticles = await getArticles();
+  const topics = await generateTopicsAction("All Automotive Categories", 18);
+
+  const allArticles = await Promise.all(
+    topics.map(async (topic) => {
+      const imageUrl = await generateImageAction(`${topic.title} ${topic.category}`);
+      return { ...topic, imageUrl };
+    })
+  );
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -27,7 +34,7 @@ export default async function BlogPage() {
                   All Articles
               </h1>
               <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
-                  Explore our comprehensive library of automotive articles.
+                  Explore our comprehensive library of automotive articles, generated in real-time by AI.
               </p>
           </div>
         </MotionWrapper>
@@ -35,5 +42,3 @@ export default async function BlogPage() {
     </div>
   );
 }
-
-    

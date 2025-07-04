@@ -1,4 +1,3 @@
-
 import {
   Car,
   Cog,
@@ -12,14 +11,11 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-export interface Article {
-  id: number;
+export interface ArticleTopic {
+  id: string;
+  slug: string;
   title: string;
   category: string;
-  summary: string;
-  content: string;
-  imageUrl: string;
-  slug: string;
 }
 
 export interface CategoryInfo {
@@ -118,5 +114,3 @@ export const categories = [
   "EVs",
   "Trends",
 ];
-
-    

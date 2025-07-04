@@ -1,8 +1,9 @@
 'use server';
 
-import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import type { ArticleTopic } from '@/lib/definitions';
+
+const OLLAMA_API_URL = 'http://localhost:11434/api/generate';
 
 const TopicSchema = z.object({
   title: z.string().describe("A compelling, short article title about an automotive topic."),
@@ -13,81 +14,61 @@ const TopicsResponseSchema = z.object({
   topics: z.array(TopicSchema),
 });
 
-const generateTopicsFlow = ai.defineFlow(
-  {
-    name: 'generateTopicsFlow',
-    inputSchema: z.object({
-      subject: z.string(),
-      count: z.number(),
-    }),
-    outputSchema: TopicsResponseSchema,
-  },
-  async ({ subject, count }) => {
-    const llmResponse = await ai.generate({
-      model: 'googleai/gemini-1.5-pro-latest',
-      prompt: `You are an automotive content strategist. Generate ${count} compelling and distinct article topics about "${subject}".
-
-      For each topic, provide a short, catchy title and its most relevant category (e.g., 'Engine', 'EVs', 'Maintenance').
-
-      Your response MUST be a valid JSON object following this structure: { "topics": [{"title": "...", "category": "..."}, ...] }.
-      Do not include any other text or markdown formatting outside of the JSON object.`,
-      config: {
-        output: {
-          format: 'json',
-          schema: TopicsResponseSchema,
-        },
-        safetySettings: [
-            {
-              category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-              threshold: 'BLOCK_NONE',
-            },
-            {
-              category: 'HARM_CATEGORY_HATE_SPEECH',
-              threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-            },
-          ],
-      },
-    });
-
-    const structuredResponse = llmResponse.output();
-    if (!structuredResponse || !structuredResponse.topics || structuredResponse.topics.length === 0) {
-      throw new Error('Failed to generate topics: AI returned invalid or empty topic list.');
-    }
-    return structuredResponse;
-  }
-);
-
+const OllamaResponseSchema = z.object({
+    model: z.string(),
+    created_at: z.string(),
+    response: z.string(), // This is a stringified JSON
+    done: z.boolean(),
+});
 
 export async function generateTopicsAction(subject: string, count: number = 6): Promise<ArticleTopic[]> {
-  const MAX_RETRIES = 3;
-  let lastError: any = null;
+  const prompt = `You are an automotive content strategist. Generate ${count} compelling and distinct article topics about "${subject}".
+For each topic, provide a short, catchy title and its most relevant category.
+Your response MUST be ONLY a valid JSON object following this exact structure: { "topics": [{"title": "...", "category": "..."}, ...] }.
+Do not include any other text, markdown formatting, or explanations outside of the JSON object.`;
 
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      const result = await generateTopicsFlow({ subject, count });
-      
-      // Success, process and return the topics
-      return result.topics.map((topic) => {
-        // The slug is now a simple, robust base64 encoding of the title.
+  try {
+    const response = await fetch(OLLAMA_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'mistral',
+        prompt: prompt,
+        stream: false,
+      }),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Ollama API error:", errorText);
+        throw new Error(`Ollama API request failed with status ${response.status}`);
+    }
+
+    const ollamaData = await response.json();
+    const validatedOllamaResponse = OllamaResponseSchema.parse(ollamaData);
+    
+    const jsonResponseString = validatedOllamaResponse.response;
+    const structuredResponse = JSON.parse(jsonResponseString);
+    
+    const parsedTopics = TopicsResponseSchema.parse(structuredResponse);
+
+    if (!parsedTopics || !parsedTopics.topics || parsedTopics.topics.length === 0) {
+      throw new Error('Failed to generate topics: AI returned invalid or empty topic list.');
+    }
+    
+    return parsedTopics.topics.map((topic) => {
         const slug = Buffer.from(topic.title).toString('base64url');
-        
         return {
-          id: slug, // Use the stable slug as the key
+          id: slug,
           slug: slug,
           ...topic,
         };
       });
-    } catch (error: any) {
-      lastError = error;
-      console.error(`Topic generation attempt ${attempt} failed for subject "${subject}":`, error.message);
-      if (attempt < MAX_RETRIES) {
-        // Wait for 1 second before retrying
-        await new Promise(res => setTimeout(res, 1000));
-      }
-    }
-  }
 
-  // If all retries fail, throw the last captured error to the boundary
-  console.error(`All ${MAX_RETRIES} topic generation attempts failed for subject "${subject}".`, lastError);
-  throw new Error('Failed to generate dynamic content. This might be due to a missing or invalid API key or a temporary service issue.');
+  } catch (error: any) {
+    console.error(`An error occurred during topic generation for subject "${subject}":`, error);
+    return [];
+  }
 }

@@ -16,10 +16,9 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      // Pexels is no longer used, the new AI image generator returns data URIs.
       {
         protocol: 'https',
-        hostname: 'picsum.photos',
+        hostname: 'images.pexels.com',
         port: '',
         pathname: '/**',
       }

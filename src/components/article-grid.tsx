@@ -1,12 +1,13 @@
-
-import { Article } from "@/lib/definitions";
+import { ArticleTopic } from "@/lib/definitions";
 import { ArticleCard } from "./article-card";
 import { Card, CardContent } from "./ui/card";
 import { AlertCircle } from "lucide-react";
 import { MotionGrid } from "./motion-grid";
+import Link from "next/link";
+import { Button } from "./ui/button";
 
 interface ArticleGridProps {
-  articles: Article[];
+  articles: (ArticleTopic & { imageUrl: string })[];
 }
 
 export function ArticleGrid({ articles }: ArticleGridProps) {
@@ -14,9 +15,14 @@ export function ArticleGrid({ articles }: ArticleGridProps) {
     return (
       <Card className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground shadow-none border-dashed">
         <CardContent className="p-6">
-            <AlertCircle className="mx-auto h-10 w-10 text-primary mb-4" />
-            <p className="font-semibold text-lg text-foreground mb-2">No Articles Found</p>
-            <p>There are no articles available for this category yet.</p>
+            <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-4" />
+            <p className="font-semibold text-lg text-foreground mb-2">Could Not Generate Topics</p>
+            <p className="max-w-md mx-auto">
+              This can happen if the local Ollama AI server is not running or if there's a network issue. Please ensure the setup is correct.
+            </p>
+            <Button asChild className="mt-6">
+                <Link href="/settings">View Setup Instructions</Link>
+            </Button>
         </CardContent>
       </Card>
     );
@@ -30,5 +36,3 @@ export function ArticleGrid({ articles }: ArticleGridProps) {
     </MotionGrid>
   );
 }
-
-    
