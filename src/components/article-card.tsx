@@ -28,7 +28,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              data-ai-hint={article.category.toLowerCase()}
+              data-ai-hint={article.title.toLowerCase().split(' ').slice(0, 2).join(' ')}
             />
         </Link>
       </CardHeader>
