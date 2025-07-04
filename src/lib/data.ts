@@ -31,12 +31,13 @@ const articleTopics: ArticleTopic[] = [
   { id: 14, title: "Top 10 Most Common OBD2 Codes and What They Mean", category: "OBD2" },
   { id: 19, title: "Understanding Electric Vehicle Battery Health And Maximizing Its Lifespan Now", category: "EVs" },
   { id: 20, title: "Common Maintenance Tasks For Electric Vehicles You Should Know About", category: "EVs" },
-  { id: 21, title: "How Regenerative Braking Works In An Electric Vehicle System", category: "EVs" },
+  { id: 21, "title": "How Regenerative Braking Works In An Electric Vehicle System", category: "EVs" },
   { id: 16, title: "Advanced OBD2 Diagnostics: Understanding Live Data And Freeze Frame Information", category: "OBD2" },
 ];
 
 const articlesFilePath = path.join(process.cwd(), 'src', 'lib', 'articles.json');
 let cachedArticles: Article[] | null = null;
+let generationPromise: Promise<Article[]> | null = null;
 
 async function generateAndCacheArticles(): Promise<Article[]> {
   console.log("Generating articles and fetching images for the first time. This may take a while...");
@@ -89,11 +90,13 @@ async function generateAndCacheArticles(): Promise<Article[]> {
 }
 
 
-export async function getArticles(): Promise<Article[]> {
+async function loadArticles(): Promise<Article[]> {
+  // This function contains the logic to either load from file cache or generate.
+  // It is wrapped by getArticles to prevent multiple concurrent executions.
   if (cachedArticles) {
     return cachedArticles;
   }
-
+  
   try {
     const data = await fs.readFile(articlesFilePath, 'utf-8');
     const articles = JSON.parse(data);
@@ -109,4 +112,16 @@ export async function getArticles(): Promise<Article[]> {
 
   cachedArticles = await generateAndCacheArticles();
   return cachedArticles;
+}
+
+export async function getArticles(): Promise<Article[]> {
+  if (cachedArticles) {
+    return cachedArticles;
+  }
+  // Use a promise-based lock to prevent multiple generation processes from running at the same time.
+  // If generation is already in progress, subsequent calls will wait for it to complete.
+  if (!generationPromise) {
+    generationPromise = loadArticles();
+  }
+  return generationPromise;
 }
