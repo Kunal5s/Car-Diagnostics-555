@@ -1,7 +1,7 @@
 'use server';
 /**
  * @fileOverview A flow to generate and populate all 54 articles for the website.
- * This is a long-running, one-time process that should be manually triggered from the admin panel.
+ * This is a long-running, one-time process that should be triggered automatically.
  */
 
 import { generateArticle, type GenerateArticleOutput } from '@/ai/flows/generate-article';
@@ -26,10 +26,10 @@ const FAILED_GENERATION_TEXT = "Content Generation Failed";
 // A lock to prevent multiple generation processes from running at the same time.
 let isGenerationRunning = false;
 
-export async function populateAllArticles(): Promise<{success: boolean; message: string; generated: number; failed: number}> {
+export async function populateAllArticles(): Promise<void> {
   if (isGenerationRunning) {
     console.log("[populate] Generation is already in progress. Skipping new request.");
-    return { success: false, message: "Generation is already in progress. Please wait.", generated: 0, failed: 0 };
+    return;
   }
   
   isGenerationRunning = true;
@@ -37,7 +37,6 @@ export async function populateAllArticles(): Promise<{success: boolean; message:
   const articles: Article[] = [];
   const articlesFilePath = path.join(process.cwd(), 'src', 'lib', 'articles.json');
   let generatedCount = 0;
-  let failedCount = 0;
   
   try {
     for (const topic of allArticleTopics) {
@@ -64,7 +63,6 @@ export async function populateAllArticles(): Promise<{success: boolean; message:
       } catch (e: any) {
         const errorMessage = `Image fetch failed for "${topic.title}": ${e.message}`;
         console.error(`[populate]   - ERROR: ${errorMessage}`);
-        // This doesn't count as a full failure, as we have a placeholder.
       }
       
       if (success && articleData) {
@@ -79,7 +77,6 @@ export async function populateAllArticles(): Promise<{success: boolean; message:
           slug: `${slugify(topic.title)}-${topic.id}`,
         });
       } else {
-        failedCount++;
          articles.push({
           id: topic.id,
           title: topic.title,
@@ -93,13 +90,11 @@ export async function populateAllArticles(): Promise<{success: boolean; message:
     }
 
     await fs.writeFile(articlesFilePath, JSON.stringify(articles, null, 2));
-    console.log(`[populate] Wrote ${articles.length} articles to cache.`);
-    return { success: true, message: `Successfully generated ${generatedCount} articles. ${failedCount} articles failed.`, generated: generatedCount, failed: failedCount };
+    console.log(`[populate] Wrote ${articles.length} articles to cache. ${generatedCount} were successful.`);
 
   } catch (error: any) {
     const criticalError = `[populate] CRITICAL: Failed to write final articles cache file: ${error.message}`;
     console.error(criticalError);
-    return { success: false, message: criticalError, generated: generatedCount, failed: failedCount };
   } finally {
     isGenerationRunning = false;
     console.log("[populate] Generation process finished.");

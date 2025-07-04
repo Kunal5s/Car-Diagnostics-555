@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -48,7 +49,7 @@ export default function GenerateContentPage() {
         <CardHeader>
           <CardTitle>Content Generation Control Panel</CardTitle>
           <CardDescription>
-            Click the button below to generate all 54 articles for your website. This is a long-running process and may take up to 10 minutes. It is designed to run once to populate your site, but you can re-run it anytime to refresh the content.
+            Click the button below to generate all 54 articles for your website. This is a long-running process and may take up to 10 minutes. It is designed to run once to populate your site. After the process is complete, the generated articles will be permanently available on your site.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center space-y-4">
