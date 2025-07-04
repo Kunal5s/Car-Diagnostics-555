@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArticleGrid } from "@/components/article-grid";
-import { articles, categoryDetails } from "@/lib/data";
+import { getArticles, categoryDetails } from "@/lib/data";
 import { CategoryCard } from "@/components/category-card";
 import {
   Car,
@@ -131,8 +131,9 @@ const faqItems = [
 ];
 
 
-export default function HomePage() {
-  const trendingArticles = articles.slice(0, 6);
+export default async function HomePage() {
+  const allArticles = await getArticles();
+  const trendingArticles = allArticles.slice(0, 6);
 
   return (
     <div className="flex flex-col">

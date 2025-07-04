@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { articles, Article } from "@/lib/data";
+import { getArticles } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import type { Metadata } from 'next';
@@ -10,6 +10,7 @@ interface ArticlePageProps {
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
+  const articles = await getArticles();
   const article = articles.find((a) => a.slug === params.slug);
 
   if (!article) {
@@ -37,12 +38,14 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 }
 
 export async function generateStaticParams() {
+  const articles = await getArticles();
   return articles.map((article) => ({
     slug: article.slug,
   }));
 }
 
-export default function ArticlePage({ params }: ArticlePageProps) {
+export default async function ArticlePage({ params }: ArticlePageProps) {
+  const articles = await getArticles();
   const article = articles.find((a) => a.slug === params.slug);
 
   if (!article) {

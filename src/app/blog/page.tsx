@@ -1,5 +1,5 @@
 import { ArticleGrid } from "@/components/article-grid";
-import { articles } from "@/lib/data";
+import { getArticles } from "@/lib/data";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
@@ -8,11 +8,13 @@ export const metadata: Metadata = {
   description: 'Browse all our articles on car diagnostics, maintenance, and technology.',
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
   const breadcrumbItems = [
     { label: "Home", href: "/" },
     { label: "Blog" },
   ];
+  
+  const articles = await getArticles();
 
   return (
     <div className="container mx-auto px-4 py-12">

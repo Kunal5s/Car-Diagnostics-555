@@ -1,6 +1,6 @@
 import { ArticleGrid } from "@/components/article-grid";
 import { Search } from "@/components/search";
-import { articles, categories } from "@/lib/data";
+import { getArticles, categories } from "@/lib/data";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
 
@@ -37,7 +37,7 @@ export async function generateStaticParams() {
     }));
 }
 
-export default function CategoryPage({ params, searchParams }: CategoryPageProps) {
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const categoryName = decodeURIComponent(params.categoryName);
   const searchTerm = searchParams?.q || "";
 
@@ -45,7 +45,9 @@ export default function CategoryPage({ params, searchParams }: CategoryPageProps
     notFound();
   }
 
-  const filteredArticles = articles.filter(
+  const allArticles = await getArticles();
+
+  const filteredArticles = allArticles.filter(
     (article) =>
       article.category.toLowerCase() === categoryName.toLowerCase() &&
       article.title.toLowerCase().includes(searchTerm.toLowerCase())
