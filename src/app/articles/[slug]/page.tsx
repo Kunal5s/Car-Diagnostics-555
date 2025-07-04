@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 function ArticleLoadingSkeleton() {
   return (
-    <div className="space-y-8">
+    <div className="container mx-auto max-w-4xl px-4 py-12 space-y-8">
       <Skeleton className="h-12 w-3/4" />
       <div className="relative mb-8 h-64 w-full md:h-96">
         <Skeleton className="h-full w-full rounded-lg" />
@@ -50,12 +50,11 @@ export default function ArticlePage() {
   }, [slug]);
 
   useEffect(() => {
-    if (slug && !articleTopic) {
-      notFound();
-      return;
-    }
-    
     if (!articleTopic) {
+      // If the slug is present but we can't find a topic, it's a 404.
+      if (slug) {
+        notFound();
+      }
       return;
     }
 
@@ -86,12 +85,22 @@ export default function ArticlePage() {
     fetchContent();
   }, [slug, articleTopic]);
   
-  if (!articleTopic) {
+  if (isLoading) {
+    return <ArticleLoadingSkeleton />;
+  }
+
+  if (error || !articleTopic) {
     return (
-        <article className="container mx-auto max-w-4xl px-4 py-12">
-            <ArticleLoadingSkeleton />
-        </article>
-      )
+      <article className="container mx-auto max-w-4xl px-4 py-12">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error Generating Article</AlertTitle>
+          <AlertDescription>
+            {error || 'The requested article could not be found.'}
+          </AlertDescription>
+        </Alert>
+      </article>
+    );
   }
 
   const breadcrumbItems = [
@@ -102,40 +111,28 @@ export default function ArticlePage() {
 
   return (
     <article className="container mx-auto max-w-4xl px-4 py-12">
-      {isLoading ? (
-        <ArticleLoadingSkeleton />
-      ) : error ? (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error Generating Article</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : (
-        <>
-          <Breadcrumbs items={breadcrumbItems} />
-          <header className="mb-8">
-            <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
-              {articleTopic.title}
-            </h1>
-            <div className="text-sm text-muted-foreground">
-              <Badge variant="secondary">{articleTopic.category}</Badge>
-            </div>
-          </header>
-          <div className="relative mb-8 h-64 w-full md:h-96">
-            <Image
-              src={imageUrl || "https://placehold.co/600x400.png"}
-              alt={articleTopic.title}
-              fill
-              className="rounded-lg object-cover"
-              sizes="100vw"
-              priority
-            />
-          </div>
-          <div className="prose prose-lg dark:prose-invert max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{articleContent}</ReactMarkdown>
-          </div>
-        </>
-      )}
+      <Breadcrumbs items={breadcrumbItems} />
+      <header className="mb-8">
+        <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
+          {articleTopic.title}
+        </h1>
+        <div className="text-sm text-muted-foreground">
+          <Badge variant="secondary">{articleTopic.category}</Badge>
+        </div>
+      </header>
+      <div className="relative mb-8 h-64 w-full md:h-96">
+        <Image
+          src={imageUrl || "https://placehold.co/600x400.png"}
+          alt={articleTopic.title}
+          fill
+          className="rounded-lg object-cover"
+          sizes="100vw"
+          priority
+        />
+      </div>
+      <div className="prose prose-lg dark:prose-invert max-w-none">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{articleContent}</ReactMarkdown>
+      </div>
     </article>
   );
 }

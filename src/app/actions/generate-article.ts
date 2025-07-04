@@ -32,7 +32,7 @@ export async function generateArticleAction(topic: string): Promise<{ content: s
         messages: [
           {
             role: "user",
-            content: `You are an expert automotive writer and SEO specialist. Write a detailed, comprehensive, and SEO-friendly article of at least 1500 words on the topic: "${topic}". The article MUST be structured with proper headings for maximum readability and SEO value. You must use a main H1 heading for the title, multiple H2 headings for primary sections, and H3, H4, H5, and H6 headings for sub-sections as appropriate. This hierarchical heading structure is mandatory.`
+            content: `You are an expert automotive writer and SEO specialist. Write a detailed, comprehensive, and SEO-friendly article of at least 500 words on the topic: "${topic}". The article MUST be structured with proper headings for maximum readability and SEO value. You must use a main H1 heading for the title, multiple H2 headings for primary sections, and H3, H4, H5, and H6 headings for sub-sections as appropriate. This hierarchical heading structure is mandatory.`
           }
         ]
       })
