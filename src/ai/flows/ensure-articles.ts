@@ -94,8 +94,8 @@ export async function ensureCategoryArticles(categoryName: string): Promise<Arti
       const validCachedArticles = allCachedArticles.filter(a => !articlesToGenerate.some(t => `${slugify(t.title)}-${t.id}` === a.slug));
 
       for (const topic of articlesToGenerate) {
-        // Increased delay to be safer with API rate limits (10 reqs/min).
-        await new Promise(resolve => setTimeout(resolve, 6000));
+        // Increased delay to be safer with API rate limits (e.g. 5 reqs/min for free tier).
+        await new Promise(resolve => setTimeout(resolve, 10000));
         console.log(`[ensure-articles] - Generating article for topic: "${topic.title}"`);
 
         let articleData: GenerateArticleOutput | null = null;
