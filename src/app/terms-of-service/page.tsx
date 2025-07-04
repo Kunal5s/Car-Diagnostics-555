@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ClientDate } from '@/components/client-date';
 
 export const metadata: Metadata = {
   title: 'Terms of Service - Car Diagnostics AI',
@@ -10,7 +11,7 @@ export default function TermsOfServicePage() {
     <div className="container mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">Terms of Service</h1>
       <div className="prose prose-lg dark:prose-invert max-w-none space-y-6">
-        <p><strong>Last Updated:</strong> {new Date().toLocaleDateString()}</p>
+        <p><strong>Last Updated:</strong> <ClientDate /></p>
         
         <p>
           Please read these Terms of Service ("Terms", "Terms of Service") carefully before using the Car Diagnostics AI website (the "Service") operated by Car Diagnostics AI ("us", "we", or "our"). Your access to and use of the Service is conditioned on your acceptance of and compliance with these Terms. These Terms apply to all visitors, users, and others who access or use the Service.

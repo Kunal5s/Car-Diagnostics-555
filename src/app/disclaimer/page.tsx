@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ClientDate } from '@/components/client-date';
 
 export const metadata: Metadata = {
   title: 'Disclaimer - Car Diagnostics AI',
@@ -10,7 +11,7 @@ export default function DisclaimerPage() {
     <div className="container mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">Disclaimer</h1>
       <div className="prose prose-lg dark:prose-invert max-w-none space-y-6">
-        <p><strong>Last Updated:</strong> {new Date().toLocaleDateString()}</p>
+        <p><strong>Last Updated:</strong> <ClientDate /></p>
         
         <p>
           The information provided by Car Diagnostics AI ("we," "us," or "our") on this website is for general informational and educational purposes only. All information on the site is provided in good faith, however, we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the site.
