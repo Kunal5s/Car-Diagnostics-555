@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { MotionWrapper } from "@/components/motion-wrapper";
 import { MotionGrid } from "@/components/motion-grid";
-import { getArticles } from "@/lib/data";
+import { getHomepageArticles, getArticles } from "@/lib/data";
 
 
 export const metadata: Metadata = {
@@ -160,7 +160,7 @@ const faqItems = [
 
 
 export default async function HomePage() {
-  const trendingArticles = (await getArticles()).slice(0, 6);
+  const trendingArticles = await getHomepageArticles();
 
   return (
     <div className="flex flex-col">

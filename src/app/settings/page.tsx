@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { KeyRound, Image as ImageIcon, Info } from 'lucide-react';
+import { KeyRound, ImageIcon, Info, AlertTriangle } from 'lucide-react';
 import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
@@ -16,9 +16,9 @@ export default function SettingsPage() {
       
       <Alert variant="destructive" className="mb-8">
         <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Action Required for Full AI Features</AlertTitle>
+        <AlertTitle>Action Required for AI Features</AlertTitle>
         <AlertDescription>
-          This application uses Google AI for article generation and Pexels for image fetching. Please provide API keys for both services to enable all content generation features.
+          This application uses Google AI for article generation and Pexels for image fetching. Please provide the required API keys to enable all content generation features. Without these keys, the application will not be able to generate content.
         </AlertDescription>
       </Alert>
 
