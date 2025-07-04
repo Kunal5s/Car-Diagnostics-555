@@ -1,6 +1,6 @@
 import { ArticleGrid } from "@/components/article-grid";
 import { Search } from "@/components/search";
-import { getArticles } from "@/lib/data";
+import { ensureCategoryArticles } from "@/ai/flows/ensure-articles";
 import { categories } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
@@ -42,13 +42,12 @@ export default async function CategoryPage({
   if (!categories.map(c => c.toLowerCase()).includes(categoryName.toLowerCase())) {
     notFound();
   }
+  
+  // This is the core change. This function will generate articles if they don't exist in the cache.
+  const articlesForCategory = await ensureCategoryArticles(categoryName);
 
-  const allArticles = await getArticles();
-
-  const filteredArticles = allArticles.filter(
-    (article) =>
-      article.category.toLowerCase() === categoryName.toLowerCase() &&
-      article.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredArticles = articlesForCategory.filter(
+    (article) => article.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   const formattedCategoryName = categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
