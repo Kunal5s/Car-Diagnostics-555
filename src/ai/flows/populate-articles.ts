@@ -1,7 +1,7 @@
 'use server';
 /**
  * @fileOverview A flow to generate and populate all 54 articles for the website.
- * This is a long-running, one-time process that should be triggered automatically.
+ * This is a long-running, one-time process that should be triggered by an admin.
  */
 
 import { generateArticle, type GenerateArticleOutput } from '@/ai/flows/generate-article';

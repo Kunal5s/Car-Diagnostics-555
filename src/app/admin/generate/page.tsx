@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -11,7 +10,7 @@ import Link from 'next/link';
 
 export default function GenerateContentPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<{success: boolean; message: string; generated: number; failed: number} | null>(null);
+  const [result, setResult] = useState<{success: boolean; message: string;} | null>(null);
   const { toast } = useToast();
 
   const handleGenerate = async () => {
@@ -22,13 +21,13 @@ export default function GenerateContentPage() {
       setResult(response);
       if (response.success) {
         toast({
-          title: 'Generation Complete',
+          title: 'Process Started',
           description: response.message,
         });
       } else {
         toast({
           variant: 'destructive',
-          title: 'Generation In Progress or Failed',
+          title: 'Process In Progress or Failed',
           description: response.message,
         });
       }
@@ -38,6 +37,7 @@ export default function GenerateContentPage() {
         title: 'An Unexpected Error Occurred',
         description: error.message || 'Please check the server console for more details.',
       });
+      setResult({success: false, message: error.message || 'An unexpected error occurred.'});
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +49,7 @@ export default function GenerateContentPage() {
         <CardHeader>
           <CardTitle>Content Generation Control Panel</CardTitle>
           <CardDescription>
-            Click the button below to generate all 54 articles for your website. This is a long-running process and may take up to 10 minutes. It is designed to run once to populate your site. After the process is complete, the generated articles will be permanently available on your site.
+            Click the button below to generate all 54 articles for your website. This is a long-running process and may take up to 10 minutes. It is designed to run once to populate your site. After the process starts, you can safely close this page. The generated articles will then be permanently available on your site.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center space-y-4">
@@ -57,7 +57,7 @@ export default function GenerateContentPage() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Generating... Please do not close this page.
+                Starting...
               </>
             ) : (
               'Generate All Articles'
@@ -67,15 +67,15 @@ export default function GenerateContentPage() {
           {result && (
              <div className="mt-6 w-full rounded-lg border bg-card p-4">
                 <div className="flex items-start space-x-3">
-                  {result.success && result.failed === 0 ? (
+                  {result.success ? (
                      <CheckCircle className="h-6 w-6 text-green-500" />
                   ) : (
-                     <AlertTriangle className="h-6 w-6 text-amber-500" />
+                     <AlertTriangle className="h-6 w-6 text-destructive" />
                   )}
                   <div>
-                    <p className="font-semibold">{result.success ? "Process Complete" : "Process Finished with Issues"}</p>
+                    <p className="font-semibold">{result.success ? "Process Started" : "Error"}</p>
                     <p className="text-sm text-muted-foreground">{result.message}</p>
-                    {result.generated > 0 && (
+                    {result.success && (
                       <Button asChild variant="link" className="p-0 mt-2">
                         <Link href="/">Go to Home Page to see the results</Link>
                       </Button>

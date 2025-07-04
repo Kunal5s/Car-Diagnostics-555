@@ -8,5 +8,5 @@ export async function triggerGeneration() {
   // We don't await the result here on the server, allowing the client to get an immediate response.
   // The flow itself will run in the background.
   populateAllArticles();
-  return { success: true, message: "Article generation process has been started. It will run in the background and may take up to 10 minutes. You can now close this page.", generated: 0, failed: 0 };
+  return { success: true, message: "Article generation process has been started. It will run in the background and may take up to 10 minutes. You can now close this page." };
 }
