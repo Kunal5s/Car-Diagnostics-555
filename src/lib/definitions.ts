@@ -19,6 +19,7 @@ export interface Article {
   content: string;
   imageUrl: string;
   slug: string;
+  generatedAt?: number;
 }
 
 export interface ArticleTopic {
@@ -173,7 +174,7 @@ export const allArticleTopics: ArticleTopic[] = [
   { id: 39, title: "Signs and Symptoms of a Clogged Vehicle Fuel Filter", category: "Fuel" },
   { id: 40, title: "Understanding Gasoline Grades and Their Effect on Performance", category: "Fuel" },
   { id: 41, title: "The Function and Failure Signs of a Fuel Pump", category: "Fuel" },
-  { id: 42, a: "Diagnosing and Cleaning Your Modern Vehicle's Fuel Injectors", category: "Fuel" },
+  { id: 42, title: "Diagnosing and Cleaning Your Modern Vehicle's Fuel Injectors", category: "Fuel" },
   // EVs (6 articles)
   { id: 43, title: "Maximizing the Lifespan of Your Electric Vehicle's Battery", category: "EVs" },
   { id: 44, title: "A Complete Guide to Electric Vehicle Charging at Home", category: "EVs" },

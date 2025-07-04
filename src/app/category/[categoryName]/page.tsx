@@ -4,6 +4,7 @@ import { getArticles } from "@/lib/data";
 import { categories, categoryDetails } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
+import { CategoryRefresher } from "./CategoryRefresher";
 
 export async function generateMetadata({ params }: { params: { categoryName: string } }): Promise<Metadata> {
   const categoryName = decodeURIComponent(params.categoryName);
@@ -54,6 +55,7 @@ export default async function CategoryPage({
 
   return (
     <div className="container mx-auto px-4 py-12">
+      <CategoryRefresher articles={articlesForCategory} categoryName={categoryName} />
       <Breadcrumbs items={breadcrumbItems} />
       <div className="text-center mb-12">
         <h1 className="text-4xl font-extrabold tracking-tight text-primary lg:text-5xl">

@@ -36,7 +36,7 @@ const prompt = ai.definePrompt({
 You must follow this set of non-negotiable rules precisely. Failure to comply will result in an unacceptable output.
 
 **RULE 1: ARTICLE LENGTH (MANDATORY)**
-The article's total word count MUST be AT LEAST 1200 words. A shorter article is not acceptable. Aim for depth and comprehensiveness.
+The article's total word count MUST be AT LEAST 1500 words. A shorter article is not acceptable. Aim for depth and comprehensiveness.
 
 **RULE 2: MARKDOWN STRUCTURE (MANDATORY AND STRICT)**
 The entire response body MUST be in well-structured Markdown format. This structure is critical for SEO and readability, and you MUST adhere to it.
@@ -53,7 +53,7 @@ The entire article must be 100% focused on the provided topic: '{{{topic}}}'. Do
 In addition to the full article, you must provide a concise, SEO-friendly summary for the article (approximately 160 characters). This summary is for metadata purposes.
 
 **FINAL INSTRUCTION:**
-The final output must strictly conform to the specified JSON schema. The 'content' field must contain the full 1200+ word article in the structured Markdown format described above, and the 'summary' field must contain the short summary. Adhere to all rules strictly.`,
+The final output must strictly conform to the specified JSON schema. The 'content' field must contain the full 1500+ word article in the structured Markdown format described above, and the 'summary' field must contain the short summary. Adhere to all rules strictly.`,
 });
 
 const generateArticleFlow = ai.defineFlow(
