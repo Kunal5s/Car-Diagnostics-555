@@ -6,7 +6,7 @@ const URL = 'https://oudworkstations.dev';
 export async function GET() {
   const articles = await getArticles();
 
-  const articleUrls = articles.map(article => {
+  const articleUrls = (articles || []).map(article => {
     return `<url><loc>${URL}/articles/${article.slug}</loc><lastmod>${new Date().toISOString()}</lastmod></url>`;
   }).join('');
 

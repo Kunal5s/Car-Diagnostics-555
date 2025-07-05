@@ -1,69 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
-import { KeyRound } from 'lucide-react';
+import { KeyRound, FileCode } from 'lucide-react';
 
 export function SettingsForm() {
-  const { toast } = useToast();
-  const [apiKey, setApiKey] = useState('');
-  const [isClient, setIsClient] = useState(false);
 
-  // This ensures localStorage is only accessed on the client
-  useEffect(() => {
-    setIsClient(true);
-    try {
-      const storedApiKey = localStorage.getItem('google_api_key');
-      if (storedApiKey) {
-        setApiKey(storedApiKey);
-      }
-    } catch (error) {
-      console.error('Could not access localStorage.');
-    }
-  }, []);
-
-  const handleSave = () => {
-    try {
-      localStorage.setItem('google_api_key', apiKey);
-      toast({
-        title: 'API Key Saved',
-        description: 'Your Google Gemini API key has been saved in your browser.',
-      });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error Saving API Key',
-        description: 'Could not save API key to local storage. Please ensure it is enabled in your browser.',
-      });
-    }
-  };
-
-  // Show skeleton while waiting for client-side hydration
-  if (!isClient) {
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>API Key</CardTitle>
-                <CardDescription>
-                  <Skeleton className="h-4 w-3/4" />
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                      <Skeleton className="h-10 flex-grow" />
-                      <Skeleton className="h-10 w-16" />
-                  </div>
-              </div>
-            </CardContent>
-        </Card>
-    );
-  }
+  const envContent = `GOOGLE_API_KEY="YOUR_GEMINI_API_KEY"
+PEXELS_API_KEY="YOUR_PEXELS_API_KEY"`;
 
   return (
     <Card>
@@ -73,44 +16,58 @@ export function SettingsForm() {
                 <KeyRound className="h-6 w-6 text-primary" />
             </div>
             <div>
-                <CardTitle>Your API Key</CardTitle>
+                <CardTitle>API Key Setup</CardTitle>
                 <CardDescription>
-                Your key is stored securely in your browser&apos;s local storage.
+                Follow these steps to securely configure your API keys.
                 </CardDescription>
             </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="api-key">Google Gemini API Key</Label>
-            <div className="flex items-center space-x-2">
-              <Input
-                id="api-key"
-                type="password"
-                placeholder="Enter your API key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-              />
-              <Button onClick={handleSave}>Save</Button>
-            </div>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+            <h3 className="font-semibold text-lg">Step 1: Get Your API Keys</h3>
+            <p className="text-sm text-muted-foreground">
+                You will need two free API keys to run this application:
+            </p>
+            <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                <li>
+                    <strong>Google Gemini API Key:</strong> Get this from{' '}
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google AI Studio</a>.
+                </li>
+                 <li>
+                    <strong>Pexels API Key:</strong> Get this from the{' '}
+                    <a href="https://www.pexels.com/api/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Pexels API documentation</a> page.
+                </li>
+            </ul>
+        </div>
+
+        <div className="space-y-2">
+            <h3 className="font-semibold text-lg">Step 2: Create a Local Environment File</h3>
              <p className="text-sm text-muted-foreground">
-              You can get your API key from{' '}
-              <a
-                href="https://aistudio.google.com/app/apikey"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                Google AI Studio
-              </a>.
+               In the root directory of your project, create a new file named exactly:
             </p>
-          </div>
-          <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 rounded-md bg-muted p-3">
+                 <FileCode className="h-5 w-5 text-muted-foreground" />
+                 <span className="font-mono text-sm font-semibold text-foreground">.env.local</span>
+            </div>
+        </div>
+        
+        <div className="space-y-2">
+            <h3 className="font-semibold text-lg">Step 3: Add Your Keys to the File</h3>
+             <p className="text-sm text-muted-foreground">
+               Copy the text below, paste it into your `.env.local` file, and replace the placeholders with your actual API keys.
+            </p>
+            <pre className="w-full overflow-x-auto rounded-md bg-muted p-4">
+              <code className="font-mono text-sm text-foreground">
+                {envContent}
+              </code>
+            </pre>
+        </div>
+
+        <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
             <p>
-              <strong>Note:</strong> Your key will be used for new interactive AI features. The main article library on this site is pre-built for speed and reliability and does not require a key.
+              <strong>Important:</strong> After creating and saving the `.env.local` file, you must **restart your application server** for the changes to take effect. This file is kept private and will not be visible in your version control system.
             </p>
-          </div>
         </div>
       </CardContent>
     </Card>

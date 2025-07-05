@@ -22,6 +22,7 @@ export interface FullArticle extends ArticleTopic {
   content: string;
   imageUrl: string;
   imageHint: string;
+  slug: string;
 }
 
 export interface CategoryInfo {
@@ -39,72 +40,72 @@ export const categoryDetails: CategoryInfo[] = [
     description: 'Engine diagnostics & performance',
     icon: Car,
     href: '/category/engine',
-    color: 'bg-blue-600',
-    iconColor: 'text-white',
+    color: 'bg-blue-600/10',
+    iconColor: 'text-blue-600',
   },
   {
     name: 'Sensors',
     description: 'Automotive sensors & monitoring',
     icon: Cpu,
     href: '/category/sensors',
-    color: 'bg-cyan-600',
-    iconColor: 'text-white',
+    color: 'bg-cyan-600/10',
+    iconColor: 'text-cyan-600',
   },
   {
     name: 'OBD2',
     description: 'OBD2 diagnostics & scanning',
     icon: Wrench,
     href: '/category/obd2',
-    color: 'bg-violet-600',
-    iconColor: 'text-white',
+    color: 'bg-violet-600/10',
+    iconColor: 'text-violet-600',
   },
   {
     name: 'Alerts',
     description: 'Warning systems & alerts',
     icon: AlertTriangle,
     href: '/category/alerts',
-    color: 'bg-red-600',
-    iconColor: 'text-white',
+    color: 'bg-red-600/10',
+    iconColor: 'text-red-600',
   },
   {
     name: 'Apps',
     description: 'Diagnostic mobile apps',
     icon: Smartphone,
     href: '/category/apps',
-    color: 'bg-emerald-600',
-    iconColor: 'text-white',
+    color: 'bg-emerald-600/10',
+    iconColor: 'text-emerald-600',
   },
   {
     name: 'Maintenance',
     description: 'Vehicle maintenance tips',
     icon: Cog,
     href: '/category/maintenance',
-    color: 'bg-sky-600',
-    iconColor: 'text-white',
+    color: 'bg-sky-600/10',
+    iconColor: 'text-sky-600',
   },
   {
     name: 'Fuel',
     description: 'Fuel systems & efficiency',
     icon: Fuel,
     href: '/category/fuel',
-    color: 'bg-orange-500',
-    iconColor: 'text-white',
+    color: 'bg-orange-500/10',
+    iconColor: 'text-orange-500',
   },
   {
     name: 'EVs',
     description: 'Electric vehicle technology',
     icon: Zap,
     href: '/category/evs',
-    color: 'bg-amber-500',
-    iconColor: 'text-white',
+    color: 'bg-amber-500/10',
+    iconColor: 'text-amber-500',
   },
   {
     name: 'Trends',
     description: 'Latest automotive trends',
     icon: TrendingUp,
     href: '/category/trends',
-    color: 'bg-pink-600',
-    iconColor: 'text-white',
+    color: 'bg-pink-600/10',
+    iconColor: 'text-pink-600',
   },
 ];
 

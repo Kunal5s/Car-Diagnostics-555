@@ -161,7 +161,7 @@ export default async function HomePage() {
       </section>
 
       {/* Trending Articles Section */}
-      <section className="py-12 bg-background">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <MotionWrapper>
             <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-primary lg:text-4xl">

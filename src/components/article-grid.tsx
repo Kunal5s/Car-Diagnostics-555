@@ -16,9 +16,12 @@ export function ArticleGrid({ articles }: ArticleGridProps) {
       <Card className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground shadow-none border-dashed">
         <CardContent className="p-6">
             <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-4" />
-            <p className="font-semibold text-lg text-foreground mb-2">No Articles Found</p>
+            <p className="font-semibold text-lg text-foreground mb-2">Content Generation in Progress or Failed</p>
             <p className="max-w-md mx-auto">
-              Content could not be loaded. This may be due to missing API keys or an error during generation. Please check the setup instructions or try again later.
+              If this is the first time you're running the app, the AI is busy generating articles and fetching images. This can take several minutes. Please refresh in a bit.
+            </p>
+             <p className="max-w-md mx-auto mt-2">
+              If the problem persists, please ensure your API keys are correctly configured in your environment file.
             </p>
             <Button asChild className="mt-6">
                 <Link href="/settings">View Setup Instructions</Link>
