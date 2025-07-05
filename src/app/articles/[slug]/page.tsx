@@ -69,4 +69,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 />
             </div>
             <div className="prose prose-lg dark:prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>
+            </div>
+        </article>
+    </div>
+  );
+}
