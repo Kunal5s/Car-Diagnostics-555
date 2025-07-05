@@ -13,9 +13,10 @@ import { ArrowRight } from "lucide-react";
 
 interface ArticleCardProps {
   topic: ArticleTopic;
+  priority?: boolean;
 }
 
-export function ArticleCard({ topic }: ArticleCardProps) {
+export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
   const articleUrl = `/articles/${topic.slug}`;
   const imageUrl = topic.imageUrl;
 
@@ -29,6 +30,7 @@ export function ArticleCard({ topic }: ArticleCardProps) {
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={priority}
             />
         </Link>
       </CardHeader>
