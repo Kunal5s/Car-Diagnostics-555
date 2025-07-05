@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { ClientDate } from '@/components/client-date';
-import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function TermsOfServicePage() {
   return (
-    <MotionWrapper className="container mx-auto max-w-4xl px-4 py-12">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">Terms of Service</h1>
       <div className="prose prose-lg dark:prose-invert max-w-none space-y-6">
         <p><strong>Last Updated:</strong> <ClientDate /></p>
@@ -48,6 +47,6 @@ export default function TermsOfServicePage() {
           If you have any questions about these Terms, please contact us at: <a href="mailto:terms@cardiagnosticsbrainai.com" className="text-primary hover:underline">terms@cardiagnosticsbrainai.com</a>.
         </p>
       </div>
-    </MotionWrapper>
+    </div>
   );
 }

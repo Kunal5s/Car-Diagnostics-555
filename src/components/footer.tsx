@@ -2,7 +2,6 @@
 import Link from 'next/link';
 import type { SVGProps } from 'react';
 import { Car, Mail, Phone, MapPin, Heart, Twitter, Linkedin } from 'lucide-react';
-import { MotionWrapper } from './motion-wrapper';
 
 const PinterestIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" {...props}>
@@ -33,69 +32,67 @@ export function Footer() {
 
   return (
     <footer className="border-t bg-background text-muted-foreground">
-      <MotionWrapper>
-        <div className="container py-12">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <div className="space-y-4">
-              <Link href="/" className="flex items-center space-x-2 text-lg font-bold text-foreground">
-                <Car className="h-6 w-6 text-primary" />
-                <span>Car Diagnostics BrainAi</span>
-              </Link>
-              <p className="text-sm">
-                Your ultimate destination for AI-powered car diagnostics, maintenance tips, and automotive technology insights. Stay ahead with expert-curated content and cutting-edge diagnostic solutions.
-              </p>
-              <div className="flex space-x-4">
-                {socialLinks.map((link) => (
-                  <Link key={link.name} href={link.href} className="text-muted-foreground transition-colors hover:text-primary">
-                    <link.icon className="h-5 w-5" />
-                    <span className="sr-only">{link.name}</span>
+      <div className="container py-12">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-4">
+            <Link href="/" className="flex items-center space-x-2 text-lg font-bold text-foreground">
+              <Car className="h-6 w-6 text-primary" />
+              <span>Car Diagnostics BrainAi</span>
+            </Link>
+            <p className="text-sm">
+              Your ultimate destination for AI-powered car diagnostics, maintenance tips, and automotive technology insights. Stay ahead with expert-curated content and cutting-edge diagnostic solutions.
+            </p>
+            <div className="flex space-x-4">
+              {socialLinks.map((link) => (
+                <Link key={link.name} href={link.href} className="text-muted-foreground transition-colors hover:text-primary">
+                  <link.icon className="h-5 w-5" />
+                  <span className="sr-only">{link.name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">Quick Links</h3>
+            <ul className="space-y-2">
+              {quickLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-sm transition-colors hover:text-primary">
+                    {link.label}
                   </Link>
-                ))}
-              </div>
-            </div>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            <div>
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">Quick Links</h3>
-              <ul className="space-y-2">
-                {quickLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-sm transition-colors hover:text-primary">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">Contact Info</h3>
-              <ul className="space-y-3 text-sm">
-                {contactInfo.map((item, index) => (
-                  <li key={index} className="flex items-center gap-3">
-                    <item.icon className="h-5 w-5 flex-shrink-0 text-primary" />
-                    {item.href ? (
-                      <a href={item.href} className="transition-colors hover:text-primary">{item.text}</a>
-                    ) : (
-                      <span>{item.text}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">Contact Info</h3>
+            <ul className="space-y-3 text-sm">
+              {contactInfo.map((item, index) => (
+                <li key={index} className="flex items-center gap-3">
+                  <item.icon className="h-5 w-5 flex-shrink-0 text-primary" />
+                  {item.href ? (
+                    <a href={item.href} className="transition-colors hover:text-primary">{item.text}</a>
+                  ) : (
+                    <span>{item.text}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
+      </div>
 
-        <div className="border-t">
-          <div className="container flex flex-col items-center justify-between py-6 text-sm sm:flex-row">
-            <p className="text-center sm:text-left">
-              © {new Date().getFullYear()} Car Diagnostics BrainAi. All rights reserved.
-            </p>
-            <p className="mt-2 flex items-center gap-1.5 sm:mt-0">
-              Made with <Heart className="h-4 w-4 text-red-500" fill="currentColor" /> for automotive enthusiasts
-            </p>
-          </div>
+      <div className="border-t">
+        <div className="container flex flex-col items-center justify-between py-6 text-sm sm:flex-row">
+          <p className="text-center sm:text-left">
+            © {new Date().getFullYear()} Car Diagnostics BrainAi. All rights reserved.
+          </p>
+          <p className="mt-2 flex items-center gap-1.5 sm:mt-0">
+            Made with <Heart className="h-4 w-4 text-red-500" fill="currentColor" /> for automotive enthusiasts
+          </p>
         </div>
-      </MotionWrapper>
+      </div>
     </footer>
   );
 }

@@ -4,7 +4,6 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { categories, categoryDetails } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
-import { MotionWrapper } from "@/components/motion-wrapper";
 import { getTopicsByCategory } from "@/lib/data";
 
 export async function generateMetadata({ params }: { params: { categoryName: string } }): Promise<Metadata> {
@@ -51,7 +50,7 @@ export default async function CategoryPage({
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <MotionWrapper>
+      <div>
         <Breadcrumbs items={breadcrumbItems} />
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold tracking-tight text-primary lg:text-5xl">
@@ -61,7 +60,7 @@ export default async function CategoryPage({
             {categoryInfo.description}
           </p>
         </div>
-      </MotionWrapper>
+      </div>
       <ArticleGrid topics={topicsForCategory} />
     </div>
   );

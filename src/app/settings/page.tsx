@@ -1,7 +1,6 @@
 
 import type { Metadata } from 'next';
 import { SettingsInfo } from './settings-info';
-import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
   title: 'How It Works',
@@ -10,12 +9,12 @@ export const metadata: Metadata = {
 
 export default function SettingsPage() {
   return (
-    <MotionWrapper className="container mx-auto max-w-2xl px-4 py-12">
+    <div className="container mx-auto max-w-2xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">How It Works</h1>
       <p className="mb-8 text-lg text-muted-foreground">
         This application comes with a pre-generated library of 54 high-quality articles about car diagnostics, complete with unique AI-generated images.
       </p>
       <SettingsInfo />
-    </MotionWrapper>
+    </div>
   );
 }

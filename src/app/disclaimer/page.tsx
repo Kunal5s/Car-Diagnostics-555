@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { ClientDate } from '@/components/client-date';
-import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
   title: 'Disclaimer',
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function DisclaimerPage() {
   return (
-    <MotionWrapper className="container mx-auto max-w-4xl px-4 py-12">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">Disclaimer</h1>
       <div className="prose prose-lg dark:prose-invert max-w-none space-y-6">
         <p><strong>Last Updated:</strong> <ClientDate /></p>
@@ -33,6 +32,6 @@ export default function DisclaimerPage() {
           While we have made every attempt to ensure that the information contained in this site has been obtained from reliable sources, Car Diagnostics BrainAi is not responsible for any errors or omissions or for the results obtained from the use of this information.
         </p>
       </div>
-    </MotionWrapper>
+    </div>
   );
 }

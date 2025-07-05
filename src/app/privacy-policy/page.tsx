@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { ClientDate } from '@/components/client-date';
-import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <MotionWrapper className="container mx-auto max-w-4xl px-4 py-12">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">Privacy Policy</h1>
       <div className="prose prose-lg dark:prose-invert max-w-none space-y-6">
         <p><strong>Last Updated:</strong> <ClientDate /></p>
@@ -43,6 +42,6 @@ export default function PrivacyPolicyPage() {
           If you have questions or comments about this Privacy Policy, please contact us at: <a href="mailto:privacy@cardiagnosticsbrainai.com" className="text-primary hover:underline">privacy@cardiagnosticsbrainai.com</a>.
         </p>
       </div>
-    </MotionWrapper>
+    </div>
   );
 }

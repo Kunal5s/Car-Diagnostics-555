@@ -1,6 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { MotionWrapper } from "@/components/motion-wrapper";
 
 export default function Loading() {
   const breadcrumbItems = [
@@ -10,7 +9,7 @@ export default function Loading() {
   ];
 
   return (
-    <MotionWrapper className="container mx-auto max-w-4xl px-4 py-12">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
       <article>
         <Breadcrumbs items={breadcrumbItems} />
         <header className="mb-8">
@@ -33,6 +32,6 @@ export default function Loading() {
             <Skeleton className="h-5 w-4/6" />
         </div>
       </article>
-    </MotionWrapper>
+    </div>
   );
 }

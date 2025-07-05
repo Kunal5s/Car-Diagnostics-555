@@ -29,8 +29,6 @@ import {
   ChevronRight,
   Star,
 } from "lucide-react";
-import { MotionWrapper } from "@/components/motion-wrapper";
-import { MotionGrid } from "@/components/motion-grid";
 import { getHomepageTopics } from "@/lib/data";
 
 
@@ -147,7 +145,7 @@ export default async function HomePage() {
       {/* Hero Section */}
       <section className="bg-primary text-primary-foreground py-20 md:py-32">
         <div className="container mx-auto px-4 text-center">
-          <MotionWrapper>
+          <div>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
               AI Car Diagnostics Made Easy with BrainAi
             </h1>
@@ -157,37 +155,37 @@ export default async function HomePage() {
             <Button size="lg" variant="secondary" asChild>
               <Link href="/blog">Explore Our Articles</Link>
             </Button>
-          </MotionWrapper>
+          </div>
         </div>
       </section>
 
       {/* Trending Articles Section */}
       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
-          <MotionWrapper>
+          <div>
             <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-primary lg:text-4xl">
               From Our Knowledge Base
             </h2>
-          </MotionWrapper>
+          </div>
           <ArticleGrid topics={trendingTopics} />
-          <MotionWrapper className="text-center mt-8">
+          <div className="text-center mt-8">
             <Button asChild variant="outline">
               <Link href="/blog">
                 Explore All Articles <ChevronRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-          </MotionWrapper>
+          </div>
         </div>
       </section>
 
       {/* How It Works Section */}
       <section className="py-16 md:py-24 bg-secondary/50">
         <div className="container mx-auto px-4">
-          <MotionWrapper className="text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">How It Works</h2>
             <p className="text-muted-foreground mt-2">A simple, 4-step process to a healthy car.</p>
-          </MotionWrapper>
-          <MotionGrid className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {howItWorksSteps.map((step) => (
               <div key={step.title} className="text-center flex flex-col items-center">
                 <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
@@ -197,27 +195,27 @@ export default async function HomePage() {
                 <p className="text-muted-foreground text-sm">{step.description}</p>
               </div>
             ))}
-          </MotionGrid>
+          </div>
         </div>
       </section>
       
       {/* Explore Categories Section */}
       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
-          <MotionWrapper className="text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">Explore Automotive Categories</h2>
             <p className="text-muted-foreground mt-2">Find articles and advice on specific car systems and topics.</p>
-          </MotionWrapper>
-          <MotionGrid className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          </div>
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {categoryDetails.map((category) => (
               <CategoryCard key={category.name} category={category} />
             ))}
-          </MotionGrid>
+          </div>
         </div>
       </section>
 
       {/* Real-Time Error Code Example Section */}
-      <MotionWrapper className="bg-secondary/50 py-12">
+      <div className="bg-secondary/50 py-12">
         <div className="container mx-auto px-4 text-center">
             <p className="text-sm uppercase tracking-widest text-muted-foreground mb-2">Real-Time Error Code Diagnostics</p>
             <div className="bg-card inline-flex items-center gap-4 p-4 rounded-lg shadow-md border">
@@ -225,34 +223,34 @@ export default async function HomePage() {
                 <span className="text-foreground text-lg">System Too Lean (Bank 1)</span>
             </div>
         </div>
-      </MotionWrapper>
+      </div>
 
       {/* Supported Vehicle Types */}
       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
-          <MotionWrapper className="text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">Works With Your Vehicle</h2>
             <p className="text-muted-foreground mt-2">We support a wide range of vehicle types manufactured after 1996.</p>
-          </MotionWrapper>
-          <MotionGrid className="flex justify-center items-center gap-8 md:gap-16 flex-wrap">
+          </div>
+          <div className="flex justify-center items-center gap-8 md:gap-16 flex-wrap">
             {supportedVehicles.map((vehicle) => (
               <div key={vehicle.name} className="flex flex-col items-center gap-2 text-muted-foreground">
                 <vehicle.icon className="h-12 w-12" />
                 <span className="font-medium">{vehicle.name}</span>
               </div>
             ))}
-          </MotionGrid>
+          </div>
         </div>
       </section>
 
       {/* BrainAi Features Section */}
       <section className="py-16 md:py-24 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4">
-          <MotionWrapper className="text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold">Why Choose Car Diagnostics BrainAi?</h2>
             <p className="text-primary-foreground/80 mt-2">Unlock powerful features for complete peace of mind.</p>
-          </MotionWrapper>
-          <MotionGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {features.map((feature) => (
               <div key={feature.title} className="flex items-start gap-4">
                  <div className="bg-primary-foreground/20 rounded-lg p-3">
@@ -264,18 +262,18 @@ export default async function HomePage() {
                 </div>
               </div>
             ))}
-          </MotionGrid>
+          </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
-          <MotionWrapper className="text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">Loved by Car Owners</h2>
             <p className="text-muted-foreground mt-2">See what our users are saying about BrainAi.</p>
-          </MotionWrapper>
-          <MotionGrid className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial) => (
               <Card key={testimonial.name} className="flex flex-col">
                 <CardHeader>
@@ -291,17 +289,17 @@ export default async function HomePage() {
                 </CardContent>
               </Card>
             ))}
-          </MotionGrid>
+          </div>
         </div>
       </section>
 
       {/* FAQ Section */}
       <section className="py-16 md:py-24 bg-secondary/50">
         <div className="container mx-auto px-4 max-w-3xl">
-          <MotionWrapper className="text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">Frequently Asked Questions</h2>
-          </MotionWrapper>
-          <MotionWrapper>
+          </div>
+          <div>
             <Accordion type="single" collapsible className="w-full">
               {faqItems.map((item) => (
                 <AccordionItem key={item.question} value={item.question}>
@@ -310,12 +308,12 @@ export default async function HomePage() {
                 </AccordionItem>
               ))}
             </Accordion>
-          </MotionWrapper>
+          </div>
         </div>
       </section>
 
       {/* Newsletter Signup Section */}
-      <MotionWrapper className="bg-primary py-16 text-primary-foreground">
+      <div className="bg-primary py-16 text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-2">Get Weekly Car Health Tips</h2>
           <p className="text-primary-foreground/80 mb-6">Join our newsletter for maintenance advice and product updates.</p>
@@ -331,7 +329,7 @@ export default async function HomePage() {
             </Button>
           </form>
         </div>
-      </MotionWrapper>
+      </div>
     </div>
   );
 }

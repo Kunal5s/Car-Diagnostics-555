@@ -2,7 +2,6 @@ import { type ArticleTopic } from "@/lib/definitions";
 import { ArticleCard } from "./article-card";
 import { Card, CardContent } from "./ui/card";
 import { AlertCircle } from "lucide-react";
-import { MotionGrid } from "./motion-grid";
 import Link from "next/link";
 import { Button } from "./ui/button";
 
@@ -26,10 +25,10 @@ export function ArticleGrid({ topics }: ArticleGridProps) {
   }
 
   return (
-    <MotionGrid className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {topics.map((topic) => (
         <ArticleCard key={topic.id} topic={topic} />
       ))}
-    </MotionGrid>
+    </div>
   );
 }

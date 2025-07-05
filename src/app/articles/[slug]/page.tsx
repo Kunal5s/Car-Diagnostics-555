@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { MotionWrapper } from '@/components/motion-wrapper';
 import type { Metadata } from 'next';
 import { getArticleBySlug, getAllTopics } from '@/lib/data';
 
@@ -49,7 +48,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const contentWithoutTitle = article.content.replace(/^# .*\n\n?/, '');
 
   return (
-    <MotionWrapper className="container mx-auto max-w-4xl px-4 py-12">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
         <article>
             <Breadcrumbs items={breadcrumbItems} />
             <header className="mb-8">
@@ -72,6 +71,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>
             </div>
         </article>
-    </MotionWrapper>
+    </div>
   );
 }
