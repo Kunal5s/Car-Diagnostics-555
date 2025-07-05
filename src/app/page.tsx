@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { MotionWrapper } from "@/components/motion-wrapper";
 import { MotionGrid } from "@/components/motion-grid";
-import { getHomepageArticles } from "@/lib/data";
+import { getHomepageTopics } from "@/lib/data";
 
 
 export const metadata: Metadata = {
@@ -139,7 +139,7 @@ const faqItems = [
 
 
 export default async function HomePage() {
-  const trendingArticles = await getHomepageArticles();
+  const trendingTopics = await getHomepageTopics();
 
   return (
     <div className="flex flex-col">
@@ -168,7 +168,7 @@ export default async function HomePage() {
               From Our Knowledge Base
             </h2>
           </MotionWrapper>
-          <ArticleGrid articles={trendingArticles} />
+          <ArticleGrid topics={trendingTopics} />
           <MotionWrapper className="text-center mt-8">
             <Button asChild variant="outline">
               <Link href="/blog">

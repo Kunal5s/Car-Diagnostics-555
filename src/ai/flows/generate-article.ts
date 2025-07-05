@@ -12,7 +12,6 @@ import {z} from 'zod';
 
 const GenerateArticleInputSchema = z.object({
   topic: z.string().describe('The topic of the article to generate, which should be around 9 words long.'),
-  category: z.string().describe('The category of the article.'),
 });
 export type GenerateArticleInput = z.infer<typeof GenerateArticleInputSchema>;
 
@@ -71,5 +70,8 @@ const generateArticleFlow = ai.defineFlow(
 export async function generateArticle(
   input: GenerateArticleInput
 ): Promise<GenerateArticleOutput> {
+  // Adding a delay to simulate loading, as per user request for a loading experience.
+  // In a real-world scenario, the AI generation itself would provide the delay.
+  await new Promise(resolve => setTimeout(resolve, 2000));
   return await generateArticleFlow(input);
 }

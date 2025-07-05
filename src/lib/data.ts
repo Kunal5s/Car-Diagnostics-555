@@ -1,54 +1,78 @@
+import { slugify } from "./utils";
+import { generateArticle, type GenerateArticleOutput } from "@/ai/flows/generate-article";
+import type { FullArticle, ArticleTopic } from './definitions';
+import { allArticleTopics } from './topics';
 
-import { promises as fs } from 'fs';
-import path from 'path';
-import type { FullArticle } from './definitions';
+// A simple in-memory cache for generated articles to avoid re-generating during the same request lifecycle.
+const requestCache = new Map<string, FullArticle>();
 
-const articlesFilePath = path.join(process.cwd(), 'src', 'lib', 'articles.json');
-let cachedArticles: FullArticle[] | null = null;
-
-async function loadArticles(): Promise<FullArticle[]> {
-  // This function now simply reads the pre-generated file.
-  // This is fast, reliable, and prevents server crashes.
-  if (cachedArticles) {
-    return cachedArticles;
+async function generateFullArticle(topic: ArticleTopic): Promise<FullArticle> {
+  const cacheKey = topic.slug;
+  if (requestCache.has(cacheKey)) {
+    return requestCache.get(cacheKey)!;
   }
+
+  console.log(`- Live generating article for topic: "${topic.title}"`);
+  
+  let articleData: GenerateArticleOutput;
   try {
-    const data = await fs.readFile(articlesFilePath, 'utf-8');
-    const articles: FullArticle[] = JSON.parse(data);
-    cachedArticles = articles;
-    return articles;
-  } catch (error) {
-    console.error("Fatal: Could not read or parse src/lib/articles.json. The app cannot function without this file.", error);
-    // Return an empty array to prevent the app from crashing entirely.
-    // The ArticleGrid component will show an error message.
-    return [];
+    articleData = await generateArticle({ topic: topic.title });
+  } catch (e) {
+    console.error(`  - Failed to generate article content for topic: ${topic.title}`, e);
+    articleData = {
+        summary: "Error: Could not generate article summary.",
+        content: `# Error: Content Generation Failed\n\nThere was an error generating the content for this article. Please try again later. The AI model may be temporarily unavailable or there could be an issue with the API key.\n\n**Topic Attempted:** ${topic.title}`,
+    };
   }
+
+  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
+    `${topic.title}, ${topic.category}, photorealistic, automotive, detailed, professional photography`
+  )}`;
+
+  const fullArticle: FullArticle = {
+    id: topic.id,
+    title: topic.title,
+    category: topic.category,
+    slug: topic.slug,
+    summary: articleData.summary,
+    content: articleData.content,
+    imageUrl: imageUrl
+  };
+
+  requestCache.set(cacheKey, fullArticle);
+
+  // Clear cache after a short period to allow for re-generation on new requests
+  setTimeout(() => requestCache.delete(cacheKey), 5000);
+
+  return fullArticle;
 }
 
-export async function getArticles(): Promise<FullArticle[]> {
-  return await loadArticles();
+export async function getTopics(): Promise<ArticleTopic[]> {
+  return allArticleTopics;
 }
 
-export async function getHomepageArticles(): Promise<FullArticle[]> {
-  const articles = await getArticles();
-  // Show the first 6 articles on the homepage.
-  return articles.slice(0, 6);
+export async function getHomepageTopics(): Promise<ArticleTopic[]> {
+  const topics = await getTopics();
+  // Show the first 6 topics on the homepage.
+  return topics.slice(0, 6);
 }
 
-export async function getArticlesByCategory(categoryName: string): Promise<FullArticle[]> {
-  const articles = await getArticles();
+export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
+  const topics = await getTopics();
   const lowerCategoryName = categoryName.toLowerCase();
   
   if (lowerCategoryName === 'all') {
-    return articles;
+    return topics;
   }
   
-  return articles.filter(article => article.category.toLowerCase() === lowerCategoryName);
+  return topics.filter(topic => topic.category.toLowerCase() === lowerCategoryName);
 }
   
 export async function getArticleBySlug(slug: string): Promise<FullArticle | undefined> {
-  const articles = await getArticles();
-  return articles.find(article => article.slug === slug);
+  const topics = await getTopics();
+  const topic = topics.find(topic => topic.slug === slug);
+  if (!topic) {
+    return undefined;
+  }
+  return await generateFullArticle(topic);
 }
-
-    

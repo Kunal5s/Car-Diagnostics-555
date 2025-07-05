@@ -6,17 +6,20 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { MotionWrapper } from '@/components/motion-wrapper';
 import type { Metadata } from 'next';
-import { getArticleBySlug, getArticles } from '@/lib/data';
+import { getArticleBySlug, getTopics } from '@/lib/data';
 
 
 export async function generateStaticParams() {
-  const articles = await getArticles();
-  return articles.map((article) => ({
-    slug: article.slug,
+  const topics = await getTopics();
+  return topics.map((topic) => ({
+    slug: topic.slug,
   }));
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  // For dynamic pages, we generate metadata based on the slug.
+  // This will call the AI to generate the article just for the metadata.
+  // Next.js may cache this result for the page component itself.
   const article = await getArticleBySlug(params.slug);
   
   if (!article) {

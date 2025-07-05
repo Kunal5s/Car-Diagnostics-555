@@ -2,7 +2,7 @@ import { ArticleGrid } from "@/components/article-grid";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MotionWrapper } from "@/components/motion-wrapper";
-import { getArticles } from "@/lib/data";
+import { getTopics } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: 'All Articles',
@@ -15,7 +15,7 @@ export default async function BlogPage() {
     { label: "Blog" },
   ];
   
-  const allArticles = await getArticles();
+  const allTopics = await getTopics();
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -30,7 +30,7 @@ export default async function BlogPage() {
               </p>
           </div>
         </MotionWrapper>
-        <ArticleGrid articles={allArticles} />
+        <ArticleGrid topics={allTopics} />
     </div>
   );
 }

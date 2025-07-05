@@ -15,13 +15,13 @@ export interface ArticleTopic {
   id: number;
   title: string;
   category: string;
+  slug: string;
 }
 
 export interface FullArticle extends ArticleTopic {
   summary: string;
   content: string;
   imageUrl: string;
-  slug: string;
 }
 
 export interface CategoryInfo {

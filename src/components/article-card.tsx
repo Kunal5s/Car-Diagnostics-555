@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { type FullArticle } from "@/lib/definitions";
+import { type ArticleTopic } from "@/lib/definitions";
 import {
   Card,
   CardContent,
@@ -12,19 +12,23 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 interface ArticleCardProps {
-  article: FullArticle;
+  topic: ArticleTopic;
 }
 
-export function ArticleCard({ article }: ArticleCardProps) {
-  const articleUrl = `/articles/${article.slug}`;
+export function ArticleCard({ topic }: ArticleCardProps) {
+  const articleUrl = `/articles/${topic.slug}`;
+  // Dynamically generate image URL from topic title using Pollinations.ai
+  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
+    `${topic.title}, ${topic.category}, photorealistic, automotive, detailed, professional photography`
+  )}`;
 
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <CardHeader className="p-0">
         <Link href={articleUrl} className="block relative h-48 w-full">
             <Image
-              src={article.imageUrl}
-              alt={article.title}
+              src={imageUrl}
+              alt={topic.title}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -33,16 +37,13 @@ export function ArticleCard({ article }: ArticleCardProps) {
       </CardHeader>
       <CardContent className="flex-grow p-6">
         <Badge variant="secondary" className="mb-2">
-          {article.category}
+          {topic.category}
         </Badge>
-        <h3 className="mb-2 line-clamp-2 font-semibold leading-tight">
+        <h3 className="mb-2 line-clamp-3 font-semibold leading-tight h-20">
           <Link href={articleUrl} className="hover:text-primary">
-            {article.title}
+            {topic.title}
           </Link>
         </h3>
-        <p className="line-clamp-3 text-sm text-muted-foreground">
-          {article.summary}
-        </p>
       </CardContent>
       <CardFooter className="p-6 pt-0">
         <Button asChild variant="link" className="p-0">
