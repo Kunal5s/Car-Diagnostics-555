@@ -34,9 +34,8 @@ import { getHomepageArticles } from "@/lib/data";
 
 
 export const metadata: Metadata = {
-  title: "Car Diagnostics AI - Your Intelligent Automotive Assistant",
-  description: "Detect engine problems instantly with Car Diagnostics AI. Get smart analysis, vehicle health reports, and expert-written articles on maintenance and repair.",
-  keywords: ["AI car diagnostics", "OBD2 error codes", "engine fault scan", "vehicle health report", "car diagnostics tool", "Car Diagnostics AI"],
+  description: "Detect engine problems instantly with Car Diagnostics BrainAi. Get smart analysis, vehicle health reports, and expert-written articles on maintenance and repair.",
+  keywords: ["AI car diagnostics", "OBD2 error codes", "engine fault scan", "vehicle health report", "car diagnostics tool", "Car Diagnostics BrainAi"],
 };
 
 const howItWorksSteps = [
@@ -100,12 +99,12 @@ const features = [
 const testimonials = [
   {
     name: "Sarah J.",
-    review: "Car Diagnostics AI helped me identify a sensor issue my mechanic missed. Saved me over $500 on needless repairs!",
+    review: "Car Diagnostics BrainAi helped me identify a sensor issue my mechanic missed. Saved me over $500 on needless repairs!",
     rating: 5,
   },
   {
     name: "Mike T.",
-    review: "As someone who knows nothing about cars, Car Diagnostics AI is a lifesaver. The reports are so easy to understand.",
+    review: "As someone who knows nothing about cars, Car Diagnostics BrainAi is a lifesaver. The reports are so easy to understand.",
     rating: 5,
   },
   {
@@ -117,8 +116,8 @@ const testimonials = [
 
 const faqItems = [
   {
-    question: "What is Car Diagnostics AI?",
-    answer: "Car Diagnostics AI is an intelligent tool that helps you diagnose vehicle problems quickly and accurately. It analyzes symptoms, explains complex fault codes in simple terms, and provides easy-to-understand reports and repair suggestions.",
+    question: "What is Car Diagnostics BrainAi?",
+    answer: "Car Diagnostics BrainAi is an intelligent tool that helps you diagnose vehicle problems quickly and accurately. It analyzes symptoms, explains complex fault codes in simple terms, and provides easy-to-understand reports and repair suggestions.",
   },
   {
     question: "Do I need special tools to use it?",
@@ -149,7 +148,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <MotionWrapper>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
-              AI Car Diagnostics Made Easy
+              AI Car Diagnostics Made Easy with BrainAi
             </h1>
             <p className="text-lg md:text-xl text-primary-foreground/80 max-w-3xl mx-auto mb-8">
               Detect engine problems instantly using artificial intelligence. Fast, reliable, and always available.
@@ -249,7 +248,7 @@ export default async function HomePage() {
       <section className="py-16 md:py-24 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4">
           <MotionWrapper className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold">Why Choose Car Diagnostics AI?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">Why Choose Car Diagnostics BrainAi?</h2>
             <p className="text-primary-foreground/80 mt-2">Unlock powerful features for complete peace of mind.</p>
           </MotionWrapper>
           <MotionGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -273,7 +272,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <MotionWrapper className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">Loved by Car Owners</h2>
-            <p className="text-muted-foreground mt-2">See what our users are saying about our AI.</p>
+            <p className="text-muted-foreground mt-2">See what our users are saying about BrainAi.</p>
           </MotionWrapper>
           <MotionGrid className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial) => (

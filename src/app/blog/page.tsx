@@ -5,7 +5,7 @@ import { MotionWrapper } from "@/components/motion-wrapper";
 import { getArticles } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: 'All Articles - Car Diagnostics AI',
+  title: 'All Articles',
   description: 'Browse all our articles on car diagnostics, maintenance, and technology.',
 };
 

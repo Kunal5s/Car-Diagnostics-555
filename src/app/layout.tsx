@@ -9,7 +9,10 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Car Diagnostics AI",
+  title: {
+    default: 'Car Diagnostics BrainAi - Your Intelligent Automotive Assistant',
+    template: '%s - Car Diagnostics BrainAi',
+  },
   description: "Your intelligent assistant for vehicle diagnostics and maintenance.",
 };
 

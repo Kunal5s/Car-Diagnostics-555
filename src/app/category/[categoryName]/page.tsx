@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: { categoryName: str
   }
 
   return {
-    title: `${formattedCategoryName} Articles - Car Diagnostics AI`,
+    title: `${formattedCategoryName} Articles`,
     description: `Browse articles about ${formattedCategoryName}. Find tips on car maintenance, diagnostics, and more.`,
   }
 }

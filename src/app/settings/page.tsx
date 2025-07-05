@@ -4,7 +4,7 @@ import { Info } from 'lucide-react';
 import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
-  title: 'Setup - Car Diagnostics AI',
+  title: 'Setup',
   description: 'Application setup information.',
 };
 

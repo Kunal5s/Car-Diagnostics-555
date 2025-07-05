@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 
   return {
-    title: `${article.title} - Car Diagnostics AI`,
+    title: article.title,
     description: `An in-depth, AI-generated article on ${article.title}.`,
   }
 }

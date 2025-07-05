@@ -3,8 +3,8 @@ import { ClientDate } from '@/components/client-date';
 import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
-  title: 'Disclaimer - Car Diagnostics AI',
-  description: 'Disclaimer for Car Diagnostics AI. The information provided on this website is for informational purposes only.',
+  title: 'Disclaimer',
+  description: 'Disclaimer for Car Diagnostics BrainAi. The information provided on this website is for informational purposes only.',
 };
 
 export default function DisclaimerPage() {
@@ -15,7 +15,7 @@ export default function DisclaimerPage() {
         <p><strong>Last Updated:</strong> <ClientDate /></p>
         
         <p>
-          The information provided by Car Diagnostics AI ("we," "us," or "our") on this website is for general informational and educational purposes only. All information on the site is provided in good faith, however, we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the site.
+          The information provided by Car Diagnostics BrainAi ("we," "us," or "our") on this website is for general informational and educational purposes only. All information on the site is provided in good faith, however, we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the site.
         </p>
         
         <h2 className="text-2xl font-semibold">Not Professional Advice</h2>
@@ -30,7 +30,7 @@ export default function DisclaimerPage() {
 
         <h2 className="text-2xl font-semibold">Errors and Omissions Disclaimer</h2>
         <p>
-          While we have made every attempt to ensure that the information contained in this site has been obtained from reliable sources, Car Diagnostics AI is not responsible for any errors or omissions or for the results obtained from the use of this information.
+          While we have made every attempt to ensure that the information contained in this site has been obtained from reliable sources, Car Diagnostics BrainAi is not responsible for any errors or omissions or for the results obtained from the use of this information.
         </p>
       </div>
     </MotionWrapper>

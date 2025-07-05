@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
-  title: 'Contact Us - Car Diagnostics AI',
-  description: "Get in touch with Car Diagnostics AI. We're here to answer your questions and receive your feedback.",
+  title: 'Contact Us',
+  description: "Get in touch with Car Diagnostics BrainAi. We're here to answer your questions and receive your feedback.",
 };
 
 export default function ContactPage() {
@@ -20,14 +20,14 @@ export default function ContactPage() {
           <p>
             For all general questions and feedback, please email us at:
             <br />
-            <a href="mailto:contact@cardiagnosticsai.com" className="text-primary hover:underline">contact@cardiagnosticsai.com</a>
+            <a href="mailto:contact@cardiagnosticsbrainai.com" className="text-primary hover:underline">contact@cardiagnosticsbrainai.com</a>
           </p>
         </div>
         
         <div>
           <h2 className="text-2xl font-semibold">Our Office</h2>
           <p>
-            Car Diagnostics AI Headquarters
+            Car Diagnostics BrainAi Headquarters
             <br />
             123 Auto Lane
             <br />
