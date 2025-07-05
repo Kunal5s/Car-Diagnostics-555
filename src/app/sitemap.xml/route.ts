@@ -1,17 +1,16 @@
-import { getArticles } from '@/lib/data';
+import { getAllArticles } from '@/lib/data';
 import { categories } from '@/lib/definitions';
 
 const URL = 'https://oudworkstations.dev';
 
 export async function GET() {
-  const articles = await getArticles();
+  const articles = await getAllArticles();
 
   const articleUrls = (articles || []).map(article => {
     return `<url><loc>${URL}/articles/${article.slug}</loc><lastmod>${new Date().toISOString()}</lastmod></url>`;
   }).join('');
 
   const categoryUrls = categories
-    .filter(c => c !== "All")
     .map(category => {
       return `<url><loc>${URL}/category/${category.toLowerCase()}</loc><lastmod>${new Date().toISOString()}</lastmod></url>`;
     }).join('');
