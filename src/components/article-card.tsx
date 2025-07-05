@@ -19,18 +19,21 @@ interface ArticleCardProps {
 export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
   const articleUrl = `/articles/${topic.slug}`;
   const imageUrl = topic.imageUrl;
+  const dataAiHint = topic['data-ai-hint'] ?? 'automotive';
 
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <CardHeader className="p-0">
-        <Link href={articleUrl} className="block relative h-48 w-full group">
+        <Link href={articleUrl} className="block relative h-48 w-full group bg-muted">
             <Image
               src={imageUrl}
               alt={topic.title}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              width={400}
+              height={300}
+              className="object-cover transition-transform duration-300 group-hover:scale-105 w-full h-full"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority={priority}
+              data-ai-hint={dataAiHint}
             />
         </Link>
       </CardHeader>

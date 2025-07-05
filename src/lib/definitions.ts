@@ -17,6 +17,7 @@ export interface ArticleTopic {
   category: string;
   slug: string;
   imageUrl: string;
+  'data-ai-hint'?: string;
 }
 
 export interface FullArticle extends ArticleTopic {
