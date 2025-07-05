@@ -4,17 +4,19 @@ import allArticles from './articles.json';
 
 // This function simulates an async call, which is good practice for data fetching.
 export async function getAllArticles(): Promise<FullArticle[]> {
+  // The type assertion is safe because the JSON file is now static and matches the type.
   return allArticles as FullArticle[];
 }
 
 export async function getAllTopics(): Promise<ArticleTopic[]> {
   const articles = await getAllArticles();
-  return articles.map(({ id, title, category, slug, imageUrl }) => ({
+  return articles.map(({ id, title, category, slug, imageUrl, imageHint }) => ({
     id,
     title,
     category,
     slug,
     imageUrl,
+    imageHint,
   }));
 }
 
