@@ -111,8 +111,10 @@ async function generateAndCacheArticles(): Promise<FullArticle[]> {
     }
 
     try {
-        console.log(`  - Fetching image for hint: "${articleData.imageHint}"...`);
-        const fetchedImageUrl = await getImageForQuery(articleData.imageHint);
+        // Use the article title and category for a more reliable image search
+        const imageQuery = `${topic.title} ${topic.category}`;
+        console.log(`  - Fetching image for query: "${imageQuery}"...`);
+        const fetchedImageUrl = await getImageForQuery(imageQuery);
         if(fetchedImageUrl) {
             imageUrl = fetchedImageUrl;
         }
