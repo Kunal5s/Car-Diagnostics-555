@@ -46,7 +46,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
   // Remove H1 from markdown content as it's already in the header
   const contentWithoutTitle = article.content.replace(/^# .*\n\n?/, '');
-  const dataAiHint = article['data-ai-hint'] ?? 'automotive';
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
@@ -66,7 +65,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                   className="rounded-lg object-cover"
                   sizes="100vw"
                   priority
-                  data-ai-hint={dataAiHint}
                 />
             </div>
             <div className="prose prose-lg dark:prose-invert max-w-none">
