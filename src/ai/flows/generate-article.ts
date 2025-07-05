@@ -11,9 +11,9 @@ import {ai} from '@/ai/genkit';
 import {z} from 'zod';
 
 const GenerateArticleInputSchema = z.object({
-  topic: z.string().describe('The topic of the article to generate, which should be around 9 words long.'),
+  topic: z.string().describe('The topic of the article to generate.'),
 });
-export type GenerateArticleInput = z.infer<typeof GenerateArticleInputSchema>;
+type GenerateArticleInput = z.infer<typeof GenerateArticleInputSchema>;
 
 const GenerateArticleOutputSchema = z.object({
   summary: z
@@ -23,8 +23,12 @@ const GenerateArticleOutputSchema = z.object({
     ),
   content: z
     .string()
+    .min(
+      7000,
+      'The article content must be at least 7000 characters to be considered a valid, detailed article.'
+    )
     .describe(
-      'The full, detailed, SEO-friendly article content, in Markdown format. It should be well-structured with H1, H2, H3, H4, H5, and H6 headings for a professional layout.'
+      'The full, detailed, SEO-friendly article content, in Markdown format. It MUST be at least 7000 characters long. It should be well-structured with H1, H2, H3, etc., for headings.'
     ),
 });
 export type GenerateArticleOutput = z.infer<typeof GenerateArticleOutputSchema>;
@@ -33,19 +37,19 @@ const prompt = ai.definePrompt({
   name: 'articleGeneratorPrompt',
   input: {schema: GenerateArticleInputSchema},
   output: {schema: GenerateArticleOutputSchema},
-  prompt: `You are an AI writer tasked with generating a long-form, expert-level automotive article. Your single most important directive is to meet the minimum word count.
+  prompt: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: '{{{topic}}}'.
 
-**PRIMARY DIRECTIVE: The article content MUST be a MINIMUM of 1600 words.** This is not a suggestion; it is a strict requirement. A response under 1600 words is considered a failure. Do not summarize. Write a full, comprehensive, and exhaustive article.
+This is a strict requirement: The article content you generate MUST be very long and detailed, with a minimum length of 7000 characters. Responding with content shorter than this will be considered a failure.
 
-**SECONDARY DIRECTIVE: The response MUST be in well-structured Markdown and fit the provided JSON schema.**
-- The article MUST begin with an H1 heading for the title. Do not just repeat the topic; create a compelling, SEO-friendly title based on the topic.
-- You MUST use a deep hierarchy of H2, H3, and H4 headings to structure the content logically. This is mandatory for readability and SEO.
-- Do not use filler content. The text must be valuable, informative, and detailed.
-- Provide a short, SEO-friendly summary (around 160 characters) as a separate field.
+Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
+- The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the content.
+- You MUST include multiple H2 (##) headings to structure the main sections of the article.
+- Within each H2 section, you MUST use several H3 (###) headings to break down the content into sub-sections.
+- The use of this hierarchical heading structure (H1 -> H2 -> H3 etc.) is MANDATORY.
 
-Topic to write about: '{{{topic}}}'
+In addition to the article, you must provide a concise, SEO-friendly summary for the article (approximately 160 characters).
 
-Re-confirming your main goal: Generate a complete article of **at least 1600 words**.`,
+IMPORTANT: The final output must conform to the specified JSON schema. The 'content' field must contain the full article in the structured Markdown format and be AT LEAST 7000 characters long. Failure to follow these rules will result in an invalid response.`,
 });
 
 const generateArticleFlow = ai.defineFlow(
@@ -57,7 +61,7 @@ const generateArticleFlow = ai.defineFlow(
   async (input) => {
     const {output} = await prompt(input);
     if (!output) {
-      throw new Error('Failed to generate article content.');
+      throw new Error('Failed to generate article content. The AI model returned no output.');
     }
     return output;
   }
@@ -66,5 +70,11 @@ const generateArticleFlow = ai.defineFlow(
 export async function generateArticle(
   input: GenerateArticleInput
 ): Promise<GenerateArticleOutput> {
-  return await generateArticleFlow(input);
+    try {
+        return await generateArticleFlow(input);
+    } catch (error) {
+        console.error("Error in generateArticleFlow, the prompt likely failed schema validation:", error);
+        // Re-throw the error to be caught by the caller in data.ts
+        throw error;
+    }
 }

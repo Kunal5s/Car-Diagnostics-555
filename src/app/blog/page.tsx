@@ -1,8 +1,9 @@
+
 import { ArticleGrid } from "@/components/article-grid";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MotionWrapper } from "@/components/motion-wrapper";
-import { getTopics } from "@/lib/data";
+import { getAllTopics } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: 'All Articles',
@@ -15,7 +16,7 @@ export default async function BlogPage() {
     { label: "Blog" },
   ];
   
-  const allTopics = await getTopics();
+  const allTopics = await getAllTopics();
 
   return (
     <div className="container mx-auto px-4 py-12">
