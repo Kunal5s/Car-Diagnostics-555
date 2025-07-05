@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Metadata } from 'next';
 import { getArticleBySlug, getAllTopics } from '@/lib/data';
+import { AIImageGrid } from '@/components/ai-image-grid';
 
 
 export async function generateStaticParams() {
@@ -16,7 +17,7 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { slug:string } }): Promise<Metadata> {
   const article = await getArticleBySlug(params.slug);
   
   if (!article) {
@@ -61,6 +62,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 <Image
                   src={article.imageUrl}
                   alt={article.title}
+                  data-ai-hint="car diagnostics"
                   fill
                   className="rounded-lg object-cover"
                   sizes="100vw"
@@ -70,6 +72,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             <div className="prose prose-lg dark:prose-invert max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>
             </div>
+            <AIImageGrid title={article.title} category={article.category} />
         </article>
     </div>
   );
