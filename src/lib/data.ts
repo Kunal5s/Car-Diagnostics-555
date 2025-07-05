@@ -1,60 +1,69 @@
 import articlesData from './articles.json';
-import { categories, categoryDetails } from "./definitions";
-import type { Article as ArticleTopic, FullArticle } from "./definitions";
+import type { FullArticle } from "./definitions";
 
+// The full, static library of all 54 articles.
 const articles: FullArticle[] = articlesData as FullArticle[];
 
 /**
- * Gets the current time slot of the day, from 0 to 7.
- * This is used to rotate content and simulate 8 refreshes per day (every 3 hours).
- * This corresponds to refreshes at 12, 3, 6, 9 (AM/PM).
+ * Gets the current time slot of the day.
+ * The day is divided into 8 slots of 3 hours each.
+ * This ensures content rotates at 12, 3, 6, and 9 (AM/PM), UTC.
  * @returns The current time slot (0-7).
  */
 function getCurrentTimeSlot(): number {
-    const hours = new Date().getUTCHours(); // Use UTC for global consistency
-    // 8 slots in 24 hours means a new slot every 3 hours.
+    const hours = new Date().getUTCHours();
     return Math.floor(hours / 3);
 }
 
 /**
- * Rotates an array to simulate fresh content.
+ * Rotates an array to simulate fresh content based on the current time slot.
  * @param arr The array to rotate.
- * @param count The number of positions to rotate.
  * @returns The rotated array.
  */
-function rotateArray<T>(arr: T[], count: number): T[] {
+function rotateArrayForFreshness<T>(arr: T[]): T[] {
     if (arr.length === 0) return [];
-    const rotation = count % arr.length;
+    const slot = getCurrentTimeSlot();
+    const rotation = slot % arr.length;
     return [...arr.slice(rotation), ...arr.slice(0, rotation)];
 }
 
 
+/**
+ * Returns all articles, with the order rotated for the main blog page.
+ */
 export async function getArticles(): Promise<FullArticle[]> {
+  // Rotate by a larger amount for more variety on the main blog page
   const slot = getCurrentTimeSlot();
-  // Rotate the entire list for the /blog page to show a different order.
-  return rotateArray(articles, slot * 9); // Rotate by a larger amount for variety
+  const rotation = (slot * 9) % articles.length; 
+  return [...articles.slice(rotation), ...articles.slice(0, rotation)];
 }
 
+/**
+ * Returns 6 unique articles for the homepage, one from each of the first 6 categories.
+ * The selection is rotated throughout the day.
+ */
 export async function getHomepageArticles(): Promise<FullArticle[]> {
-    const slot = getCurrentTimeSlot();
-    const homepageArticles: FullArticle[] = [];
-  
-    // We want to feature one article from each category on the homepage.
-    // The specific article from each category will change based on the time slot.
-    categoryDetails.forEach(category => {
-      const categoryArticles = articles.filter(a => a.category === category.name);
-      if (categoryArticles.length > 0) {
-        // Rotate the articles for this category based on the time slot
-        const rotated = rotateArray(categoryArticles, slot);
-        // Add the "freshest" article for this time slot to our homepage list
-        homepageArticles.push(rotated[0]);
-      }
+    const articlesByCategory: Record<string, FullArticle[]> = {};
+    articles.forEach(article => {
+        if (!articlesByCategory[article.category]) {
+            articlesByCategory[article.category] = [];
+        }
+        articlesByCategory[article.category].push(article);
     });
-  
-    // This will return one article per category, for a total of 9 on the homepage grid.
-    return homepageArticles;
+
+    const homepageArticles: FullArticle[] = [];
+    // Take one article from each category, rotating the selection
+    for (const category in articlesByCategory) {
+        homepageArticles.push(rotateArrayForFreshness(articlesByCategory[category])[0]);
+    }
+    
+    return homepageArticles.slice(0, 6);
 }
 
+/**
+ * Gets all articles for a given category, with the order rotated for freshness.
+ * @param categoryName The name of the category.
+ */
 export async function getArticlesByCategory(categoryName: string): Promise<FullArticle[]> {
     const lowerCategoryName = categoryName.toLowerCase();
     
@@ -62,14 +71,14 @@ export async function getArticlesByCategory(categoryName: string): Promise<FullA
       return getArticles();
     }
     
-    // For a specific category page, we always want to show all articles in that category.
-    // The rotation just changes the display order for freshness.
     const categoryArticles = articles.filter(article => article.category.toLowerCase() === lowerCategoryName);
-    const slot = getCurrentTimeSlot();
-    return rotateArray(categoryArticles, slot);
+    return rotateArrayForFreshness(categoryArticles);
 }
   
+/**
+ * Finds a single article by its slug from the static library.
+ * @param slug The slug of the article to find.
+ */
 export async function getArticleBySlug(slug: string): Promise<FullArticle | undefined> {
-    // Search the entire list regardless of time slot for direct link access
     return articles.find(article => article.slug === slug);
 }

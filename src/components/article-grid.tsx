@@ -7,21 +7,21 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 
 interface ArticleGridProps {
-  articles: (ArticleTopic & { imageUrl: string })[];
+  articles: (ArticleTopic & { imageUrl: string; imageHint: string; })[];
 }
 
 export function ArticleGrid({ articles }: ArticleGridProps) {
-  if (articles.length === 0) {
+  if (!articles || articles.length === 0) {
     return (
       <Card className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground shadow-none border-dashed">
         <CardContent className="p-6">
             <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-4" />
-            <p className="font-semibold text-lg text-foreground mb-2">Could Not Generate Topics</p>
+            <p className="font-semibold text-lg text-foreground mb-2">No Articles Found</p>
             <p className="max-w-md mx-auto">
-              This can happen if the AI service is temporarily unavailable or if the required API key is missing. Please check your setup and try again.
+              There are no articles available for this category at the moment. Please check back later or explore other categories.
             </p>
             <Button asChild className="mt-6">
-                <Link href="/settings">View Setup Instructions</Link>
+                <Link href="/blog">View All Articles</Link>
             </Button>
         </CardContent>
       </Card>

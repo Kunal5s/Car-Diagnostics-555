@@ -34,21 +34,21 @@ import { getHomepageArticles } from "@/lib/data";
 
 
 export const metadata: Metadata = {
-  title: "AI Car Diagnostics Made Easy with BrainAi - Engine Fault Scan",
-  description: "Detect engine problems instantly with BrainAi's AI-powered car diagnostics. Get OBD2 error codes, vehicle health reports, and smart fix suggestions. No tools required.",
-  keywords: ["AI car diagnostics", "OBD2 error codes", "engine fault scan", "vehicle health report", "car diagnostics tool", "BrainAi"],
+  title: "Car Diagnostics AI - Your Intelligent Automotive Assistant",
+  description: "Detect engine problems instantly with Car Diagnostics AI. Get smart analysis, vehicle health reports, and expert-written articles on maintenance and repair.",
+  keywords: ["AI car diagnostics", "OBD2 error codes", "engine fault scan", "vehicle health report", "car diagnostics tool", "Car Diagnostics AI"],
 };
 
 const howItWorksSteps = [
   {
-    icon: PlugZap,
-    title: "Connect Vehicle",
-    description: "Simply plug our optional OBD2 scanner or use your phone's camera.",
+    icon: Smartphone,
+    title: "Describe the Issue",
+    description: "Use our AI chat to describe your car's symptoms in simple terms.",
   },
   {
     icon: BrainCircuit,
-    title: "AI Diagnosis Runs",
-    description: "BrainAi securely scans your vehicle’s system for thousands of potential faults.",
+    title: "AI Analysis",
+    description: "Our AI analyzes the problem and provides potential causes and solutions.",
   },
   {
     icon: FileText,
@@ -57,8 +57,8 @@ const howItWorksSteps = [
   },
   {
     icon: Wrench,
-    title: "Fix Suggestions",
-    description: "Receive clear, step-by-step guidance on how to fix detected issues.",
+    title: "Explore Articles",
+    description: "Browse our expert knowledge base for detailed guides and DIY tips.",
   },
 ];
 
@@ -100,61 +100,41 @@ const features = [
 const testimonials = [
   {
     name: "Sarah J.",
-    review: "BrainAi helped me identify a sensor issue my mechanic missed. Saved me over $500 on needless repairs!",
+    review: "Car Diagnostics AI helped me identify a sensor issue my mechanic missed. Saved me over $500 on needless repairs!",
     rating: 5,
   },
   {
     name: "Mike T.",
-    review: "As someone who knows nothing about cars, BrainAi is a lifesaver. The reports are so easy to understand.",
+    review: "As someone who knows nothing about cars, Car Diagnostics AI is a lifesaver. The reports are so easy to understand.",
     rating: 5,
   },
   {
     name: "Carlos R.",
-    review: "I was quoted $1,000 for a repair. BrainAi found the real, much cheaper problem. This tool is a must-have for any car owner.",
+    review: "I was quoted $1,000 for a repair. The AI found the real, much cheaper problem. This tool is a must-have for any car owner.",
     rating: 5,
   },
 ];
 
 const faqItems = [
   {
-    question: "What is Car Diagnostics BrainAi?",
-    answer: "BrainAi is an AI tool that scans your car for faults. It decodes complex error codes into simple reports and suggests potential fixes, making car care easy and understandable.",
+    question: "What is Car Diagnostics AI?",
+    answer: "Car Diagnostics AI is an intelligent tool that helps you diagnose vehicle problems quickly and accurately. It analyzes symptoms, explains complex fault codes in simple terms, and provides easy-to-understand reports and repair suggestions.",
   },
   {
-    question: "Do I need special tools to use BrainAi?",
-    answer: "No tools are required! You can use your phone's camera for a quick scan. For deeper insights, you can connect an optional standard OBD2 scanner to the app.",
+    question: "Do I need special tools to use it?",
+    answer: "No tools are required for many features! You can use our AI chat to diagnose symptoms. For reading specific error codes, you can use any standard, affordable OBD2 scanner that connects to your phone.",
   },
   {
-    question: "What problems can BrainAi detect?",
-    answer: "BrainAi identifies thousands of issues, from engine misfires and sensor failures to transmission warnings. It helps you catch problems early to avoid costly future repairs and breakdowns.",
+    question: "What problems can it detect?",
+    answer: "Our AI can help diagnose thousands of issues, from engine misfires and sensor failures to transmission warnings and EV battery problems. It helps you catch problems early to avoid costly future repairs.",
   },
   {
-    question: "Is my vehicle compatible with BrainAi?",
-    answer: "Our system works with most cars, trucks, and SUVs manufactured after 1996, including gasoline, diesel, and electric vehicles. Check your car's compatibility on our website.",
+    question: "Is my vehicle compatible?",
+    answer: "Our knowledge base covers most cars, trucks, and SUVs manufactured after 1996, including gasoline, diesel, and electric vehicles. The OBD2-related features work with any OBD2-compliant vehicle.",
   },
   {
     question: "How accurate are the AI diagnostics?",
-    answer: "Our AI uses a massive vehicle database for highly accurate reports. It analyzes error codes and symptoms to provide reliable insights, helping you understand your car's health better.",
-  },
-  {
-    question: "Can BrainAi help me save money?",
-    answer: "Yes! By pinpointing exact issues, BrainAi helps you avoid unnecessary diagnostic fees and repairs. Informed car owners make smarter, more cost-effective decisions about their vehicle's maintenance.",
-  },
-  {
-    question: "Is my personal and vehicle data secure?",
-    answer: "Absolutely. Your privacy is a top priority. All data is encrypted and handled with strict security protocols. We do not share your information without your explicit consent.",
-  },
-  {
-    question: "How do Smart Fix suggestions work?",
-    answer: "After a diagnosis, BrainAi provides estimated repair costs and DIY guides for simple fixes. This feature empowers you to handle minor issues yourself and save on labor costs.",
-  },
-  {
-    question: "Can I use BrainAi for regular maintenance?",
-    answer: "Definitely. BrainAi is perfect for proactive vehicle care. It helps you track your car's health over time and stay ahead of potential issues before they become serious problems.",
-  },
-  {
-    question: "Does this replace my mechanic?",
-    answer: "BrainAi is a powerful diagnostic partner, not a replacement for a skilled mechanic. It gives you the data needed for informed conversations and faster, more accurate professional repairs.",
+    answer: "Our AI uses a massive vehicle database for highly accurate reports. It analyzes symptoms and error codes to provide reliable insights, helping you understand your car's health better.",
   },
 ];
 
@@ -169,7 +149,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <MotionWrapper>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
-              AI Car Diagnostics Made Easy with BrainAi
+              AI Car Diagnostics Made Easy
             </h1>
             <p className="text-lg md:text-xl text-primary-foreground/80 max-w-3xl mx-auto mb-8">
               Detect engine problems instantly using artificial intelligence. Fast, reliable, and always available.
@@ -182,7 +162,7 @@ export default async function HomePage() {
       </section>
 
       {/* Trending Articles Section */}
-      <section className="py-12 bg-secondary/50">
+      <section className="py-12 bg-background">
         <div className="container mx-auto px-4">
           <MotionWrapper>
             <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-primary lg:text-4xl">
@@ -201,7 +181,7 @@ export default async function HomePage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="py-16 md:py-24 bg-secondary/50">
         <div className="container mx-auto px-4">
           <MotionWrapper className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">How It Works</h2>
@@ -222,7 +202,7 @@ export default async function HomePage() {
       </section>
       
       {/* Explore Categories Section */}
-      <section className="py-16 md:py-24 bg-secondary/50">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <MotionWrapper className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">Explore Automotive Categories</h2>
@@ -237,7 +217,7 @@ export default async function HomePage() {
       </section>
 
       {/* Real-Time Error Code Example Section */}
-      <MotionWrapper className="bg-background py-12">
+      <MotionWrapper className="bg-secondary/50 py-12">
         <div className="container mx-auto px-4 text-center">
             <p className="text-sm uppercase tracking-widest text-muted-foreground mb-2">Real-Time Error Code Diagnostics</p>
             <div className="bg-card inline-flex items-center gap-4 p-4 rounded-lg shadow-md border">
@@ -248,7 +228,7 @@ export default async function HomePage() {
       </MotionWrapper>
 
       {/* Supported Vehicle Types */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <MotionWrapper className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">Works With Your Vehicle</h2>
@@ -269,7 +249,7 @@ export default async function HomePage() {
       <section className="py-16 md:py-24 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4">
           <MotionWrapper className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold">Why Choose BrainAi?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">Why Choose Car Diagnostics AI?</h2>
             <p className="text-primary-foreground/80 mt-2">Unlock powerful features for complete peace of mind.</p>
           </MotionWrapper>
           <MotionGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -293,7 +273,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <MotionWrapper className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">Loved by Car Owners</h2>
-            <p className="text-muted-foreground mt-2">See what our users are saying about BrainAi.</p>
+            <p className="text-muted-foreground mt-2">See what our users are saying about our AI.</p>
           </MotionWrapper>
           <MotionGrid className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial) => (
@@ -316,7 +296,7 @@ export default async function HomePage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-secondary/50">
         <div className="container mx-auto px-4 max-w-3xl">
           <MotionWrapper className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">Frequently Asked Questions</h2>

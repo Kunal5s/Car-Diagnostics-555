@@ -39,7 +39,7 @@ export const categoryDetails: CategoryInfo[] = [
     description: 'Engine diagnostics & performance',
     icon: Car,
     href: '/category/engine',
-    color: 'bg-green-500',
+    color: 'bg-blue-600',
     iconColor: 'text-white',
   },
   {
@@ -47,7 +47,7 @@ export const categoryDetails: CategoryInfo[] = [
     description: 'Automotive sensors & monitoring',
     icon: Cpu,
     href: '/category/sensors',
-    color: 'bg-blue-500',
+    color: 'bg-cyan-600',
     iconColor: 'text-white',
   },
   {
@@ -55,7 +55,7 @@ export const categoryDetails: CategoryInfo[] = [
     description: 'OBD2 diagnostics & scanning',
     icon: Wrench,
     href: '/category/obd2',
-    color: 'bg-purple-500',
+    color: 'bg-violet-600',
     iconColor: 'text-white',
   },
   {
@@ -63,7 +63,7 @@ export const categoryDetails: CategoryInfo[] = [
     description: 'Warning systems & alerts',
     icon: AlertTriangle,
     href: '/category/alerts',
-    color: 'bg-red-500',
+    color: 'bg-red-600',
     iconColor: 'text-white',
   },
   {
@@ -71,7 +71,7 @@ export const categoryDetails: CategoryInfo[] = [
     description: 'Diagnostic mobile apps',
     icon: Smartphone,
     href: '/category/apps',
-    color: 'bg-indigo-500',
+    color: 'bg-emerald-600',
     iconColor: 'text-white',
   },
   {
@@ -79,7 +79,7 @@ export const categoryDetails: CategoryInfo[] = [
     description: 'Vehicle maintenance tips',
     icon: Cog,
     href: '/category/maintenance',
-    color: 'bg-teal-500',
+    color: 'bg-sky-600',
     iconColor: 'text-white',
   },
   {
@@ -103,7 +103,7 @@ export const categoryDetails: CategoryInfo[] = [
     description: 'Latest automotive trends',
     icon: TrendingUp,
     href: '/category/trends',
-    color: 'bg-pink-500',
+    color: 'bg-pink-600',
     iconColor: 'text-white',
   },
 ];

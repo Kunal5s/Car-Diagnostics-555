@@ -26,7 +26,7 @@ export function Footer() {
   ];
 
   const contactInfo = [
-    { icon: Mail, text: 'info@cardiagnosticsbrainai.com', href: 'mailto:info@cardiagnosticsbrainai.com' },
+    { icon: Mail, text: 'info@cardiagnostics.ai', href: 'mailto:info@cardiagnostics.ai' },
     { icon: Phone, text: '+1 (555) 123-4567', href: 'tel:+15551234567' },
     { icon: MapPin, text: 'San Francisco, CA' },
   ];
@@ -39,7 +39,7 @@ export function Footer() {
             <div className="space-y-4">
               <Link href="/" className="flex items-center space-x-2 text-lg font-bold text-foreground">
                 <Car className="h-6 w-6 text-primary" />
-                <span>CarDiagnosticsBrainAI</span>
+                <span>Car Diagnostics AI</span>
               </Link>
               <p className="text-sm">
                 Your ultimate destination for AI-powered car diagnostics, maintenance tips, and automotive technology insights. Stay ahead with expert-curated content and cutting-edge diagnostic solutions.
@@ -88,7 +88,7 @@ export function Footer() {
         <div className="border-t">
           <div className="container flex flex-col items-center justify-between py-6 text-sm sm:flex-row">
             <p className="text-center sm:text-left">
-              © {new Date().getFullYear()} CarDiagnosticsBrainAI. All rights reserved.
+              © {new Date().getFullYear()} Car Diagnostics AI. All rights reserved.
             </p>
             <p className="mt-2 flex items-center gap-1.5 sm:mt-0">
               Made with <Heart className="h-4 w-4 text-red-500" fill="currentColor" /> for automotive enthusiasts
@@ -99,5 +99,3 @@ export function Footer() {
     </footer>
   );
 }
-
-    

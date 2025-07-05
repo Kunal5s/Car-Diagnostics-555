@@ -12,7 +12,7 @@ interface CategoryCardProps {
 export function CategoryCard({ category }: CategoryCardProps) {
   const { name, description, icon: Icon, href, color, iconColor } = category;
   return (
-    <Card className="group flex h-full flex-col text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+    <Card className="group flex h-full flex-col text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-card">
         <CardContent className="flex flex-grow flex-col items-center p-6">
             <div className={cn("mb-4 flex h-14 w-14 items-center justify-center rounded-lg", color)}>
                 <Icon className={cn("h-7 w-7 transition-transform duration-300 group-hover:scale-110", iconColor)} />
