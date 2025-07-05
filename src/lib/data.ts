@@ -1,6 +1,5 @@
 import { slugify } from "./utils";
 import { generateArticle } from "@/ai/flows/generate-article";
-import { getImageForQuery } from "./pexels";
 import { promises as fs } from 'fs';
 import path from 'path';
 import type { FullArticle } from './definitions';
@@ -85,7 +84,7 @@ let generationPromise: Promise<FullArticle[]> | null = null;
 const CACHE_EXPIRATION_HOURS = 12;
 
 async function generateAndCacheArticles(): Promise<FullArticle[]> {
-  console.log("Generating 54 articles and fetching images. This may take a while...");
+  console.log("Generating 54 articles and fetching images using Pollinations.ai. This may take a while...");
 
   const articles: FullArticle[] = [];
   for (const topic of allArticleTopics) {
@@ -96,9 +95,7 @@ async function generateAndCacheArticles(): Promise<FullArticle[]> {
     let articleData = {
         summary: "Could not load article summary.",
         content: "There was an error generating this article. Please try again later.",
-        imageHint: topic.category.toLowerCase(),
     };
-    let imageUrl = 'https://placehold.co/600x400.png';
 
     try {
         console.log(`  - Generating article content for "${topic.title}"...`);
@@ -109,19 +106,12 @@ async function generateAndCacheArticles(): Promise<FullArticle[]> {
     } catch (e) {
         console.error(`  - Failed to generate article content for topic: ${topic.title}`, e);
     }
-
-    try {
-        // Use the article title and category for a more reliable image search
-        const imageQuery = `${topic.title} ${topic.category}`;
-        console.log(`  - Fetching image for query: "${imageQuery}"...`);
-        const fetchedImageUrl = await getImageForQuery(imageQuery);
-        if(fetchedImageUrl) {
-            imageUrl = fetchedImageUrl;
-        }
-    } catch(e) {
-        console.error(`  - Failed to fetch image for topic: ${topic.title}`, e);
-    }
-
+    
+    // Generate image using Pollinations.ai
+    const imagePrompt = `${topic.title}, ${topic.category}, photorealistic, automotive, detailed, professional photography`;
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}`;
+    console.log(`  - Generated image URL for prompt: "${imagePrompt}"`);
+    
     articles.push({
         id: topic.id,
         title: topic.title,
@@ -130,7 +120,6 @@ async function generateAndCacheArticles(): Promise<FullArticle[]> {
         content: articleData.content,
         imageUrl,
         slug: `${slugify(topic.title)}-${topic.id}`,
-        imageHint: articleData.imageHint,
     });
   }
 

@@ -5,8 +5,7 @@ import { KeyRound, FileCode } from 'lucide-react';
 
 export function SettingsForm() {
 
-  const envContent = `GOOGLE_API_KEY="YOUR_GEMINI_API_KEY"
-PEXELS_API_KEY="YOUR_PEXELS_API_KEY"`;
+  const envContent = `GOOGLE_API_KEY="YOUR_GEMINI_API_KEY"`;
 
   return (
     <Card>
@@ -25,18 +24,14 @@ PEXELS_API_KEY="YOUR_PEXELS_API_KEY"`;
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-            <h3 className="font-semibold text-lg">Step 1: Get Your API Keys</h3>
+            <h3 className="font-semibold text-lg">Step 1: Get Your API Key</h3>
             <p className="text-sm text-muted-foreground">
-                You will need two free API keys to run this application:
+                You will need a free Google Gemini API key to run this application:
             </p>
             <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
                 <li>
                     <strong>Google Gemini API Key:</strong> Get this from{' '}
                     <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google AI Studio</a>.
-                </li>
-                 <li>
-                    <strong>Pexels API Key:</strong> Get this from the{' '}
-                    <a href="https://www.pexels.com/api/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Pexels API documentation</a> page.
                 </li>
             </ul>
         </div>
@@ -53,15 +48,21 @@ PEXELS_API_KEY="YOUR_PEXELS_API_KEY"`;
         </div>
         
         <div className="space-y-2">
-            <h3 className="font-semibold text-lg">Step 3: Add Your Keys to the File</h3>
+            <h3 className="font-semibold text-lg">Step 3: Add Your Key to the File</h3>
              <p className="text-sm text-muted-foreground">
-               Copy the text below, paste it into your `.env.local` file, and replace the placeholders with your actual API keys.
+               Copy the text below, paste it into your `.env.local` file, and replace the placeholder with your actual API key.
             </p>
             <pre className="w-full overflow-x-auto rounded-md bg-muted p-4">
               <code className="font-mono text-sm text-foreground">
                 {envContent}
               </code>
             </pre>
+        </div>
+        
+        <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
+            <p>
+              The application uses AI to generate articles. Images are automatically generated using a keyless service. To enable article generation, you must provide your own Google Gemini API key.
+            </p>
         </div>
 
         <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">

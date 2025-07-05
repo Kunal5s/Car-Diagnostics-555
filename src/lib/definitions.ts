@@ -21,7 +21,6 @@ export interface FullArticle extends ArticleTopic {
   summary: string;
   content: string;
   imageUrl: string;
-  imageHint: string;
   slug: string;
 }
 

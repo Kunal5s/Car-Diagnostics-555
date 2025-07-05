@@ -27,7 +27,6 @@ const GenerateArticleOutputSchema = z.object({
     .describe(
       'The full, detailed, SEO-friendly article content, in Markdown format. It should be well-structured with H1, H2, H3, H4, H5, and H6 headings for a professional layout.'
     ),
-  imageHint: z.string().describe('A concise two-word search query hint (e.g., "engine diagnostics", "sensor cleaning") for finding a relevant stock photo for the article.'),
 });
 export type GenerateArticleOutput = z.infer<typeof GenerateArticleOutputSchema>;
 
@@ -47,9 +46,7 @@ Your response MUST be in well-structured Markdown format. The structure is absol
 - The content under each heading should be detailed and informative. Do not use filler text. Provide real, valuable explanations.
 - Start the article with a compelling introduction (immediately following the H1 heading) and conclude with a useful summary paragraph.
 
-In addition to the full article content, you must provide:
-1. A concise, SEO-friendly summary for the article (approximately 160 characters).
-2. A two-word "imageHint" that is a perfect, concise search term for finding a stock photo for this article. Examples: "engine diagnostics", "sensor cleaning", "EV charging", "brake maintenance".
+In addition to the full article content, you must provide a concise, SEO-friendly summary for the article (approximately 160 characters).
 
 The topic you must write about is: '{{{topic}}}'
 
