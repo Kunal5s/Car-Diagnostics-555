@@ -33,23 +33,19 @@ const prompt = ai.definePrompt({
   name: 'articleGeneratorPrompt',
   input: {schema: GenerateArticleInputSchema},
   output: {schema: GenerateArticleOutputSchema},
-  prompt: `You are an expert automotive writer and SEO specialist, renowned for creating highly detailed, comprehensive, and authoritative articles. Your task is to write an in-depth article on the provided topic.
+  prompt: `You are an AI writer tasked with generating a long-form, expert-level automotive article. Your single most important directive is to meet the minimum word count.
 
-The article's length is absolutely critical. It MUST be **a minimum of 1600 words**. Do not write a short article. The goal is a comprehensive guide that covers the topic in great detail.
+**PRIMARY DIRECTIVE: The article content MUST be a MINIMUM of 1600 words.** This is not a suggestion; it is a strict requirement. A response under 1600 words is considered a failure. Do not summarize. Write a full, comprehensive, and exhaustive article.
 
-Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
-- The article's main title MUST be an H1 heading (e.g., '# Title of the Article'), which should be the very first thing in the content. Do NOT repeat the topic as an H1, but create a compelling title based on it.
-- You MUST include multiple H2 (##) headings to structure the main sections of the article.
-- Within each H2 section, you MUST use several H3 (###) headings to break down the content into sub-sections.
-- For even deeper nesting where necessary, you MUST use H4, H5, and H6 headings. This hierarchical structure is not optional.
-- The content under each heading should be detailed and informative. Do not use filler text. Provide real, valuable explanations.
-- Start the article with a compelling introduction (immediately following the H1 heading) and conclude with a useful summary paragraph.
+**SECONDARY DIRECTIVE: The response MUST be in well-structured Markdown and fit the provided JSON schema.**
+- The article MUST begin with an H1 heading for the title. Do not just repeat the topic; create a compelling, SEO-friendly title based on the topic.
+- You MUST use a deep hierarchy of H2, H3, and H4 headings to structure the content logically. This is mandatory for readability and SEO.
+- Do not use filler content. The text must be valuable, informative, and detailed.
+- Provide a short, SEO-friendly summary (around 160 characters) as a separate field.
 
-In addition to the full article content, you must provide a concise, SEO-friendly summary for the article (approximately 160 characters).
+Topic to write about: '{{{topic}}}'
 
-The topic you must write about is: '{{{topic}}}'
-
-IMPORTANT: The final output must conform to the specified JSON schema. The most important instruction is the word count. The article **must exceed 1600 words**. Failure to meet this length requirement will result in an invalid response.`,
+Re-confirming your main goal: Generate a complete article of **at least 1600 words**.`,
 });
 
 const generateArticleFlow = ai.defineFlow(
@@ -70,8 +66,5 @@ const generateArticleFlow = ai.defineFlow(
 export async function generateArticle(
   input: GenerateArticleInput
 ): Promise<GenerateArticleOutput> {
-  // Adding a delay to simulate loading, as per user request for a loading experience.
-  // In a real-world scenario, the AI generation itself would provide the delay.
-  await new Promise(resolve => setTimeout(resolve, 2000));
   return await generateArticleFlow(input);
 }

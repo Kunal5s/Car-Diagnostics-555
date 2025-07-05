@@ -25,6 +25,15 @@ async function generateFullArticle(topic: ArticleTopic): Promise<FullArticle> {
     };
   }
 
+  // Quality Check: Ensure the generated article is not too short.
+  const wordCount = articleData.content.split(/\s+/).length;
+  if (wordCount < 1000) { 
+      console.error(`  - Generated article is too short (${wordCount} words) for topic: ${topic.title}`);
+      articleData.summary = "Error: Could not generate a complete article.";
+      articleData.content = `# Error: Content Generation Failed\n\nThe AI failed to generate a sufficiently long article. This might be a temporary issue with the service. Please try again later.\n\n**Topic Attempted:** ${topic.title}`;
+  }
+
+
   const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
     `${topic.title}, ${topic.category}, photorealistic, automotive, detailed, professional photography`
   )}`;
@@ -60,10 +69,6 @@ export async function getHomepageTopics(): Promise<ArticleTopic[]> {
 export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
   const topics = await getTopics();
   const lowerCategoryName = categoryName.toLowerCase();
-  
-  if (lowerCategoryName === 'all') {
-    return topics;
-  }
   
   return topics.filter(topic => topic.category.toLowerCase() === lowerCategoryName);
 }
