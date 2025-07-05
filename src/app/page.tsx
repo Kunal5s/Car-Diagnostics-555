@@ -155,7 +155,7 @@ export default async function HomePage() {
               Detect engine problems instantly using artificial intelligence. Fast, reliable, and always available.
             </p>
             <Button size="lg" variant="secondary" asChild>
-              <Link href="/blog">Explore Articles</Link>
+              <Link href="/blog">Explore Our Articles</Link>
             </Button>
           </MotionWrapper>
         </div>

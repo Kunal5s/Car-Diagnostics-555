@@ -57,7 +57,8 @@ export async function getHomepageArticles(): Promise<FullArticle[]> {
         homepageArticles.push(rotateArrayForFreshness(articlesByCategory[category])[0]);
     }
     
-    return homepageArticles.slice(0, 6);
+    // Rotate the final list of categories to ensure the homepage grid changes
+    return rotateArrayForFreshness(homepageArticles).slice(0, 6);
 }
 
 /**
