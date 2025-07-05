@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'images.pexels.com',
+        hostname: 'image.pollinations.ai',
         port: '',
         pathname: '/**',
       },
