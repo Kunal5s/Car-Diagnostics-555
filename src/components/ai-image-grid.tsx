@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -31,7 +30,6 @@ export function AIImageGrid({ title, category }: AIImageGridProps) {
   if (imageUrls.length === 0) {
     return (
         <section className="py-12">
-            <h2 className="text-center text-2xl font-bold text-primary mb-8">🔧 AI-Generated Images Based on This Article</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {[...Array(6)].map((_, i) => (
                     <div key={i} className="bg-muted rounded-lg aspect-square animate-pulse" />
@@ -43,7 +41,6 @@ export function AIImageGrid({ title, category }: AIImageGridProps) {
 
   return (
     <section className="py-12">
-      <h2 className="text-center text-2xl font-bold text-primary mb-8">🔧 AI-Generated Images Based on This Article</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {imageUrls.map((url, index) => (
           <div key={index} className="border border-border rounded-lg overflow-hidden shadow-md transition-transform duration-200 hover:scale-105">
