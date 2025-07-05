@@ -35,16 +35,16 @@ const prompt = ai.definePrompt({
   name: 'articleGeneratorPrompt',
   input: {schema: GenerateArticleInputSchema},
   output: {schema: GenerateArticleOutputSchema},
-  prompt: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the provided topic.
+  prompt: `You are an expert automotive writer and SEO specialist, renowned for creating highly detailed, comprehensive, and authoritative articles. Your task is to write an in-depth article on the provided topic.
 
-The article MUST be **at least 1600 words long**.
+The article's length is absolutely critical. It MUST be **a minimum of 1600 words**. Do not write a short article. The goal is a comprehensive guide that covers the topic in great detail.
 
 Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
 - The article's main title MUST be an H1 heading (e.g., '# Title of the Article'), which should be the very first thing in the content. Do NOT repeat the topic as an H1, but create a compelling title based on it.
 - You MUST include multiple H2 (##) headings to structure the main sections of the article.
 - Within each H2 section, you MUST use several H3 (###) headings to break down the content into sub-sections.
-- For even deeper nesting where necessary, you MUST use H4, H5, and H6 headings.
-- The use of this hierarchical heading structure (H1 -> H2 -> H3 -> H4 -> H5 -> H6) is MANDATORY and must be followed strictly.
+- For even deeper nesting where necessary, you MUST use H4, H5, and H6 headings. This hierarchical structure is not optional.
+- The content under each heading should be detailed and informative. Do not use filler text. Provide real, valuable explanations.
 - Start the article with a compelling introduction (immediately following the H1 heading) and conclude with a useful summary paragraph.
 
 In addition to the full article content, you must provide:
@@ -53,7 +53,7 @@ In addition to the full article content, you must provide:
 
 The topic you must write about is: '{{{topic}}}'
 
-IMPORTANT: The final output must conform to the specified JSON schema. Failure to follow the Markdown structure or word count will result in an invalid response.`,
+IMPORTANT: The final output must conform to the specified JSON schema. The most important instruction is the word count. The article **must exceed 1600 words**. Failure to meet this length requirement will result in an invalid response.`,
 });
 
 const generateArticleFlow = ai.defineFlow(
