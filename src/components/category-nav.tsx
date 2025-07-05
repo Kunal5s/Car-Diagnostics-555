@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
-import { categories } from "@/lib/definitions";
 
 interface CategoryNavProps {
   categories: string[];
@@ -16,12 +15,9 @@ export function CategoryNav({ categories, className }: CategoryNavProps) {
 
   const getActiveCategory = () => {
     if (pathname.startsWith('/category/')) {
-        return pathname.split('/')[2] || 'all';
+        return pathname.split('/')[2] || '';
     }
-    if (pathname === '/blog' || pathname === '/') {
-        return 'all';
-    }
-    return 'all'; // Default to all for other pages like articles
+    return ''; // No active category for non-category pages
   };
 
   const activeCategory = getActiveCategory();
@@ -29,11 +25,7 @@ export function CategoryNav({ categories, className }: CategoryNavProps) {
   return (
     <nav className={cn("flex space-x-2 overflow-x-auto whitespace-nowrap scrollbar-hide py-3", className)}>
       {categories.map((category) => {
-        const href =
-          category === "All"
-            ? `/blog`
-            : `/category/${category.toLowerCase()}`;
-
+        const href = `/category/${category.toLowerCase()}`;
         const isActive = activeCategory === category.toLowerCase();
 
         return (

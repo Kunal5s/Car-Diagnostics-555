@@ -109,7 +109,6 @@ export const categoryDetails: CategoryInfo[] = [
 ];
 
 export const categories = [
-  "All",
   "Engine",
   "Sensors",
   "OBD2",
