@@ -1,134 +1,117 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, FileText, ClipboardCopy, Check } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { KeyRound } from 'lucide-react';
 
 export function SettingsForm() {
-  const [googleKey, setGoogleKey] = useState('');
-  const [pexelsKey, setPexelsKey] = useState('');
-  const [generatedConfig, setGeneratedConfig] = useState('');
-  const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
+  const [apiKey, setApiKey] = useState('');
+  const [isClient, setIsClient] = useState(false);
 
-  const handleGenerate = () => {
-    if (!googleKey || !pexelsKey) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing Keys',
-        description: 'Please enter both API keys to generate the configuration.',
-      });
-      return;
+  // This ensures localStorage is only accessed on the client
+  useEffect(() => {
+    setIsClient(true);
+    try {
+      const storedApiKey = localStorage.getItem('google_api_key');
+      if (storedApiKey) {
+        setApiKey(storedApiKey);
+      }
+    } catch (error) {
+      console.error('Could not access localStorage.');
     }
-    const config = `GOOGLE_API_KEY="${googleKey}"
-PEXELS_API_KEY="${pexelsKey}"`;
-    setGeneratedConfig(config);
-  };
+  }, []);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(generatedConfig).then(() => {
-      setIsCopied(true);
+  const handleSave = () => {
+    try {
+      localStorage.setItem('google_api_key', apiKey);
       toast({
-        title: 'Copied to Clipboard!',
-        description: 'You can now paste this into your .env.local file.',
+        title: 'API Key Saved',
+        description: 'Your Google Gemini API key has been saved in your browser.',
       });
-      setTimeout(() => setIsCopied(false), 2000);
-    }, (err) => {
+    } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'Copy Failed',
-        description: 'Could not copy text to clipboard.',
+        title: 'Error Saving API Key',
+        description: 'Could not save API key to local storage. Please ensure it is enabled in your browser.',
       });
-    });
+    }
   };
+
+  // Show skeleton while waiting for client-side hydration
+  if (!isClient) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>API Key</CardTitle>
+                <CardDescription>
+                  <Skeleton className="h-4 w-3/4" />
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                      <Skeleton className="h-10 flex-grow" />
+                      <Skeleton className="h-10 w-16" />
+                  </div>
+              </div>
+            </CardContent>
+        </Card>
+    );
+  }
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-            <KeyRound className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <CardTitle>Generate API Configuration</CardTitle>
-            <CardDescription>
-              Enter your keys below to create your environment file.
-            </CardDescription>
-          </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                <KeyRound className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+                <CardTitle>Your API Key</CardTitle>
+                <CardDescription>
+                Your key is stored securely in your browser&apos;s local storage.
+                </CardDescription>
+            </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent>
         <div className="space-y-4">
-          <div>
-            <Label htmlFor="google-key">Google Gemini API Key</Label>
-            <Input
-              id="google-key"
-              type="password"
-              placeholder="Enter your Google Gemini key"
-              value={googleKey}
-              onChange={(e) => setGoogleKey(e.target.value)}
-              className="mt-1"
-            />
-            <p className="mt-1 text-sm text-muted-foreground">
-              Get this from{' '}
-              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+          <div className="space-y-2">
+            <Label htmlFor="api-key">Google Gemini API Key</Label>
+            <div className="flex items-center space-x-2">
+              <Input
+                id="api-key"
+                type="password"
+                placeholder="Enter your API key"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+              <Button onClick={handleSave}>Save</Button>
+            </div>
+             <p className="text-sm text-muted-foreground">
+              You can get your API key from{' '}
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
                 Google AI Studio
               </a>.
             </p>
           </div>
-          <div>
-            <Label htmlFor="pexels-key">Pexels API Key</Label>
-            <Input
-              id="pexels-key"
-              type="password"
-              placeholder="Enter your Pexels API key"
-              value={pexelsKey}
-              onChange={(e) => setPexelsKey(e.target.value)}
-              className="mt-1"
-            />
-            <p className="mt-1 text-sm text-muted-foreground">
-              Get this from the{' '}
-              <a href="https://www.pexels.com/api/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                Pexels API docs page
-              </a>.
+          <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
+            <p>
+              <strong>Note:</strong> Your key will be used for new interactive AI features. The main article library on this site is pre-built for speed and reliability and does not require a key.
             </p>
           </div>
         </div>
-        <Button onClick={handleGenerate} className="w-full">
-          <FileText className="mr-2 h-4 w-4" />
-          Generate Configuration
-        </Button>
-
-        {generatedConfig && (
-          <div className="space-y-4 rounded-lg border bg-card p-4">
-            <h3 className="font-semibold text-foreground">Your Generated Configuration</h3>
-            <p className="text-sm text-muted-foreground">
-              Copy this content into a new file named <code className="font-mono rounded bg-muted px-1 py-0.5">.env.local</code> in your project's main folder. Then, restart your server.
-            </p>
-            <div className="relative">
-              <Textarea
-                readOnly
-                value={generatedConfig}
-                className="h-24 font-mono text-xs"
-                aria-label="Generated API key configuration"
-              />
-              <Button
-                size="icon"
-                variant="ghost"
-                className="absolute right-2 top-2 h-7 w-7"
-                onClick={handleCopy}
-              >
-                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <ClipboardCopy className="h-4 w-4" />}
-                <span className="sr-only">Copy to clipboard</span>
-              </Button>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

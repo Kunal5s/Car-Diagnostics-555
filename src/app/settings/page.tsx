@@ -3,16 +3,16 @@ import { SettingsForm } from './settings-form';
 import { MotionWrapper } from '@/components/motion-wrapper';
 
 export const metadata: Metadata = {
-  title: 'API Key Setup',
-  description: 'Configure your API keys to enable automatic content generation.',
+  title: 'Settings',
+  description: 'Manage your API keys and application settings.',
 };
 
 export default function SettingsPage() {
   return (
     <MotionWrapper className="container mx-auto max-w-2xl px-4 py-12">
-      <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">API Key Setup</h1>
+      <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">Settings</h1>
       <p className="mb-8 text-lg text-muted-foreground">
-        Use this form to generate the necessary configuration to enable all AI features for your website.
+        Manage your API Keys and preferences for interactive AI features.
       </p>
       <SettingsForm />
     </MotionWrapper>
