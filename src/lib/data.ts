@@ -9,11 +9,12 @@ export async function getAllArticles(): Promise<FullArticle[]> {
 
 export async function getAllTopics(): Promise<ArticleTopic[]> {
   const articles = await getAllArticles();
-  return articles.map(({ id, title, category, slug }) => ({
+  return articles.map(({ id, title, category, slug, imageUrl }) => ({
     id,
     title,
     category,
     slug,
+    imageUrl,
   }));
 }
 

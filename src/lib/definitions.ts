@@ -16,12 +16,12 @@ export interface ArticleTopic {
   title: string;
   category: string;
   slug: string;
+  imageUrl: string;
 }
 
 export interface FullArticle extends ArticleTopic {
   summary: string;
   content: string;
-  imageUrl: string;
 }
 
 export interface CategoryInfo {

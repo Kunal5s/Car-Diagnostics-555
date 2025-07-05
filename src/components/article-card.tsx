@@ -17,15 +17,12 @@ interface ArticleCardProps {
 
 export function ArticleCard({ topic }: ArticleCardProps) {
   const articleUrl = `/articles/${topic.slug}`;
-  // Dynamically generate image URL from topic title using Pollinations.ai
-  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
-    `${topic.title}, ${topic.category}, photorealistic, automotive, detailed, professional photography`
-  )}`;
+  const imageUrl = topic.imageUrl;
 
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <CardHeader className="p-0">
-        <Link href={articleUrl} className="block relative h-48 w-full">
+        <Link href={articleUrl} className="block relative h-48 w-full group">
             <Image
               src={imageUrl}
               alt={topic.title}
@@ -39,7 +36,7 @@ export function ArticleCard({ topic }: ArticleCardProps) {
         <Badge variant="secondary" className="mb-2">
           {topic.category}
         </Badge>
-        <h3 className="mb-2 line-clamp-3 font-semibold leading-tight h-20">
+        <h3 className="mb-2 line-clamp-2 font-semibold leading-tight h-14">
           <Link href={articleUrl} className="hover:text-primary">
             {topic.title}
           </Link>
