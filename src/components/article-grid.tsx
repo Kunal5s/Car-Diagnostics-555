@@ -1,4 +1,4 @@
-import { ArticleTopic } from "@/lib/definitions";
+import { type FullArticle } from "@/lib/definitions";
 import { ArticleCard } from "./article-card";
 import { Card, CardContent } from "./ui/card";
 import { AlertCircle } from "lucide-react";
@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 
 interface ArticleGridProps {
-  articles: (ArticleTopic & { imageUrl: string; imageHint: string; })[];
+  articles: FullArticle[];
 }
 
 export function ArticleGrid({ articles }: ArticleGridProps) {
@@ -18,10 +18,10 @@ export function ArticleGrid({ articles }: ArticleGridProps) {
             <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-4" />
             <p className="font-semibold text-lg text-foreground mb-2">No Articles Found</p>
             <p className="max-w-md mx-auto">
-              There are no articles available for this category at the moment. Please check back later or explore other categories.
+              Content could not be loaded. This may be due to missing API keys or an error during generation. Please check the setup instructions or try again later.
             </p>
             <Button asChild className="mt-6">
-                <Link href="/blog">View All Articles</Link>
+                <Link href="/settings">View Setup Instructions</Link>
             </Button>
         </CardContent>
       </Card>

@@ -25,14 +25,17 @@ const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
 /**
  * Fetches a single, relevant image from Pexels for a given query.
  * @param query The search query for the image.
- * @returns The URL of the large version of the image, or null if not found.
+ * @returns The URL of the large version of the image, or a placeholder if not found.
  */
-export async function getImageForQuery(query: string): Promise<string | null> {
+export async function getImageForQuery(
+  query: string
+): Promise<string> {
+  const fallbackImageUrl = 'https://placehold.co/600x400.png';
   if (!PEXELS_API_KEY) {
     console.warn(
-      'Pexels API key is not configured. Skipping image fetch. Set the PEXELS_API_KEY environment variable.'
+      'Pexels API key is not configured. Returning placeholder image. Set the PEXELS_API_KEY environment variable.'
     );
-    return null;
+    return fallbackImageUrl;
   }
 
   const searchUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(
@@ -50,20 +53,20 @@ export async function getImageForQuery(query: string): Promise<string | null> {
       console.error(
         `Pexels API request failed with status: ${response.status}. Response: ${await response.text()}`
       );
-      return null;
+      return fallbackImageUrl;
     }
 
     const data = await response.json();
     const parsedData = PexelsResponseSchema.safeParse(data);
 
     if (!parsedData.success || parsedData.data.photos.length === 0) {
-      console.warn(`No image found on Pexels for query: "${query}"`);
-      return null;
+      console.warn(`No image found on Pexels for query: "${query}". Returning placeholder.`);
+      return fallbackImageUrl;
     }
 
     return parsedData.data.photos[0].src.large;
   } catch (error) {
     console.error(`An error occurred while fetching image from Pexels:`, error);
-    return null;
+    return fallbackImageUrl;
   }
 }

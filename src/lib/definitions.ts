@@ -13,12 +13,12 @@ import {
 
 export interface ArticleTopic {
   id: number;
-  slug: string;
   title: string;
   category: string;
 }
 
 export interface FullArticle extends ArticleTopic {
+  summary: string;
   content: string;
   imageUrl: string;
   imageHint: string;

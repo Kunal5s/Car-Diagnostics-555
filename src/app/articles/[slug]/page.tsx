@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   return {
     title: article.title,
-    description: `An in-depth, AI-generated article on ${article.title}.`,
+    description: article.summary,
   }
 }
 
@@ -55,6 +55,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
                 {article.title}
             </h1>
+            <p className="text-lg text-muted-foreground">{article.summary}</p>
             </header>
             <div className="relative mb-8 h-64 w-full md:h-96">
                 <Image

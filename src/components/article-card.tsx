@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { type ArticleTopic } from "@/lib/definitions";
+import { type FullArticle } from "@/lib/definitions";
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 interface ArticleCardProps {
-  article: ArticleTopic & { imageUrl: string; imageHint: string; };
+  article: FullArticle;
 }
 
 export function ArticleCard({ article }: ArticleCardProps) {
@@ -36,13 +36,13 @@ export function ArticleCard({ article }: ArticleCardProps) {
         <Badge variant="secondary" className="mb-2">
           {article.category}
         </Badge>
-        <h3 className="mb-2 line-clamp-3 font-semibold leading-tight">
+        <h3 className="mb-2 line-clamp-2 font-semibold leading-tight">
           <Link href={articleUrl} className="hover:text-primary">
             {article.title}
           </Link>
         </h3>
-        <p className="line-clamp-2 text-sm text-muted-foreground">
-          Click to read the full AI-generated article on this topic.
+        <p className="line-clamp-3 text-sm text-muted-foreground">
+          {article.summary}
         </p>
       </CardContent>
       <CardFooter className="p-6 pt-0">

@@ -120,20 +120,20 @@ const faqItems = [
     answer: "Car Diagnostics BrainAi is an intelligent tool that helps you diagnose vehicle problems quickly and accurately. It analyzes symptoms, explains complex fault codes in simple terms, and provides easy-to-understand reports and repair suggestions.",
   },
   {
-    question: "Do I need special tools to use it?",
-    answer: "No tools are required for many features! You can use our AI chat to diagnose symptoms. For reading specific error codes, you can use any standard, affordable OBD2 scanner that connects to your phone.",
+    question: "How does the content get generated?",
+    answer: "Our system uses advanced AI, powered by Google's Gemini models, to write detailed, expert-level articles on a wide range of automotive topics. We then use the Pexels API to automatically find a relevant, high-quality image for each article.",
   },
   {
-    question: "What problems can it detect?",
-    answer: "Our AI can help diagnose thousands of issues, from engine misfires and sensor failures to transmission warnings and EV battery problems. It helps you catch problems early to avoid costly future repairs.",
+    question: "Do I need special tools to use the site?",
+    answer: "No tools are required to browse our extensive library of AI-generated articles. To enable the automatic content generation, you simply need to provide your own free API keys from Google and Pexels in the settings.",
   },
   {
     question: "Is my vehicle compatible?",
-    answer: "Our knowledge base covers most cars, trucks, and SUVs manufactured after 1996, including gasoline, diesel, and electric vehicles. The OBD2-related features work with any OBD2-compliant vehicle.",
+    answer: "Our knowledge base covers most cars, trucks, and SUVs manufactured after 1996, including gasoline, diesel, and electric vehicles. The information is designed to be broadly applicable.",
   },
   {
-    question: "How accurate are the AI diagnostics?",
-    answer: "Our AI uses a massive vehicle database for highly accurate reports. It analyzes symptoms and error codes to provide reliable insights, helping you understand your car's health better.",
+    question: "How accurate are the AI diagnostics articles?",
+    answer: "Our AI uses a massive automotive database to generate highly accurate and helpful articles. It provides reliable insights to help you understand your car's health better, but should always be used as a guide alongside advice from a professional mechanic.",
   },
 ];
 
