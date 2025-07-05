@@ -61,6 +61,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 <Image
                   src={article.imageUrl}
                   alt={article.title}
+                  data-ai-hint={article.dataAiHint}
                   fill
                   className="rounded-lg object-cover"
                   sizes="100vw"
@@ -68,9 +69,4 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 />
             </div>
             <div className="prose prose-lg dark:prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>
-            </div>
-        </article>
-    </div>
-  );
-}
+                <ReactMarkdown remarkPlugins={[remarkGfm
