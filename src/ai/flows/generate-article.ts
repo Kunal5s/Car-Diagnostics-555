@@ -28,7 +28,7 @@ const GenerateArticleOutputSchema = z.object({
       'The article content must be at least 7000 characters to be considered a valid, detailed article.'
     )
     .describe(
-      'The full, detailed, SEO-friendly article content, in Markdown format. It MUST be at least 7000 characters long. It should be well-structured with H1, H2, H3, etc., for headings.'
+      'The full, detailed, SEO-friendly article content, in Markdown format. It MUST be at least 7000 characters long. It should be well-structured with Markdown headings.'
     ),
 });
 export type GenerateArticleOutput = z.infer<typeof GenerateArticleOutputSchema>;
@@ -39,17 +39,17 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateArticleOutputSchema},
   prompt: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: '{{{topic}}}'.
 
-This is a strict requirement: The article content you generate MUST be very long and detailed, with a minimum length of 7000 characters. Responding with content shorter than this will be considered a failure.
+This is a strict requirement: The article content you generate MUST be very long and detailed, with a minimum length of 7000 characters.
 
 Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
-- The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the content.
-- You MUST include multiple H2 (##) headings to structure the main sections of the article.
-- Within each H2 section, you MUST use several H3 (###) headings to break down the content into sub-sections.
-- The use of this hierarchical heading structure (H1 -> H2 -> H3 etc.) is MANDATORY.
+- Use a single H1 for the main title (e.g., '# Title of the Article'). This must be the first line.
+- Use multiple H2 headings for main sections (e.g., '## Section Title').
+- Use H3 headings for sub-sections (e.g., '### Sub-section Title').
+- CRITICAL: Do NOT write the words "H1", "H2", or "H3" in the article text itself. Use only the Markdown syntax (like '#', '##', '###') to create the headings.
 
 In addition to the article, you must provide a concise, SEO-friendly summary for the article (approximately 160 characters).
 
-IMPORTANT: The final output must conform to the specified JSON schema. The 'content' field must contain the full article in the structured Markdown format and be AT LEAST 7000 characters long. Failure to follow these rules will result in an invalid response.`,
+IMPORTANT: The final output must conform to the specified JSON schema. The 'content' field must contain the full article in the structured Markdown format and be AT LEAST 7000 characters long.`,
 });
 
 const generateArticleFlow = ai.defineFlow(
