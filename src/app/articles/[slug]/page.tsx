@@ -49,8 +49,10 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === article.category.toLowerCase());
   const Icon = categoryInfo?.icon;
 
-  // Defensively handle missing content and prevent crashes by checking if article.content exists.
-  const contentWithoutTitle = article.content ? article.content.replace(/^# .*\n\n?/, '') : '';
+  // This check is now more robust. It verifies that content is a non-empty string before processing.
+  // This prevents crashes if the AI fails to generate content and `getArticleBySlug` returns an empty string.
+  const hasContent = article.content && typeof article.content === 'string' && article.content.trim() !== '';
+  const contentWithoutTitle = hasContent ? article.content.replace(/^# .*\n\n?/, '') : '';
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
@@ -68,14 +70,14 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             <p className="text-lg text-muted-foreground">{article.summary}</p>
             </header>
             <div className="prose prose-lg dark:prose-invert max-w-none">
-                {contentWithoutTitle ? (
+                {hasContent ? (
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>
                 ) : (
                     <Alert variant="destructive">
                         <Terminal className="h-4 w-4" />
-                        <AlertTitle>Content Not Available</AlertTitle>
+                        <AlertTitle>Content Generation Failed</AlertTitle>
                         <AlertDescription>
-                          The content for this article could not be loaded at this time. Please check back later.
+                          We were unable to generate the content for this article at the moment. This might be due to a configuration issue or a temporary problem with the AI service. Please try again later.
                         </AlertDescription>
                     </Alert>
                 )}
@@ -84,4 +86,3 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     </div>
   );
 }
-
