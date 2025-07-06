@@ -116,7 +116,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
     }
 
     try {
-      // Changed .single() to .limit(1) for more robust error handling.
       const { data, error } = await supabase
         .from('articles')
         .select('*')
@@ -125,7 +124,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
         .limit(1);
       
       if (error) {
-        // Any error here is now considered a configuration problem.
         console.error("Supabase select error:", error);
         return {
             ...topicInfo,
@@ -143,40 +141,49 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
         return cachedArticle as FullArticle;
       }
     } catch (e) {
-      console.error("Error fetching from Supabase:", e);
+      console.error("Critical error fetching from Supabase:", e);
     }
     
-    console.log(`Cache miss for article "${slug}". Generating new article...`);
+    console.log(`Cache miss for article "${slug}". Generating new content...`);
     
+    let generatedData;
     try {
-      const generatedData = await generateArticle({ topic: topicInfo.title });
-      
-      let imageUrl: string | null = null;
-      try {
+        console.log(`Generating article content for: "${topicInfo.title}"`);
+        generatedData = await generateArticle({ topic: topicInfo.title });
+    } catch (e) {
+        console.error(`Article generation failed for topic: "${topicInfo.title}". This is likely a GOOGLE_API_KEY issue.`, e);
+        return {
+            ...topicInfo,
+            title: "Article Generation Failed",
+            summary: "There was an error communicating with the Google AI service.",
+            content: `# AI Service Error\n\nWe were unable to generate this article because of a problem connecting to the Google AI service.\n\n**Common Causes:**\n1.  **Invalid or Missing Google API Key:** Please double-check that the \`GOOGLE_API_KEY\` in your \`.env\` file is correct, has no extra spaces, and the development server has been restarted.\n2.  **API Not Enabled:** Ensure the "Generative Language API" (or a similar name) is enabled in your Google Cloud project.\n3.  **Billing Not Set Up:** The API requires a valid billing account to be associated with your Google Cloud project.\n\nPlease verify your key and project settings and try again.`,
+            imageUrl: `https://placehold.co/1200x600/f87171/ffffff?text=AI+Error`
+        };
+    }
+
+    let imageUrl: string | null = null;
+    try {
         console.log(`Fetching image for article: "${topicInfo.title}"`);
         imageUrl = await getImageForQuery(topicInfo.title);
-      } catch (e) {
-        console.error(`Failed to fetch image for article "${topicInfo.title}"`, e);
-      }
-      
-      const newArticle: FullArticle = {
+    } catch (e) {
+        console.error(`Image fetch failed for article "${topicInfo.title}". This is likely an UNSPLASH_API_KEY issue.`, e);
+        // Gracefully fail by just logging the error and using a placeholder.
+    }
+    
+    const newArticle: FullArticle = {
         ...topicInfo,
         summary: generatedData.summary,
         content: generatedData.content,
         imageUrl: imageUrl || `https://placehold.co/1200x600/334155/ffffff?text=${encodeURIComponent(topicInfo.title)}`
-      };
+    };
 
-      try {
-        // Use a spread to remove the id from the object before inserting
+    try {
         const { id, ...articleToInsert } = newArticle;
         
         const { error: upsertError } = await supabase
           .from('articles')
           .upsert(
-            { 
-              ...articleToInsert,
-              generated_at: new Date().toISOString(),
-            },
+            { ...articleToInsert, generated_at: new Date().toISOString() },
             { onConflict: 'slug' } 
           );
         
@@ -185,22 +192,9 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
         } else {
           console.log(`Successfully cached article "${slug}" to Supabase.`);
         }
-      } catch(e) {
-        console.error("Error saving to Supabase:", e);
-      }
-
-      return newArticle;
-
-    } catch (e) {
-      console.error(`Failed to generate article for slug "${slug}". This is likely due to a missing or invalid GOOGLE_API_KEY.`, e);
-      
-      const errorArticle: FullArticle = {
-        ...topicInfo,
-        title: "Article Generation Failed",
-        summary: "An error occurred while generating this article. Please check your API key configuration.",
-        content: `# Article Generation Failed\n\nWe were unable to generate this article at this time. This is usually due to one of two reasons:\n\n1.  **Missing or Invalid API Key:** The \`GOOGLE_API_KEY\` or \`UNSPLASH_API_KEY\` has not been set up correctly in your hosting environment.\n2.  **API Error:** There was a temporary issue with the generative AI service or the image service.\n\nPlease check your configuration in the \`README.md\` file and try again later.`,
-        imageUrl: `https://placehold.co/1200x600/f87171/ffffff?text=Generation+Error`
-      };
-      return errorArticle;
+    } catch(e) {
+      console.error("Error saving to Supabase:", e);
     }
+
+    return newArticle;
 }
