@@ -12,5 +12,7 @@ export const ai = genkit({
       apiKey: process.env.GOOGLE_API_KEY, // API Key is read from environment variables
     }),
   ],
+  // Set gemini-1.5-pro as the default model for all operations
+  // to handle the long-form content requirement.
+  model: 'googleai/gemini-1.5-pro-latest',
 });
-

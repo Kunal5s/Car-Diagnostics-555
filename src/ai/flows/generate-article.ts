@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow for generating SEO-friendly articles.
@@ -34,6 +35,8 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateArticleInputSchema},
   output: {schema: GenerateArticleOutputSchema},
   prompt: `You are a world-class automotive writer and SEO expert. Your mission is to generate a completely unique, comprehensive, and engaging article on the provided topic.
+
+The article MUST be at least 1500 words long.
 
 Topic: '{{{topic}}}'
 
