@@ -46,8 +46,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     { label: article.title },
   ];
   
-  // This removes the H1 from the markdown content, as it's already rendered in the header.
-  const contentWithoutTitle = article.content.replace(/^# .*\n\n?/, '');
+  // This more robustly removes the H1 from the markdown content, as it's already rendered in the header.
+  const contentWithoutTitle = article.content.replace(/^\s*#\s*[^\n]*\n*/, '');
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
