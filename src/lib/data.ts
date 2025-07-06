@@ -2,6 +2,7 @@
 import type { FullArticle, ArticleTopic } from './definitions';
 import allArticlesData from './articles.json';
 import { getImageFromPexels, getImageFromUnsplash } from './image-services';
+import { categories } from './definitions';
 
 // This is an in-memory cache to avoid fetching images repeatedly during the server's lifetime.
 const imageCache = new Map<number, string>();
@@ -16,13 +17,15 @@ async function enrichArticleWithImage(article: FullArticle): Promise<FullArticle
   const query = article.imageHint ? `${article.imageHint} automotive` : `${article.title} car`;
   let imageUrl = FALLBACK_IMAGE;
 
+  // As per user request: Use Unsplash for the first 6 categories, and Pexels for the rest.
+  const unsplashCategories = categories.slice(0, 6);
+
   try {
-    // 50% chance for Unsplash, 50% chance for Pexels
-    if (Math.random() < 0.5) {
-      console.log(`Fetching image from Unsplash for article ID: ${article.id}`);
+    if (unsplashCategories.map(c => c.toLowerCase()).includes(article.category.toLowerCase())) {
+      console.log(`Fetching image from Unsplash for category: ${article.category}, ID: ${article.id}`);
       imageUrl = await getImageFromUnsplash(query);
     } else {
-      console.log(`Fetching image from Pexels for article ID: ${article.id}`);
+      console.log(`Fetching image from Pexels for category: ${article.category}, ID: ${article.id}`);
       imageUrl = await getImageFromPexels(query);
     }
   } catch (error) {
