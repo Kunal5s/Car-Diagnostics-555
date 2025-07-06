@@ -119,18 +119,27 @@ async function generateAndCommit(topic) {
   console.log(`\nProcessing topic: "${topic.title}"...`);
   try {
     const slug = `${slugify(topic.title)}-${topic.id}`;
-    // Using the full title for a more specific and individual prompt.
     const prompt = `photorealistic, ${topic.title}, high detail, cinematic lighting, professional automotive photography`;
 
-    // Define repository paths (simplified without date for stable URLs)
+    // Using a list of your recommended models to improve image variety and quality.
+    const recommendedModels = [
+      'flux-realism',
+      'dreamlike-photoreal',
+      'realistic-vision-v2',
+      'portrait-plus'
+    ];
+    
+    // Pick a random model from the list for each image.
+    const model = recommendedModels[Math.floor(Math.random() * recommendedModels.length)];
+    console.log(`  - Using model: ${model}`);
+
     const imagePath = `public/images/${slug}.jpg`;
-    const articlePath = `articles/${slug}.md`;
 
     // 1. Generate image from prompt using Pollinations AI
     console.log('  - Generating image...');
     const encodedPrompt = encodeURIComponent(prompt);
     const seed = Math.floor(Math.random() * 1000000); // Random seed for variety
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux-realism&width=512&height=512&nologo=true&seed=${seed}`;
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=512&height=512&nologo=true&seed=${seed}`;
     console.log(`  - Fetching from URL: ${imageUrl}`);
     
     const imageResponse = await fetch(imageUrl);
@@ -149,31 +158,16 @@ async function generateAndCommit(topic) {
 
     console.log(`  - Compressed image size: ${(compressedImageBuffer.length / 1024).toFixed(2)} KB`);
 
-    // 3. Create simple Markdown article content (optional, can be removed if not needed)
-    const articleContent = `---
-title: "${topic.title}"
-image: /images/${slug}.jpg
----
-
-This is an AI-generated placeholder for the article on **"${topic.title}"**.
-`;
-
-    // 4. Push both the image and the article to the GitHub repository
-    console.log(`  - Pushing files to GitHub...`);
+    // 3. Push the image to the GitHub repository
+    console.log(`  - Pushing image to GitHub...`);
     await pushToGitHub(
       imagePath,
       compressedImageBuffer.toString('base64'),
       `feat: add image for "${slug}"`,
       'base64'
     );
-    // This part is optional, only uncomment if you want to push markdown files too.
-    // await pushToGitHub(
-    //   articlePath,
-    //   articleContent,
-    //   `feat: add article for "${slug}"`
-    // );
 
-    console.log(`✅ Successfully processed and uploaded assets for "${topic.title}"`);
+    console.log(`✅ Successfully processed and uploaded image for "${topic.title}"`);
   } catch (error) {
     console.error(`❌ Failed to process topic "${topic.title}":`, error.message);
   }
