@@ -85,6 +85,15 @@ export async function generateArticle(
     if (!response.ok) {
         const errorBody = await response.text();
         console.error("OpenRouter API error:", response.status, errorBody);
+
+        if (response.status === 401) {
+            return {
+                summary: "Error: Invalid API Key.",
+                content: `<h2>Article Generation Failed: Invalid API Key</h2><p>The API request was rejected with a <strong>401 Unauthorized</strong> error. This is almost always due to an invalid or missing API key. Please double-check that the <strong>OPENROUTER_API_KEY</strong> in your <strong>.env</strong> file is correct, active, and has funds.</p><p><strong>Topic attempted:</strong> ${input.topic}</p>`,
+            };
+        }
+        
+        // Throw a generic error for other statuses to be caught by the catch block
         throw new Error(`OpenRouter API request failed with status ${response.status}. Body: ${errorBody}`);
     }
 
@@ -106,13 +115,6 @@ export async function generateArticle(
   } catch (error) {
     console.error("Error in generateArticle:", error);
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-
-    if (errorMessage.includes("status 401")) {
-         return {
-            summary: "Error: Invalid API Key.",
-            content: `<h2>Article Generation Failed: Invalid API Key</h2><p>The API request was rejected, likely due to an invalid API key. Please double-check that the <strong>OPENROUTER_API_KEY</strong> in your <strong>.env</strong> file is correct, active, and has funds.</p><p><strong>Topic attempted:</strong> ${input.topic}</p>`,
-         };
-    }
 
     return {
       summary: "Error: Could not generate summary.",
