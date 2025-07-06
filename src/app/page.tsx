@@ -120,11 +120,11 @@ const faqItems = [
   },
   {
     question: "How does the content get generated?",
-    answer: "Our system uses advanced AI, powered by Google's Gemini models, to write detailed, expert-level articles on a wide range of automotive topics. We then use the Pexels API to automatically find a relevant, high-quality image for each article.",
+    answer: "Our system uses a robust and reliable content strategy. We have a pre-generated library of 54 high-quality, comprehensive articles on a wide range of automotive topics. This ensures the information is always available, fast, and reliable without the risk of API failures.",
   },
   {
-    question: "Do I need special tools to use the site?",
-    answer: "No tools are required to browse our extensive library of AI-generated articles. To enable the automatic content generation, you simply need to provide your own free API keys from Google and Pexels in the settings.",
+    question: "Do I need special tools or API keys to use the site?",
+    answer: "No, none at all. The website is fully functional out of the box. You can browse our entire library of articles without any special tools or API keys.",
   },
   {
     question: "Is my vehicle compatible?",
