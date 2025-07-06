@@ -29,7 +29,7 @@ import {
   ChevronRight,
   Star,
 } from "lucide-react";
-import { getHomepageTopics } from "@/lib/data";
+import { getHomepageTopics, getArticles } from "@/lib/data";
 
 
 export const metadata: Metadata = {
@@ -116,15 +116,15 @@ const testimonials = [
 const faqItems = [
   {
     question: "What is Car Diagnostics BrainAi?",
-    answer: "Car Diagnostics BrainAi is an intelligent platform that provides in-depth articles on automotive topics. It uses AI to generate fresh content to help you understand your vehicle better.",
+    answer: "Car Diagnostics BrainAi is an intelligent platform that provides in-depth articles on automotive topics. It uses AI to generate content to help you understand your vehicle better.",
   },
   {
     question: "How does the content get generated?",
-    answer: "This site uses a dynamic 'generate-on-demand' strategy. When an article is requested for the first time on a given day, it is generated live by the powerful meta-llama/llama-3-70b-instruct model via OpenRouter. The generated content is then cached in a Supabase database for 24 hours to ensure high performance and reliability for all other visitors.",
+    answer: "This site uses a 'generate-on-first-run' strategy. When the application is started for the first time, it generates a complete set of articles using a powerful AI model and fetches relevant images from Pexels. This content is then saved to a local file, making the website very fast for all subsequent visits.",
   },
   {
-    question: "Do I need API keys to use this site?",
-    answer: "As a visitor, you do not need any keys. For the website owner to deploy and run this application, they must provide their own API keys for OpenRouter (for content) and Pexels (for images) in an environment file. The site will not function without them.",
+    question: "Do I need API keys to run this site?",
+    answer: "Yes. For the initial content generation to work, the website owner must provide their own API keys for OpenRouter (for content) and Pexels (for images) in a `.env` file. The site will show an error if it needs to generate articles and the keys are missing.",
   },
   {
     question: "Is my vehicle compatible?",

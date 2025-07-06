@@ -1,13 +1,14 @@
-
 'use server';
 
-import type { FullArticle, ArticleTopic } from './definitions';
+import type { FullArticle } from './definitions';
 import { slugify } from "./utils";
 import { generateArticle } from "@/ai/flows/generate-article";
-import { supabase } from './supabase';
 import { getImageForQuery } from './pexels';
+import { promises as fs } from 'fs';
+import path from 'path';
 
-const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
+// This is the static list of all 60 topics.
+const allArticleTopics: Omit<FullArticle, 'slug' | 'imageUrl' | 'summary' | 'content'>[] = [
   { id: 1, title: "Advanced Methods for Diagnosing Common Engine Performance Issues Today", category: "Engine" },
   { id: 2, title: "A Step-by-Step Guide for Safely Resolving Engine Overheating", category: "Engine" },
   { id: 3, title: "Understanding When to Replace Your Car's Critical Timing Belt", category: "Engine" },
@@ -70,175 +71,136 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
   { id: 60, title: "The Role of 5G Technology in the Future of Connected and Autonomous Vehicles", category: "Trends" }
 ];
 
-const topicsWithSlugs: ArticleTopic[] = allArticleTopics.map(topic => ({
-  ...topic,
-  slug: `${slugify(topic.title)}-${topic.id}`
-}));
+const articlesFilePath = path.join(process.cwd(), 'src', 'data', 'articles.json');
+let cachedArticles: FullArticle[] | null = null;
+let generationPromise: Promise<FullArticle[]> | null = null;
 
-function seededShuffle(array: any[], seed: number) {
-  let currentIndex = array.length, temporaryValue, randomIndex;
-  const random = () => {
-    var x = Math.sin(seed++) * 10000;
-    return x - Math.floor(x);
-  };
-  while (0 !== currentIndex) {
-    randomIndex = Math.floor(random() * currentIndex);
-    currentIndex -= 1;
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
+async function generateAndCacheArticles(): Promise<FullArticle[]> {
+  console.log("Generating articles and images for the first time. This may take a while...");
+  
+  try {
+    await fs.mkdir(path.dirname(articlesFilePath), { recursive: true });
+  } catch (error) {
+    console.error("Failed to create data directory:", error);
   }
-  return array;
-}
 
-async function enhanceTopicsWithImages(topics: ArticleTopic[]): Promise<ArticleTopic[]> {
-  const slugs = topics.map(t => t.slug);
-  if (slugs.length === 0) {
-    return topics;
+  const articles: FullArticle[] = [];
+  for (const topic of allArticleTopics) {
+    console.log(`- Processing topic: "${topic.title}"`);
+    
+    let articleData = {
+        summary: "Could not generate summary for this topic.",
+        content: `# Article Generation Failed\n\nThere was an error generating the content for the topic "${topic.title}". This might be due to an API key issue or a network problem.`,
+    };
+    let imageUrl: string | null = null;
+
+    try {
+        const generatedData = await generateArticle({ topic: topic.title });
+        if (generatedData) {
+            articleData = generatedData;
+        }
+    } catch (e) {
+        console.error(`  - Article generation failed for topic: ${topic.title}`, e);
+    }
+
+    try {
+        imageUrl = await getImageForQuery(topic.title);
+    } catch(e) {
+        console.error(`  - Image fetch failed for topic: ${topic.title}`, e);
+    }
+
+    const slug = `${slugify(topic.title)}-${topic.id}`;
+    articles.push({
+        ...topic,
+        slug: slug,
+        summary: articleData.summary,
+        content: articleData.content,
+        imageUrl: imageUrl || `https://placehold.co/1200x600.png`
+    });
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
   try {
-    const { data: cachedArticles, error } = await supabase
-      .from('articles')
-      .select('slug, image_url')
-      .in('slug', slugs);
-
-    if (error) {
-      console.error("Supabase error enhancing topics with images:", error);
-      return topics;
-    }
-
-    const imageUrlMap = new Map(cachedArticles.map(a => [a.slug, a.image_url]));
-
-    return topics.map(topic => ({
-      ...topic,
-      imageUrl: imageUrlMap.get(topic.slug) || null,
-    }));
-  } catch (e) {
-    console.error("Critical error enhancing topics with images:", e);
-    return topics;
+    await fs.writeFile(articlesFilePath, JSON.stringify(articles, null, 2));
+    console.log(`✅ Successfully generated and saved ${articles.length} articles to ${articlesFilePath}`);
+  } catch (error) {
+    console.error("❌ Failed to write articles cache file:", error);
   }
+  
+  return articles;
 }
 
-export async function getAllTopics(): Promise<ArticleTopic[]> {
-  return enhanceTopicsWithImages(topicsWithSlugs);
+
+async function loadArticles(): Promise<FullArticle[]> {
+  if (cachedArticles) {
+    return cachedArticles;
+  }
+  
+  try {
+    const data = await fs.readFile(articlesFilePath, 'utf-8');
+    const articles: FullArticle[] = JSON.parse(data);
+    
+    if (articles && articles.length > 0) {
+      console.log(`Loaded ${articles.length} articles from file cache.`);
+      cachedArticles = articles;
+      return cachedArticles;
+    }
+  } catch (error) {
+    console.log("Article cache file not found or is empty. Generating new articles...");
+  }
+
+  const newArticles = await generateAndCacheArticles();
+  cachedArticles = newArticles;
+  return newArticles;
 }
 
-export async function getHomepageTopics(): Promise<ArticleTopic[]> {
+export async function getArticles(): Promise<FullArticle[]> {
+  if (cachedArticles) {
+    return cachedArticles;
+  }
+  if (!generationPromise) {
+    generationPromise = loadArticles();
+  }
+  return generationPromise;
+}
+
+export async function getAllTopics(): Promise<FullArticle[]> {
+  return await getArticles();
+}
+
+export async function getHomepageTopics(): Promise<FullArticle[]> {
+  const articles = await getArticles();
   const now = new Date();
   const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
-  const shuffledTopics = seededShuffle([...topicsWithSlugs], seed);
-  const homepageTopics = shuffledTopics.slice(0, 6);
-  return enhanceTopicsWithImages(homepageTopics);
+  
+  function seededShuffle(array: any[], seed: number) {
+      let currentIndex = array.length, temporaryValue, randomIndex;
+      const random = () => {
+        var x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+      };
+      while (0 !== currentIndex) {
+        randomIndex = Math.floor(random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+      return array;
+  }
+
+  const shuffledTopics = seededShuffle([...articles], seed);
+  return shuffledTopics.slice(0, 6);
 }
 
-export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
+export async function getTopicsByCategory(categoryName: string): Promise<FullArticle[]> {
+  const articles = await getArticles();
   const lowerCategoryName = categoryName.toLowerCase();
-  const topicsForCategory = topicsWithSlugs.filter(topic => topic.category.toLowerCase() === lowerCategoryName);
-  return enhanceTopicsWithImages(topicsForCategory);
+  return articles.filter(topic => topic.category.toLowerCase() === lowerCategoryName);
 }
   
 export async function getArticleBySlug(slug: string): Promise<FullArticle | undefined> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const topicInfo = topicsWithSlugs.find(p => p.slug === slug);
-    if (!topicInfo) {
-      return undefined;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('slug', slug)
-        .gte('generated_at', today.toISOString())
-        .limit(1);
-      
-      if (error) {
-        console.error("Supabase select error:", error);
-        return {
-            ...topicInfo,
-            title: "Database Configuration Error",
-            summary: "There is an issue connecting to the database. This is usually because the Row Level Security (RLS) policies for the 'articles' table have not been set up correctly.",
-            content: `# Database Configuration Error\n\nWe were unable to connect to the Supabase database. This is usually due to one of two reasons:\n\n1.  **The 'articles' Table is Missing:** Please ensure you have created the table in your Supabase project.\n2.  **Row Level Security (RLS) Policies are Missing:** By default, your database is protected. You must create access policies to allow the website to read, insert, and update data.\n\nPlease follow the setup instructions in the project's \`README.md\` file to resolve this issue. The README contains the exact SQL script you need to run.`,
-            imageUrl: `https://placehold.co/1200x600/ef4444/ffffff?text=Database+Error`
-        };
-      }
-      
-      const cachedArticle = data && data.length > 0 ? data[0] : null;
-
-      if (cachedArticle) {
-        console.log(`Serving article "${slug}" from Supabase cache.`);
-        return cachedArticle as FullArticle;
-      }
-    } catch (e) {
-      console.error("Critical error fetching from Supabase:", e);
-    }
-    
-    console.log(`Cache miss for article "${slug}". Generating new content...`);
-    
-    let generatedData;
-    try {
-        console.log(`Generating article content for: "${topicInfo.title}"`);
-        generatedData = await generateArticle({ topic: topicInfo.title });
-    } catch (e) {
-        console.error(`Article generation failed for topic: "${topicInfo.title}". This could be an API key issue or a problem with the AI service.`, e);
-        return {
-            ...topicInfo,
-            title: "Article Generation Failed",
-            summary: "Could not connect to the AI service. Please check your API key and service status.",
-            content: `# AI Service Connection Failed\n\nWe were unable to generate the article. This is usually due to one of two reasons:\n\n1.  **Invalid API Key:** Please ensure the \`OPENROUTER_API_KEY\` in your \`.env\` file is correct and that the development server was restarted after changing it.\n\n2.  **Service Issue:** There might be a temporary problem with the OpenRouter.ai service. You can check their status page for any ongoing issues.\n\nOnce you have verified your key, the article generation should work correctly.`,
-            imageUrl: `https://placehold.co/1200x600/f87171/ffffff?text=AI+Service+Error`
-        };
-    }
-
-    let imageUrl: string | null = null;
-    const pexelsKeyExists = !!process.env.PEXELS_API_KEY;
-
-    if (pexelsKeyExists) {
-        try {
-            console.log(`Fetching image for article: "${topicInfo.title}"`);
-            imageUrl = await getImageForQuery(topicInfo.title);
-        } catch (e) {
-            console.error(`Image fetch failed for article "${topicInfo.title}".`, e);
-        }
-    }
-
-    const placeholderUrl = `https://placehold.co/1200x600.png`;
-
-    const newArticle: FullArticle = {
-        ...topicInfo,
-        summary: generatedData.summary,
-        content: generatedData.content,
-        imageUrl: imageUrl || placeholderUrl
-    };
-
-    if (!pexelsKeyExists) {
-        newArticle.content += `\n\n---\n\n**Developer Note:** The Pexels API key is missing. Please add \`PEXELS_API_KEY\` to your \`.env\` file to enable images.`;
-        newArticle.imageUrl = `https://placehold.co/1200x600/fca5a5/b91c1c?text=Pexels+Key+Missing`;
-    } else if (!imageUrl) {
-         newArticle.content += `\n\n---\n\n**Developer Note:** An image could not be found on Pexels for the topic "${topicInfo.title}". A placeholder is being used.`;
-    }
-
-    try {
-        const { id, ...articleToInsert } = newArticle;
-        
-        const { error: upsertError } = await supabase
-          .from('articles')
-          .upsert(
-            { ...articleToInsert, generated_at: new Date().toISOString() },
-            { onConflict: 'slug' } 
-          );
-        
-        if (upsertError) {
-          console.error("Supabase upsert error:", upsertError);
-        } else {
-          console.log(`Successfully cached article "${slug}" to Supabase.`);
-        }
-    } catch(e) {
-      console.error("Error saving to Supabase:", e);
-    }
-
-    return newArticle;
+    const articles = await getArticles();
+    return articles.find(p => p.slug === slug);
 }
