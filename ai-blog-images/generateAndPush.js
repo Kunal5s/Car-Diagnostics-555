@@ -1,110 +1,148 @@
-// This is a placeholder script for generating and pushing images.
-// You will need to fill this out with your specific logic.
 
-import { Octokit } from "@octokit/rest";
 import fetch from "node-fetch";
 import sharp from "sharp";
-import { promises as fs } from "fs";
-import path from "path";
+import { Octokit } from "@octokit/rest";
 
 // --- CONFIGURATION ---
-// You need to provide these values
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // Create a personal access token with repo scope
-const GITHUB_OWNER = "your-github-username"; // The owner of the repository
-const GITHUB_REPO = "your-repo-name"; // The name of the repository
-const GIT_BRANCH = "main"; // Or the branch you want to commit to
+// You must provide these values in your environment or here.
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // Recommended: Set in .env file
+const GITHUB_OWNER = "kunal5s"; // The owner of the repository, e.g., your GitHub username
+const GITHUB_REPO = "ai-blog-images"; // The name of the repository
+const BRANCH = "main"; // The branch to commit to
 
-// The path within your Next.js project where images should be stored.
-// This should be inside the `public` directory.
-const IMAGE_OUTPUT_PATH_IN_REPO = "public/images/articles";
+// --- SCRIPT ---
 
-
-// --- MAIN FUNCTION ---
-async function main() {
-  console.log("Starting image generation and push process...");
-
-  if (!GITHUB_TOKEN) {
-    console.error("Error: GITHUB_TOKEN is not set. Please set it in your environment variables.");
-    process.exit(1);
-  }
-  if (GITHUB_OWNER === "your-github-username" || GITHUB_REPO === "your-repo-name") {
-     console.error("Error: Please update GITHUB_OWNER and GITHUB_REPO in this script.");
-     process.exit(1);
-  }
-
-  // Example Logic:
-  // 1. Get a list of articles that need images.
-  //    (You'll need to read your article data source, e.g., by importing from `../src/lib/data.ts`)
-
-  // 2. For each article, generate or fetch an image.
-  //    - Use an AI image generator API or a stock photo API (e.g., Pexels, Unsplash).
-  //    - Example:
-  //      const imageUrl = await fetchImageForTopic("a futuristic car");
-  //      const imageResponse = await fetch(imageUrl);
-  //      const imageBuffer = await imageResponse.buffer();
-
-  // 3. Process the image using Sharp.
-  //    - Resize, optimize, change format, etc.
-  //    - const processedImageBuffer = await sharp(imageBuffer).resize(800).webp().toBuffer();
-
-  // 4. Commit the new image to your GitHub repository.
-  //    - const newImagePath = `${IMAGE_OUTPUT_PATH_IN_REPO}/article-slug-123.webp`;
-  //    - await commitFileToGitHub(
-  //        newImagePath,
-  //        processedImageBuffer,
-  //        `feat: add image for article XYZ`
-  //      );
-
-  console.log("Process complete. (This is a placeholder, no actual operations were performed).");
+// Check for GitHub Token
+if (!GITHUB_TOKEN) {
+  console.error(
+    "Error: GITHUB_TOKEN is not set. Please set it in your environment variables."
+  );
+  process.exit(1);
 }
 
+const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 /**
- * Commits a file to a GitHub repository.
- * @param {string} filePath - The path of the file within the repository.
- * @param {Buffer} contentBuffer - The content of the file as a Buffer.
- * @param {string} commitMessage - The message for the commit.
+ * Generates content for a given prompt and commits it to GitHub.
+ * @param {string} prompt The prompt for generating the article and image.
  */
-async function commitFileToGitHub(filePath, contentBuffer, commitMessage) {
-  const octokit = new Octokit({ auth: GITHUB_TOKEN });
-
+async function generateAndCommit(prompt) {
+  console.log(`\nProcessing prompt: "${prompt}"...`);
   try {
-    // Content must be base64 encoded for the GitHub API
-    const contentEncoded = contentBuffer.toString('base64');
+    const today = new Date().toISOString().split("T")[0];
+    const slug = prompt
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
 
-    // To update a file, you need the SHA of the existing file.
-    // This logic handles both creating a new file and updating an existing one.
-    let sha;
-    try {
-      const { data: existingFile } = await octokit.repos.getContent({
-        owner: GITHUB_OWNER,
-        repo: GITHUB_REPO,
-        path: filePath,
-        ref: GIT_BRANCH,
-      });
-      if (existingFile) sha = existingFile.sha;
-    } catch (error) {
-      // If the file doesn't exist, it's a 404, which is fine. We're creating it.
-      if (error.status !== 404) {
-        throw error;
-      }
+    // Define repository paths
+    const imagePath = `public/images/${today}/${slug}.jpg`;
+    const articlePath = `articles/${today}/${slug}.md`;
+
+    // 1. Generate image from prompt using Pollinations AI
+    console.log("  - Generating image...");
+    const encodedPrompt = encodeURIComponent(prompt);
+    const seed = Math.floor(Math.random() * 1000000);
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux-realism&width=512&height=512&nologo=true&seed=${seed}`;
+    const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch image: ${imageResponse.statusText}`);
     }
+    const imageBuffer = await imageResponse.buffer();
 
-    const { data } = await octokit.repos.createOrUpdateFileContents({
+    // 2. Compress the image using Sharp
+    console.log("  - Compressing image...");
+    const compressedImageBuffer = await sharp(imageBuffer)
+      .resize(512)
+      .jpeg({ quality: 30 })
+      .toBuffer();
+
+    // 3. Create simple Markdown article content
+    console.log("  - Creating markdown file...");
+    const articleContent = `---
+title: ${prompt}
+date: ${today}
+image: /images/${today}/${slug}.jpg
+---
+
+AI-generated article based on **"${prompt}"**
+
+Stay tuned for more insights! 🚀
+`;
+
+    // 4. Push both the image and the article to the GitHub repository
+    console.log(`  - Pushing files to GitHub...`);
+    await pushToGitHub(
+      imagePath,
+      compressedImageBuffer.toString("base64"),
+      `feat: add image for "${slug}"`,
+      "base64"
+    );
+    await pushToGitHub(
+      articlePath,
+      articleContent,
+      `feat: add article for "${slug}"`
+    );
+
+    console.log(`✅ Successfully uploaded image and article for "${prompt}"`);
+  } catch (error) {
+    console.error(`❌ Failed to process prompt "${prompt}":`, error.message);
+  }
+}
+
+/**
+ * Commits a file to the configured GitHub repository.
+ * @param {string} filePath - The path of the file within the repository.
+ * @param {string} content - The content of the file (can be base64 encoded).
+ * @param {string} commitMessage - The message for the commit.
+ * @param {string} [encoding="utf-8"] - Use 'base64' for binary files.
+ */
+async function pushToGitHub(
+  filePath,
+  content,
+  commitMessage,
+  encoding = "utf-8"
+) {
+  let sha;
+  try {
+    const { data } = await octokit.repos.getContent({
       owner: GITHUB_OWNER,
       repo: GITHUB_REPO,
       path: filePath,
-      message: commitMessage,
-      content: contentEncoded,
-      branch: GIT_BRANCH,
-      sha, // Provide SHA if updating, otherwise it's undefined for new files
+      ref: BRANCH,
     });
-
-    console.log(`Successfully committed ${filePath}: ${data.commit.html_url}`);
-    return data;
+    if (data && data.sha) {
+      sha = data.sha;
+    }
   } catch (error) {
-    console.error(`Error committing file "${filePath}":`, error);
+    if (error.status !== 404) {
+      throw error; // Rethrow actual errors
+    }
+    // If it's a 404, file doesn't exist, which is fine. sha remains undefined.
   }
+
+  await octokit.repos.createOrUpdateFileContents({
+    owner: GITHUB_OWNER,
+    repo: GITHUB_REPO,
+    path: filePath,
+    message: commitMessage,
+    content:
+      encoding === "base64"
+        ? content
+        : Buffer.from(content).toString("base64"),
+    branch: BRANCH,
+    sha,
+  });
+}
+
+/**
+ * Main execution function.
+ */
+async function main() {
+  console.log("--- Starting Content Generation Script ---");
+  // 🧪 Run Example
+  await generateAndCommit("How AI Will Change Agriculture in 2030");
+  console.log("--- Content Generation Script Finished ---");
 }
 
 main().catch(console.error);
