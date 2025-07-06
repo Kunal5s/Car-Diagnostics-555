@@ -64,11 +64,11 @@ export async function generateArticle(
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        'HTTP-Referer': 'https://oudworkstations.dev', // Recommended by OpenRouter
-        'X-Title': 'Car Diagnostics BrainAi',       // Recommended by OpenRouter
+        'HTTP-Referer': 'https://car-diagnostics-ai.vercel.app', // Replace with your deployed URL
+        'X-Title': 'Car Diagnostics BrainAi',      
       },
       body: JSON.stringify({
-        model: "meta-llama/llama-3-70b-instruct", // Using LLaMA 3 as requested
+        model: "meta-llama/llama-3-70b-instruct",
         messages: [
           {
             role: "user",
@@ -112,8 +112,6 @@ export async function generateArticle(
     return parsedContent;
   } catch (error) {
     console.error("Failed to generate article:", error);
-    // The SyntaxError is no longer expected, so the specific check is removed.
-    // We re-throw the original error to be handled by the calling function.
     throw error;
   }
 }
