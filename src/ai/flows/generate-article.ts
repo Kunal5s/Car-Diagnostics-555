@@ -1,38 +1,26 @@
 
 'use server';
 /**
- * @fileOverview An AI flow for generating SEO-friendly articles.
+ * @fileOverview A flow for generating SEO-friendly articles using OpenRouter.
  *
  * - generateArticle - A function that handles the article generation process.
  * - GenerateArticleInput - The input type for the generateArticle function.
  * - GenerateArticleOutput - The return type for the generateArticle function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'zod';
+import { z } from 'zod';
 
 const GenerateArticleInputSchema = z.object({
   topic: z.string().describe('The topic of the article to generate.'),
 });
-type GenerateArticleInput = z.infer<typeof GenerateArticleInputSchema>;
+export type GenerateArticleInput = z.infer<typeof GenerateArticleInputSchema>;
 
-const GenerateArticleOutputSchema = z.object({
-  summary: z
-    .string()
-    .describe('A short, SEO-friendly summary of the article (around 160 characters).'),
-  content: z
-    .string()
-    .describe(
-      'The full, detailed, SEO-friendly article content, in Markdown format. It should be well-structured with H1, H2, H3, etc., for headings.'
-    ),
-});
-export type GenerateArticleOutput = z.infer<typeof GenerateArticleOutputSchema>;
+export interface GenerateArticleOutput {
+  summary: string;
+  content: string;
+}
 
-const prompt = ai.definePrompt({
-  name: 'articleGeneratorPrompt',
-  input: {schema: GenerateArticleInputSchema},
-  output: {schema: GenerateArticleOutputSchema},
-  prompt: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: '{{{topic}}}'.
+const promptTemplate = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: '{TOPIC}'.
 
 The article MUST be at least 1600 words long.
 
@@ -48,26 +36,71 @@ Your response MUST be in well-structured Markdown format. The structure is absol
 
 In addition to the article, you must provide a concise, SEO-friendly summary for the article (approximately 160 characters).
 
-IMPORTANT: The final output must conform to the specified JSON schema, with the 'content' field containing the full article in the structured Markdown format described above. Failure to follow the Markdown structure will result in an invalid response.`,
-});
-
-const generateArticleFlow = ai.defineFlow(
-  {
-    name: 'generateArticleFlow',
-    inputSchema: GenerateArticleInputSchema,
-    outputSchema: GenerateArticleOutputSchema,
-  },
-  async (input) => {
-    const {output} = await prompt(input);
-    if (!output) {
-      throw new Error('Failed to generate article content.');
-    }
-    return output;
-  }
-);
+IMPORTANT: Your final output must be a JSON object with two keys: "summary" and "content". The "content" field must contain the full article in the structured Markdown format described above.
+The JSON object should look like this:
+{
+  "summary": "Your short SEO-friendly summary here.",
+  "content": "# Your Full Article in Markdown\\n\\n## Section 1\\n\\n..."
+}`;
 
 export async function generateArticle(
   input: GenerateArticleInput
 ): Promise<GenerateArticleOutput> {
-  return await generateArticleFlow(input);
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    throw new Error('OpenRouter API key is not configured in .env file.');
+  }
+
+  const prompt = promptTemplate.replace('{TOPIC}', input.topic);
+
+  try {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        'HTTP-Referer': 'https://oudworkstations.dev', // Recommended by OpenRouter
+        'X-Title': 'Car Diagnostics BrainAi',       // Recommended by OpenRouter
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite-preview-06-17",
+        response_format: { type: "json_object" }, // Enforce JSON output
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        console.error("OpenRouter API error:", response.status, errorBody);
+        throw new Error(`OpenRouter API request failed with status ${response.status}.`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.choices || data.choices.length === 0 || !data.choices[0].message.content) {
+        console.error("Invalid response structure from OpenRouter:", data);
+        throw new Error("Received an invalid response from the AI service.");
+    }
+
+    const contentString = data.choices[0].message.content;
+    const parsedContent: GenerateArticleOutput = JSON.parse(contentString);
+    
+    if (!parsedContent.summary || !parsedContent.content) {
+        console.error("Invalid JSON structure in AI response:", parsedContent);
+        throw new Error("The AI returned a response with an invalid JSON structure.");
+    }
+    
+    return parsedContent;
+  } catch (error) {
+    console.error("Failed to generate article:", error);
+    if (error instanceof SyntaxError) {
+        throw new Error('The AI returned malformed JSON and it could not be parsed.');
+    }
+    throw error;
+  }
 }

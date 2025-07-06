@@ -152,13 +152,13 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
         console.log(`Generating article content for: "${topicInfo.title}"`);
         generatedData = await generateArticle({ topic: topicInfo.title });
     } catch (e) {
-        console.error(`Article generation failed for topic: "${topicInfo.title}". The API key may be correct, but the Google Cloud project might be misconfigured.`, e);
+        console.error(`Article generation failed for topic: "${topicInfo.title}". This could be an API key issue or a problem with the AI service.`, e);
         return {
             ...topicInfo,
-            title: "Google AI Service Error",
-            summary: "Could not connect to the Google AI service. Please check your project settings.",
-            content: `# Google AI Service Connection Failed\n\nYou've correctly provided an API key, but we are still unable to connect to the Google AI service. This almost always means there is a configuration issue in your Google Cloud project.\n\n**Please check these two things in your Google Cloud project:**\n\n1.  **API Service Not Enabled:** The most common reason is that the **"Generative Language API"** (or a similar name like **"Gemini API"**) is not enabled. You must enable it for your key to work.\n\n2.  **Billing Not Connected:** Google's powerful AI models require a billing account to be linked to your project. Please ensure your project has a valid and active billing account.\n\nOnce you have verified these settings, the article generation will work correctly.`,
-            imageUrl: `https://placehold.co/1200x600/f87171/ffffff?text=AI+Config+Error`
+            title: "Article Generation Failed",
+            summary: "Could not connect to the AI service. Please check your API key and service status.",
+            content: `# AI Service Connection Failed\n\nWe were unable to generate the article. This is usually due to one of two reasons:\n\n1.  **Invalid API Key:** Please ensure the \`OPENROUTER_API_KEY\` in your \`.env\` file is correct and that the development server was restarted after changing it.\n\n2.  **Service Issue:** There might be a temporary problem with the OpenRouter.ai service. You can check their status page for any ongoing issues.\n\nOnce you have verified your key, the article generation should work correctly.`,
+            imageUrl: `https://placehold.co/1200x600/f87171/ffffff?text=AI+Service+Error`
         };
     }
 

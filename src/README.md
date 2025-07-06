@@ -11,12 +11,12 @@ This project requires **two environment variables** to be set up for the AI feat
 
 You need to set up these two secrets on your hosting platform (e.g., Vercel, Firebase App Hosting). For local development, create a `.env` file in the root of your project.
 
--   `GOOGLE_API_KEY`: Your API key for the Google Gemini model. You can get this from [Google AI Studio](https://aistudio.google.com/app/apikey).
+-   `OPENROUTER_API_KEY`: Your API key for the OpenRouter service. You can get a free key from their [website](https://openrouter.ai/).
 -   `UNSPLASH_API_KEY`: Your API key for the Unsplash API, used to fetch article images. You can get this by creating a free developer account on the [Unsplash Developers](https://unsplash.com/developers) page.
 
 Your local `.env` file should look like this:
 ```
-GOOGLE_API_KEY="your_google_api_key_here"
+OPENROUTER_API_KEY="your_openrouter_api_key_here"
 UNSPLASH_API_KEY="your_unsplash_api_key_here"
 ```
 
@@ -82,7 +82,7 @@ After running this script, your database will be correctly configured to work wi
 
 This application uses a hybrid content strategy to provide fresh daily content while ensuring maximum reliability and performance.
 
--   **Dynamic AI Generation:** When a user visits an article page for the first time on any given day, the content is generated in real-time by the powerful Gemini 1.5 Pro AI model.
+-   **Dynamic AI Generation:** When a user visits an article page for the first time on any given day, the content is generated in real-time by an AI model via OpenRouter.
 -   **Dynamic Image Fetching:** At the same time, an image relevant to the article's topic is fetched from the Unsplash API.
 -   **Supabase Smart Caching:** Once an article and its image are generated/fetched, they are automatically saved (cached) in your Supabase database for 24 hours. Any other user who visits that same article on the same day will be served the content instantly from the Supabase cache, not from the AI.
 -   **Reliability & Performance:** This "generate-once, serve-many" approach dramatically reduces API calls, lowers costs, and ensures the site is fast and reliable, avoiding the errors and timeouts common with live AI generation on every page load.

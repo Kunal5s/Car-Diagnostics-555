@@ -16,20 +16,19 @@ This project requires two API keys to function correctly. How you set them depen
 For the website to work in this development environment, you **must** use a local environment file.
 
 1.  A `.env` file has been created for you in the project's root directory.
-2.  Open the `.env` file.
-3.  Replace `YOUR_GOOGLE_API_KEY_HERE` with your actual Google Gemini API key. You can get this from [Google AI Studio](https://aistudio.google.com/app/apikey).
-4.  The Unsplash key you provided has already been added.
+2.  The OpenRouter key you provided has already been added.
+3.  The Unsplash key has also been added. You can get your own key from the [Unsplash Developers](https://unsplash.com/developers) page.
 
-The file content should look like this after you add your key:
+The file content should look like this:
 ```
-GOOGLE_API_KEY="abCdeFgHijklmN..."
+OPENROUTER_API_KEY="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"
 UNSPLASH_API_KEY="eZSpDCjtVCHL9J8-w44SoUqQvHFmcL2R9sESsNprG5M"
 ```
-> **IMPORTANT:** Without adding your Google API key to the `.env` file, the article generation will fail in this local environment.
+> **IMPORTANT:** Without these keys in the `.env` file, the article and image generation will fail in this local environment. You can get a free OpenRouter API key from the [OpenRouter website](https://openrouter.ai/).
 
 #### **For Production Hosting (e.g., Vercel)**
 
-When you deploy your website to a hosting service like Vercel or Firebase App Hosting, you must set the `GOOGLE_API_KEY` and `UNSPLASH_API_KEY` as environment variables in your project's settings on that platform. The `.env` file is not used in production.
+When you deploy your website to a hosting service like Vercel or Firebase App Hosting, you must set the `OPENROUTER_API_KEY` and `UNSPLASH_API_KEY` as environment variables in your project's settings on that platform. The `.env` file is not used in production.
 
 ### 2. Supabase Database Setup
 
@@ -91,7 +90,7 @@ After running this script, your database will be correctly configured to work wi
 
 This application uses a hybrid content strategy to provide fresh daily content while ensuring maximum reliability and performance.
 
--   **Dynamic AI Generation:** When a user visits an article page for the first time on any given day, the content is generated in real-time by the powerful Gemini 1.5 Pro AI model.
+-   **Dynamic AI Generation:** When a user visits an article page for the first time on any given day, the content is generated in real-time by an AI model via OpenRouter.
 -   **Dynamic Image Fetching:** At the same time, an image relevant to the article's topic is fetched from the Unsplash API.
 -   **Supabase Smart Caching:** Once an article and its image are generated/fetched, they are automatically saved (cached) in your Supabase database for 24 hours. Any other user who visits that same article on the same day will be served the content instantly from the Supabase cache, not from the AI.
 -   **Reliability & Performance:** This "generate-once, serve-many" approach dramatically reduces API calls, lowers costs, and ensures the site is fast and reliable, avoiding the errors and timeouts common with live AI generation on every page load.

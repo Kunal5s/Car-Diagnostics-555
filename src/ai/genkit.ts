@@ -1,7 +1,16 @@
 import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {openAI} from 'genkitx-openai';
 
 export const ai = genkit({
-  plugins: [googleAI({apiKey: process.env.GOOGLE_API_KEY})],
-  model: 'googleai/gemini-1.5-pro-latest',
+  plugins: [
+    openAI({
+      apiKey: process.env.OPENROUTER_API_KEY!,
+      baseURL: 'https://openrouter.ai/api/v1',
+      defaultHeaders: {
+        'HTTP-Referer': 'https://oudworkstations.dev',
+        'X-Title': 'Car Diagnostics BrainAi',
+      },
+    }),
+  ],
+  model: 'google/gemini-2.5-flash-lite-preview-06-17',
 });
