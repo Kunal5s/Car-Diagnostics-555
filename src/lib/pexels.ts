@@ -22,7 +22,8 @@ export async function getImageForQuery(query: string): Promise<string | null> {
     return null;
   }
 
-  const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1&orientation=landscape`;
+  const enhancedQuery = `${query} car repair automobile`;
+  const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(enhancedQuery)}&per_page=1&orientation=landscape`;
 
   try {
     const response = await fetch(url, {
@@ -45,6 +46,7 @@ export async function getImageForQuery(query: string): Promise<string | null> {
       return data.photos[0].src.landscape;
     }
 
+    console.warn(`No Pexels image found for query: "${enhancedQuery}"`);
     return null;
   } catch (error) {
     console.error("Failed to fetch image from Pexels:", error);

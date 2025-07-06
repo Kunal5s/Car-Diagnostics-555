@@ -194,27 +194,31 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
     }
 
     let imageUrl: string | null = null;
-    let imageError = false;
-    try {
-        console.log(`Fetching image for article: "${topicInfo.title}"`);
-        imageUrl = await getImageForQuery(topicInfo.title);
-        if (!imageUrl) {
-            imageError = true;
+    const pexelsKeyExists = !!process.env.PEXELS_API_KEY;
+
+    if (pexelsKeyExists) {
+        try {
+            console.log(`Fetching image for article: "${topicInfo.title}"`);
+            imageUrl = await getImageForQuery(topicInfo.title);
+        } catch (e) {
+            console.error(`Image fetch failed for article "${topicInfo.title}".`, e);
         }
-    } catch (e) {
-        console.error(`Image fetch failed for article "${topicInfo.title}". This is likely a PEXELS_API_KEY issue.`, e);
-        imageError = true;
     }
-    
+
+    const placeholderUrl = `https://placehold.co/1200x600.png`;
+
     const newArticle: FullArticle = {
         ...topicInfo,
         summary: generatedData.summary,
         content: generatedData.content,
-        imageUrl: imageUrl || `https://placehold.co/1200x600/fca5a5/b91c1c?text=Pexels+Key+Error`
+        imageUrl: imageUrl || placeholderUrl
     };
 
-    if (imageError) {
-        newArticle.content += `\n\n---\n\n**Developer Note:** The article image could not be loaded. This is usually because the \`PEXELS_API_KEY\` is missing or invalid in your \`.env\` file.`;
+    if (!pexelsKeyExists) {
+        newArticle.content += `\n\n---\n\n**Developer Note:** The Pexels API key is missing. Please add \`PEXELS_API_KEY\` to your \`.env\` file to enable images.`;
+        newArticle.imageUrl = `https://placehold.co/1200x600/fca5a5/b91c1c?text=Pexels+Key+Missing`;
+    } else if (!imageUrl) {
+         newArticle.content += `\n\n---\n\n**Developer Note:** An image could not be found on Pexels for the topic "${topicInfo.title}". A placeholder is being used.`;
     }
 
     try {
