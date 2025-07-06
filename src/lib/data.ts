@@ -151,11 +151,15 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
 
       // 3. Save the new article to Supabase
       try {
+        // Exclude the static 'id' from the topic before upserting.
+        // The database will generate its own primary key.
+        const { id, ...articleToInsert } = newArticle;
+        
         const { error: upsertError } = await supabase
           .from('articles')
           .upsert(
             { 
-              ...newArticle,
+              ...articleToInsert,
               generated_at: new Date().toISOString(),
             },
             { onConflict: 'slug' } 
