@@ -1,13 +1,24 @@
+'use client';
+
 import { type ArticleTopic } from "@/lib/definitions";
 import { ArticleCard } from "./article-card";
 import { Card, CardContent } from "./ui/card";
 import { AlertCircle } from "lucide-react";
-import Link from "next/link";
-import { Button } from "./ui/button";
+import { motion } from 'framer-motion';
 
 interface ArticleGridProps {
   topics: ArticleTopic[];
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
 
 export function ArticleGrid({ topics }: ArticleGridProps) {
   if (!topics || topics.length === 0) {
@@ -25,10 +36,15 @@ export function ArticleGrid({ topics }: ArticleGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+    <motion.div 
+      className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {topics.map((topic, index) => (
         <ArticleCard key={topic.id} topic={topic} priority={index < 3} />
       ))}
-    </div>
+    </motion.div>
   );
 }

@@ -1,11 +1,60 @@
 
 import type { FullArticle, ArticleTopic } from './definitions';
-import allArticles from './articles.json';
+import allArticlesData from './articles.json';
+import { getImageForQuery } from './pexels';
 
-// This function simulates an async call, which is good practice for data fetching.
+
+let articleCache: FullArticle[] | null = null;
+const pexelsCache = new Map<string, string>();
+
+
+async function fetchAndCacheArticles(): Promise<FullArticle[]> {
+  console.log("Fetching images from Pexels and caching articles...");
+
+  // Use a temporary cache for the duration of this function call
+  const tempPexelsCache = new Map<string, string>();
+
+  const articlesWithImages: FullArticle[] = await Promise.all(
+    (allArticlesData as FullArticle[]).map(async (article) => {
+      const query = article.imageHint || article.title;
+      let imageUrl = pexelsCache.get(query) || tempPexelsCache.get(query);
+
+      if (!imageUrl) {
+        try {
+          const pexelsUrl = await getImageForQuery(query);
+          if (pexelsUrl) {
+            imageUrl = pexelsUrl;
+            tempPexelsCache.set(query, imageUrl);
+          } else {
+            // Fallback to placeholder if Pexels returns nothing
+            imageUrl = `https://placehold.co/720x405.png`;
+          }
+        } catch (error) {
+          console.error(`Failed to fetch image for query "${query}":`, error);
+          imageUrl = `https://placehold.co/720x405.png`; // Fallback on error
+        }
+      }
+
+      return {
+        ...article,
+        imageUrl: imageUrl!,
+      };
+    })
+  );
+  
+  // Update the main cache after all promises are resolved
+  tempPexelsCache.forEach((value, key) => pexelsCache.set(key, value));
+  
+  articleCache = articlesWithImages;
+  console.log("Finished fetching and caching images.");
+  return articleCache;
+}
+
 export async function getAllArticles(): Promise<FullArticle[]> {
-  // The type assertion is safe because the JSON file is now static and matches the type.
-  return allArticles as FullArticle[];
+  if (articleCache) {
+    return articleCache;
+  }
+  return await fetchAndCacheArticles();
 }
 
 export async function getAllTopics(): Promise<ArticleTopic[]> {
@@ -22,7 +71,6 @@ export async function getAllTopics(): Promise<ArticleTopic[]> {
 
 export async function getHomepageTopics(): Promise<ArticleTopic[]> {
   const topics = await getAllTopics();
-  // Show the first 6 topics on the homepage.
   return topics.slice(0, 6);
 }
 
