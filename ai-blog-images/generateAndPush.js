@@ -1,4 +1,8 @@
 
+// This line MUST be at the very top to ensure environment variables are loaded.
+// It looks for the .env file in the parent directory (the project root).
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+
 const fetch = require('node-fetch');
 const sharp = require('sharp');
 const { Octokit } = require('@octokit/rest');
@@ -105,7 +109,7 @@ async function pushToGitHub(filePath, contentBuffer, commitMessage) {
   try {
       await octokit.repos.createOrUpdateFileContents({
         owner: GITHUB_OWNER,
-        repo: GITHUB_REPO,
+        repo: GZIP_REPO,
         path: filePath,
         message: commitMessage,
         content: contentBuffer.toString('base64'),
@@ -180,7 +184,8 @@ async function main() {
   if (!GITHUB_TOKEN) {
     console.error("========================================================================");
     console.error("❌ ERROR: GitHub token not found.");
-    console.error("   Please set the GITHUB_TOKEN environment variable in your .env file.");
+    console.error("   Please set the GITHUB_TOKEN environment variable in your project's");
+    console.error("   root .env file. The script will not work without it.");
     console.error("========================================================================");
     return;
   }
