@@ -76,7 +76,7 @@ This application uses a hybrid content strategy to provide fresh daily content w
 -   **Dynamic Image Fetching:** At the same time, an image relevant to the article's topic is fetched from the Unsplash API.
 -   **Supabase Smart Caching:** Once an article and its image are generated/fetched, they are automatically saved (cached) in your Supabase database for 24 hours. Any other user who visits that same article on the same day will be served the content instantly from the Supabase cache, not from the AI.
 -   **Reliability & Performance:** This "generate-once, serve-many" approach dramatically reduces API calls, lowers costs, and ensures the site is fast and reliable, avoiding the errors and timeouts common with live AI generation on every page load.
--   **Static Topic Base:** The site is built on a stable foundation of 54 curated article topics. This ensures that all category pages and article URLs are permanent and SEO-friendly.
+-   **Static Topic Base:** The site is built on a stable foundation of 60 curated article topics. This ensures that all category pages and article URLs are permanent and SEO-friendly.
 -   **Daily Homepage Refresh:** To keep the experience fresh, the homepage automatically shuffles the article topics every 24 hours to feature a new set of 6 "trending" articles.
 
 This hybrid model provides the dynamic, AI-powered content you want with the stability and performance that a professional website requires.
