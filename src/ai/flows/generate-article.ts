@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview A flow for generating SEO-friendly articles using OpenRouter.
@@ -22,10 +21,18 @@ export interface GenerateArticleOutput {
 
 const promptTemplate = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: '{TOPIC}'.
 
+IMPORTANT: You must follow this output format EXACTLY.
+
+First, on the very first line, write a concise, SEO-friendly summary for the article (approximately 160 characters).
+
+After the summary, on a new line, you MUST add the exact separator '|||ARTICLE_SEPARATOR|||'.
+
+After the separator, write the full article.
+
 The article MUST be at least 1600 words long.
 
-Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
-- The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the content.
+The article's content MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
+- The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the article content.
 - You MUST include multiple H2 (##) headings to structure the main sections of the article.
 - Within each H2 section, you MUST use several H3 (###) headings to break down the content into sub-sections.
 - For even deeper nesting where necessary, you can use H4, H5, and H6 headings.
@@ -34,14 +41,12 @@ Your response MUST be in well-structured Markdown format. The structure is absol
 - Before the final conclusion, you MUST include a section with an H2 heading titled 'Key Takeaways' that summarizes the main points of the article in a bulleted list.
 - End the article with a final 'Conclusion' section under an H2 heading.
 
-In addition to the article, you must provide a concise, SEO-friendly summary for the article (approximately 160 characters).
-
-IMPORTANT: Your final output must be a JSON object with two keys: "summary" and "content". The "content" field must contain the full article in the structured Markdown format described above.
-The JSON object should look like this:
-{
-  "summary": "Your short SEO-friendly summary here.",
-  "content": "# Your Full Article in Markdown\\n\\n## Section 1\\n\\n..."
-}`;
+Your final output must be structured like this, with NO extra text or explanations before or after:
+[The summary text goes here]
+|||ARTICLE_SEPARATOR|||
+# The Full Article in Markdown
+## Section 1
+...`;
 
 export async function generateArticle(
   input: GenerateArticleInput
@@ -64,7 +69,6 @@ export async function generateArticle(
       },
       body: JSON.stringify({
         model: "meta-llama/llama-3-70b-instruct", // Using LLaMA 3 as requested
-        response_format: { type: "json_object" }, // Enforce JSON output
         messages: [
           {
             role: "user",
@@ -88,19 +92,28 @@ export async function generateArticle(
     }
 
     const contentString = data.choices[0].message.content;
-    const parsedContent: GenerateArticleOutput = JSON.parse(contentString);
+    const parts = contentString.split('|||ARTICLE_SEPARATOR|||');
+
+    if (parts.length < 2) {
+        console.error("AI response did not contain the expected separator.", contentString.substring(0, 500)); // Log first 500 chars for debugging
+        throw new Error("The AI returned a response with an invalid structure (separator not found).");
+    }
+
+    const parsedContent: GenerateArticleOutput = {
+        summary: parts[0].trim(),
+        content: parts[1].trim()
+    };
     
     if (!parsedContent.summary || !parsedContent.content) {
-        console.error("Invalid JSON structure in AI response:", parsedContent);
-        throw new Error("The AI returned a response with an invalid JSON structure.");
+        console.error("Invalid structure in AI response after splitting:", parsedContent);
+        throw new Error("The AI returned an empty summary or content.");
     }
     
     return parsedContent;
   } catch (error) {
     console.error("Failed to generate article:", error);
-    if (error instanceof SyntaxError) {
-        throw new Error('The AI returned malformed JSON and it could not be parsed.');
-    }
+    // The SyntaxError is no longer expected, so the specific check is removed.
+    // We re-throw the original error to be handled by the calling function.
     throw error;
   }
 }
