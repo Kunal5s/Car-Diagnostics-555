@@ -74,10 +74,30 @@ const generateArticleFlow = ai.defineFlow(
     outputSchema: GenerateArticleOutputSchema,
   },
   async (input) => {
-    const {output} = await prompt(input);
+    const result = await prompt(input);
+    const { output } = result;
+
     if (!output) {
-      throw new Error('Failed to generate article content. The AI model returned no output, possibly due to safety filters or an internal error.');
+      const candidate = result.candidates?.[0];
+      const finishReason = candidate?.finishReason;
+      const finishMessage = candidate?.finishMessage;
+      
+      let errorMessage = 'Failed to generate article content. The AI model returned no output.';
+
+      if (finishReason) {
+        errorMessage += ` Reason: ${finishReason}.`;
+      }
+      if (finishMessage) {
+        errorMessage += ` Details: "${finishMessage}".`;
+      }
+      if (finishReason === 'SAFETY') {
+        errorMessage += ' The content may have been blocked by safety filters. Consider adjusting the safety settings in the prompt configuration.';
+      }
+      
+      // Throw a proper Error object so it can be logged with a stack trace.
+      throw new Error(errorMessage);
     }
+    
     return output;
   }
 );
