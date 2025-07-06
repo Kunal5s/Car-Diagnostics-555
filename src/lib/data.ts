@@ -177,8 +177,15 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
       return newArticle;
 
     } catch (e) {
-      console.error(`Failed to generate article for slug "${slug}":`, e);
-      throw new Error(`Failed to generate article for slug "${slug}": ${e}`);
+      console.error(`Failed to generate article for slug "${slug}". This is likely due to a missing or invalid GOOGLE_API_KEY.`, e);
+      
+      // Return a temporary article object with an error message instead of crashing
+      const errorArticle: FullArticle = {
+        ...topicInfo,
+        summary: "An error occurred while generating this article.",
+        content: `# Article Generation Failed\n\nWe were unable to generate this article at this time. This is usually due to one of two reasons:\n\n1.  **Missing API Key:** The \`GOOGLE_API_KEY\` has not been set up on the hosting environment.\n2.  **API Error:** There was a temporary issue with the generative AI service.\n\nPlease check your configuration in the README and try again later.`,
+      };
+      return errorArticle;
     }
 }
 
