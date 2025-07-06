@@ -17,18 +17,18 @@ For the website to work in this development environment, you **must** use a loca
 
 1.  A `.env` file has been created for you in the project's root directory.
 2.  The OpenRouter key you provided has already been added.
-3.  You still need an Unsplash key for images. You can get a free key from the [Unsplash Developers](https://unsplash.com/developers) page and add it to the `.env` file.
+3.  You still need a Pexels key for images. You can get a free key from the [Pexels API](https://www.pexels.com/api/) page and add it to the `.env` file.
 
 The file content should look like this:
 ```
 OPENROUTER_API_KEY="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"
-UNSPLASH_API_KEY="your_unsplash_api_key_here"
+PEXELS_API_KEY="your_pexels_api_key_here"
 ```
 > **IMPORTANT:** Without these keys in the `.env` file, the article and image generation will fail in this local environment. You can get a free OpenRouter API key from the [OpenRouter website](https://openrouter.ai/).
 
 #### **For Production Hosting (e.g., Vercel)**
 
-When you deploy your website to a hosting service like Vercel or Firebase App Hosting, you must set the `OPENROUTER_API_KEY` and `UNSPLASH_API_KEY` as environment variables in your project's settings on that platform. The `.env` file is not used in production.
+When you deploy your website to a hosting service like Vercel or Firebase App Hosting, you must set the `OPENROUTER_API_KEY` and `PEXELS_API_KEY` as environment variables in your project's settings on that platform. The `.env` file is not used in production.
 
 ### 2. Supabase Database Setup
 
@@ -91,7 +91,7 @@ After running this script, your database will be correctly configured to work wi
 This application uses a hybrid content strategy to provide fresh daily content while ensuring maximum reliability and performance.
 
 -   **Dynamic AI Generation:** When a user visits an article page for the first time on any given day, the content is generated in real-time by the powerful `meta-llama/llama-3-70b-instruct` model via OpenRouter.
--   **Dynamic Image Fetching:** At the same time, an image relevant to the article's topic is fetched from the Unsplash API.
+-   **Dynamic Image Fetching:** At the same time, an image relevant to the article's topic is fetched from the Pexels API.
 -   **Supabase Smart Caching:** Once an article and its image are generated/fetched, they are automatically saved (cached) in your Supabase database for 24 hours. Any other user who visits that same article on the same day will be served the content instantly from the Supabase cache, not from the AI.
 -   **Reliability & Performance:** This "generate-once, serve-many" approach dramatically reduces API calls, lowers costs, and ensures the site is fast and reliable, avoiding the errors and timeouts common with live AI generation on every page load.
 -   **Static Topic Base:** The site is built on a stable foundation of 60 curated article topics. This ensures that all category pages and article URLs are permanent and SEO-friendly.

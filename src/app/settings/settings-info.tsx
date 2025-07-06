@@ -35,7 +35,7 @@ export function SettingsInfo() {
         <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
            <h3 className="font-semibold text-lg flex items-center text-foreground mb-2"><KeyRound className="mr-2 h-5 w-5" /> API Keys Required</h3>
             <p>
-              This dynamic strategy requires two API keys to be set in a <strong>.env</strong> file: an <strong>OPENROUTER_API_KEY</strong> for content generation and an <strong>UNSPLASH_API_KEY</strong> for fetching images. Without these, the article generation will fail.
+              This dynamic strategy requires two API keys to be set in a <strong>.env</strong> file: an <strong>OPENROUTER_API_KEY</strong> for content generation and a <strong>PEXELS_API_KEY</strong> for fetching images. Without these, the article generation will fail.
             </p>
         </div>
       </CardContent>

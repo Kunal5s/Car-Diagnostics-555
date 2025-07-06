@@ -5,7 +5,7 @@ import type { FullArticle, ArticleTopic } from './definitions';
 import { slugify } from "./utils";
 import { generateArticle } from "@/ai/flows/generate-article";
 import { supabase } from './supabase';
-import { getImageForQuery } from './unsplash';
+import { getImageForQuery } from './pexels';
 
 const allArticleTopics: Omit<ArticleTopic, 'slug'>[] = [
   { id: 1, title: "Advanced Methods for Diagnosing Common Engine Performance Issues Today", category: "Engine" },
@@ -171,7 +171,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
             imageError = true;
         }
     } catch (e) {
-        console.error(`Image fetch failed for article "${topicInfo.title}". This is likely an UNSPLASH_API_KEY issue.`, e);
+        console.error(`Image fetch failed for article "${topicInfo.title}". This is likely a PEXELS_API_KEY issue.`, e);
         imageError = true;
     }
     
@@ -179,11 +179,11 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
         ...topicInfo,
         summary: generatedData.summary,
         content: generatedData.content,
-        imageUrl: imageUrl || `https://placehold.co/1200x600/fca5a5/b91c1c?text=Unsplash+Key+Error`
+        imageUrl: imageUrl || `https://placehold.co/1200x600/fca5a5/b91c1c?text=Pexels+Key+Error`
     };
 
     if (imageError) {
-        newArticle.content += `\n\n---\n\n**Developer Note:** The article image could not be loaded. This is usually because the \`UNSPLASH_API_KEY\` is missing or invalid in your \`.env\` file.`;
+        newArticle.content += `\n\n---\n\n**Developer Note:** The article image could not be loaded. This is usually because the \`PEXELS_API_KEY\` is missing or invalid in your \`.env\` file.`;
     }
 
     try {
