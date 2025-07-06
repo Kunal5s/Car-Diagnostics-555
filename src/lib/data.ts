@@ -1,4 +1,3 @@
-
 'use server';
 
 import type { FullArticle, ArticleTopic } from './definitions';
@@ -117,25 +116,28 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
     }
 
     try {
-      const { data: cachedArticle, error } = await supabase
+      // Changed .single() to .limit(1) for more robust error handling.
+      const { data, error } = await supabase
         .from('articles')
         .select('*')
         .eq('slug', slug)
         .gte('generated_at', today.toISOString())
-        .single();
+        .limit(1);
       
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
+        // Any error here is now considered a configuration problem.
         console.error("Supabase select error:", error);
-        // This is a special error to guide the user to configure the database correctly.
         return {
             ...topicInfo,
             title: "Database Configuration Error",
             summary: "There is an issue connecting to the database. This is usually because the Row Level Security (RLS) policies for the 'articles' table have not been set up correctly.",
-            content: `# Database Configuration Error\n\nWe were unable to connect to the Supabase database. This is usually due to one of two reasons:\n\n1.  **The 'articles' Table is Missing:** Please ensure you have created the table in your Supabase project.\n2.  **Row Level Security (RLS) Policies are Missing:** By default, your database is protected. You must create access policies to allow the website to read and write data.\n\nPlease follow the setup instructions in the project's \`README.md\` file to resolve this issue. The README contains the exact SQL script you need to run.`,
+            content: `# Database Configuration Error\n\nWe were unable to connect to the Supabase database. This is usually due to one of two reasons:\n\n1.  **The 'articles' Table is Missing:** Please ensure you have created the table in your Supabase project.\n2.  **Row Level Security (RLS) Policies are Missing:** By default, your database is protected. You must create access policies to allow the website to read, insert, and update data.\n\nPlease follow the setup instructions in the project's \`README.md\` file to resolve this issue. The README contains the exact SQL script you need to run.`,
             imageUrl: `https://placehold.co/1200x600/ef4444/ffffff?text=Database+Error`
         };
       }
       
+      const cachedArticle = data && data.length > 0 ? data[0] : null;
+
       if (cachedArticle) {
         console.log(`Serving article "${slug}" from Supabase cache.`);
         return cachedArticle as FullArticle;
