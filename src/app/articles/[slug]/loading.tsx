@@ -13,9 +13,7 @@ export default function Loading() {
     <div className="container mx-auto max-w-4xl px-4 py-12">
       <article>
         <Breadcrumbs items={breadcrumbItems} />
-        <div className="flex justify-center items-center mb-8 h-56 w-full bg-muted rounded-lg">
-          <Skeleton className="h-28 w-28 rounded-full" />
-        </div>
+        <Skeleton className="h-80 w-full mb-8 rounded-lg" />
         <header className="mb-8">
           <Skeleton className="h-12 w-full mb-4" />
           <Skeleton className="h-6 w-3/4" />

@@ -5,6 +5,7 @@ import type { FullArticle, ArticleTopic } from './definitions';
 import { slugify } from "./utils";
 import { generateArticle } from "@/ai/flows/generate-article";
 import { supabase } from './supabase';
+import { getImageForQuery } from './unsplash';
 
 const allArticleTopics: Omit<ArticleTopic, 'slug'>[] = [
   { id: 1, title: "Advanced Methods for Diagnosing Common Engine Performance Issues Today", category: "Engine" },
@@ -68,8 +69,6 @@ const topicsWithSlugs: ArticleTopic[] = allArticleTopics.map(topic => ({
   slug: `${slugify(topic.title)}-${topic.id}`
 }));
 
-// This function provides a stable, seeded shuffle based on the current date.
-// This means the "random" order will be the same for all users for an entire day.
 function seededShuffle(array: any[], seed: number) {
   let currentIndex = array.length, temporaryValue, randomIndex;
   const random = () => {
@@ -91,14 +90,9 @@ export async function getAllTopics(): Promise<ArticleTopic[]> {
 }
 
 export async function getHomepageTopics(): Promise<ArticleTopic[]> {
-  // Create a seed based on the current date (YYYYMMDD format)
   const now = new Date();
   const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
-
-  // Shuffle the topics using the daily seed
   const shuffledTopics = seededShuffle([...topicsWithSlugs], seed);
-  
-  // Return the first 6 topics from the daily shuffled list
   return shuffledTopics.slice(0, 6);
 }
 
@@ -111,7 +105,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // 1. Check Supabase for a fresh article
     try {
       const { data: cachedArticle, error } = await supabase
         .from('articles')
@@ -120,7 +113,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
         .gte('generated_at', today.toISOString())
         .single();
       
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found"
+      if (error && error.code !== 'PGRST116') {
         console.error("Supabase select error:", error);
       }
       
@@ -132,7 +125,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
       console.error("Error fetching from Supabase:", e);
     }
     
-    // 2. If not found, generate a new one
     console.log(`Cache miss for article "${slug}". Generating new article...`);
     
     const topicInfo = topicsWithSlugs.find(p => p.slug === slug);
@@ -143,16 +135,22 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
     try {
       const generatedData = await generateArticle({ topic: topicInfo.title });
       
+      let imageUrl: string | null = null;
+      try {
+        console.log(`Fetching image for article: "${topicInfo.title}"`);
+        imageUrl = await getImageForQuery(topicInfo.title);
+      } catch (e) {
+        console.error(`Failed to fetch image for article "${topicInfo.title}"`, e);
+      }
+      
       const newArticle: FullArticle = {
         ...topicInfo,
         summary: generatedData.summary,
         content: generatedData.content,
+        imageUrl: imageUrl || `https://placehold.co/1200x600/334155/ffffff?text=${encodeURIComponent(topicInfo.title)}`
       };
 
-      // 3. Save the new article to Supabase
       try {
-        // Exclude the static 'id' from the topic before upserting.
-        // The database will generate its own primary key.
         const { id, ...articleToInsert } = newArticle;
         
         const { error: upsertError } = await supabase
@@ -179,17 +177,16 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
     } catch (e) {
       console.error(`Failed to generate article for slug "${slug}". This is likely due to a missing or invalid GOOGLE_API_KEY.`, e);
       
-      // Return a temporary article object with an error message instead of crashing
       const errorArticle: FullArticle = {
         ...topicInfo,
         summary: "An error occurred while generating this article.",
         content: `# Article Generation Failed\n\nWe were unable to generate this article at this time. This is usually due to one of two reasons:\n\n1.  **Missing API Key:** The \`GOOGLE_API_KEY\` has not been set up on the hosting environment.\n2.  **API Error:** There was a temporary issue with the generative AI service.\n\nPlease check your configuration in the README and try again later.`,
+        imageUrl: `https://placehold.co/1200x600/f87171/ffffff?text=Generation+Error`
       };
       return errorArticle;
     }
 }
 
-// This function is used by the sitemap. It returns all possible article topics.
 export async function getAllArticles(): Promise<ArticleTopic[]> {
     return topicsWithSlugs;
 }

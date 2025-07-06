@@ -22,6 +22,7 @@ export interface ArticleTopic {
 export interface FullArticle extends ArticleTopic {
   summary: string;
   content: string;
+  imageUrl?: string | null;
 }
 
 export interface CategoryInfo {

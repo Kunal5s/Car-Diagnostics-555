@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow for generating SEO-friendly articles.
@@ -33,7 +34,7 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateArticleOutputSchema},
   prompt: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: '{{{topic}}}'.
 
-The article MUST be at least 1700 words long.
+The article MUST be at least 1600 words long.
 
 Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
 - The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the content.
@@ -41,7 +42,9 @@ Your response MUST be in well-structured Markdown format. The structure is absol
 - Within each H2 section, you MUST use several H3 (###) headings to break down the content into sub-sections.
 - For even deeper nesting where necessary, you can use H4, H5, and H6 headings.
 - The use of this hierarchical heading structure (H1 -> H2 -> H3 etc.) is MANDATORY and must be followed strictly.
-- Start the article with a compelling introduction (immediately following the H1 heading) and conclude with a useful summary paragraph.
+- Start the article with a compelling introduction (immediately following the H1 heading).
+- Before the final conclusion, you MUST include a section with an H2 heading titled 'Key Takeaways' that summarizes the main points of the article in a bulleted list.
+- End the article with a final 'Conclusion' section under an H2 heading.
 
 In addition to the article, you must provide a concise, SEO-friendly summary for the article (approximately 160 characters).
 
