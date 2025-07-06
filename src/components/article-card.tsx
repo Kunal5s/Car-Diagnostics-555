@@ -39,13 +39,13 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
         <CardHeader className="p-0">
           <Link href={articleUrl} className="block relative h-48 w-full group bg-muted overflow-hidden rounded-t-lg">
             <Image
-              src={topic.imageUrl || 'https://placehold.co/1200x600.png'} // Fallback just in case.
+              src={topic.imageUrl || 'https://placehold.co/1200x600.png'}
               alt={topic.title}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               priority={priority}
-              data-ai-hint={topic.category}
+              data-ai-hint={`${topic.category} car`}
             />
           </Link>
         </CardHeader>

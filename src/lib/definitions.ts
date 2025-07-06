@@ -17,13 +17,23 @@ export interface ArticleTopic {
   title: string;
   category: string;
   slug: string;
-  imageUrl?: string | null;
+  imageUrl: string | null;
 }
 
 export interface FullArticle extends ArticleTopic {
   summary: string;
   content: string;
-  imageUrl?: string | null;
+}
+
+export interface ArticleFromDb {
+  id: number;
+  slug: string;
+  title: string;
+  category: string;
+  summary: string | null;
+  content: string | null;
+  image_url: string | null;
+  generated_at: string;
 }
 
 export interface CategoryInfo {

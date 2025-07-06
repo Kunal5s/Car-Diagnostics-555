@@ -7,6 +7,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Metadata } from 'next';
 import { getArticleBySlug, getAllTopics } from '@/lib/data';
+import { Card, CardContent } from '@/components/ui/card';
+import { AlertCircle } from 'lucide-react';
 
 export async function generateStaticParams() {
   const topics = await getAllTopics();
@@ -54,10 +56,28 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     { label: 'Blog', href: '/blog' },
     { label: article.title },
   ];
-
-  // The content is now guaranteed to exist from articles.json
+  
   // This removes the H1 from the markdown content, as it's already rendered in the header.
   const contentWithoutTitle = article.content.replace(/^# .*\n\n?/, '');
+
+  // Check for database configuration errors specifically
+  const isDbError = article.summary.includes("Database Configuration Error");
+  if(isDbError) {
+      return (
+         <div className="container mx-auto max-w-4xl px-4 py-12">
+            <Breadcrumbs items={breadcrumbItems} />
+            <Card className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground border-dashed">
+                <CardContent className="p-6">
+                    <AlertCircle className="mx-auto h-12 w-12 text-destructive mb-4" />
+                    <h2 className="font-bold text-2xl text-foreground mb-2">Database Configuration Error</h2>
+                    <p className="max-w-xl mx-auto">
+                        This application requires a one-time database setup to cache articles. Please follow the instructions in the `README.md` file to run the required SQL script in your Supabase project.
+                    </p>
+                </CardContent>
+            </Card>
+        </div>
+      )
+  }
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
@@ -72,6 +92,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                   className="object-cover"
                   priority
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  data-ai-hint={`${article.category} car`}
                 />
               </div>
             )}
