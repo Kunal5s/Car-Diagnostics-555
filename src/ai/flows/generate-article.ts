@@ -31,7 +31,7 @@ export type GenerateArticleOutput = z.infer<typeof GenerateArticleOutputSchema>;
 // The prompt for the AI model.
 const SYSTEM_PROMPT = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the given topic.
 
-Your highest priority is to meet the required length. The article MUST be extremely detailed and comprehensive, with a strict minimum word count of 1500 words. Do not write an article shorter than 1500 words under any circumstances.
+Your highest priority is to meet the required length. The article MUST be extremely detailed and comprehensive, with a strict minimum word count of 1700 words. Do not write an article shorter than 1700 words under any circumstances. Failure to meet the 1700-word minimum will result in a failed task. The word count is the most critical requirement.
 
 Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
 - The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the content.
@@ -70,7 +70,8 @@ export async function generateArticle(
             'X-Title': 'Car Diagnostics BrainAi',
         },
         body: JSON.stringify({
-            model: 'qwen/qwen-2-7b-instruct',
+            model: 'meta-llama/llama-3-70b-instruct',
+            response_format: { "type": "json_object" },
             messages: [
                 { role: "system", content: SYSTEM_PROMPT },
                 { role: "user", content: `Generate an article on the topic: "${input.topic}"` }
