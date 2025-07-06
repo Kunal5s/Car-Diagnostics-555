@@ -1,4 +1,3 @@
-
 // This line MUST be at the very top to ensure environment variables are loaded.
 // It looks for the .env file in the parent directory (the project root).
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
@@ -109,7 +108,7 @@ async function pushToGitHub(filePath, contentBuffer, commitMessage) {
   try {
       await octokit.repos.createOrUpdateFileContents({
         owner: GITHUB_OWNER,
-        repo: GZIP_REPO,
+        repo: GITHUB_REPO,
         path: filePath,
         message: commitMessage,
         content: contentBuffer.toString('base64'),
