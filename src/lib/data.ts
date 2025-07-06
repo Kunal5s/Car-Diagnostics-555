@@ -1,42 +1,72 @@
 
 import type { FullArticle, ArticleTopic } from './definitions';
 import allArticlesData from './articles.json';
+import { getImageForQuery } from './image-services';
 
-const articles: FullArticle[] = allArticlesData as FullArticle[];
+const articles: Omit<FullArticle, 'imageUrl'>[] = allArticlesData as Omit<FullArticle, 'imageUrl'>[];
 
-// Functions are kept async to avoid changing signatures in all page components.
-// They now resolve immediately with static data.
+// In-memory cache to avoid repeated API calls for the same article during a server's lifetime
+const imageCache = new Map<number, string>();
+
+async function enrichArticleWithImage<T extends { id: number; title: string; category: string; slug: string; }>(article: T): Promise<T & { imageUrl: string; imageHint?: string }> {
+  if (imageCache.has(article.id)) {
+    return { ...article, imageUrl: imageCache.get(article.id)! };
+  }
+
+  // Use both title and category for a more specific image query
+  const query = `${article.title} ${article.category}`;
+  const imageUrl = await getImageForQuery(query);
+  imageCache.set(article.id, imageUrl);
+
+  const imageHint = article.title.split(' ').slice(0, 2).join(' ');
+
+  return { ...article, imageUrl, imageHint };
+}
+
 
 export async function getAllArticles(): Promise<FullArticle[]> {
-  return Promise.resolve(articles);
+  const enrichedArticles = await Promise.all(
+    articles.map(article => enrichArticleWithImage(article as FullArticle))
+  );
+  return enrichedArticles;
 }
 
 export async function getAllTopics(): Promise<ArticleTopic[]> {
-  return Promise.resolve(
-    articles.map(({ id, title, category, slug, imageUrl, imageHint }) => ({
-      id,
-      title,
-      category,
-      slug,
-      imageUrl,
-      imageHint,
-    }))
+  const enrichedTopics = await Promise.all(
+    articles.map(async (article) => {
+      return await enrichArticleWithImage(article as ArticleTopic);
+    })
   );
+  return enrichedTopics;
 }
 
 export async function getHomepageTopics(): Promise<ArticleTopic[]> {
-  // We take the first 6 articles from the static JSON for consistency on the homepage
-  return Promise.resolve(articles.slice(0, 6));
+  const homepageArticles = articles.slice(0, 6);
+  const enrichedTopics = await Promise.all(
+     homepageArticles.map(async (article) => {
+      return await enrichArticleWithImage(article as ArticleTopic);
+    })
+  );
+  return enrichedTopics;
 }
 
 export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
-  const allArticles = await getAllTopics();
   const lowerCategoryName = categoryName.toLowerCase();
+  const filteredArticles = articles.filter(topic => topic.category.toLowerCase() === lowerCategoryName);
   
-  return allArticles.filter(topic => topic.category.toLowerCase() === lowerCategoryName);
+  const enrichedTopics = await Promise.all(
+     filteredArticles.map(async (article) => {
+      return await enrichArticleWithImage(article as ArticleTopic);
+    })
+  );
+
+  return enrichedTopics;
 }
   
 export async function getArticleBySlug(slug: string): Promise<FullArticle | undefined> {
   const article = articles.find(article => article.slug === slug);
-  return Promise.resolve(article);
+  if (!article) {
+    return undefined;
+  }
+  return await enrichArticleWithImage(article as FullArticle);
 }
