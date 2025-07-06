@@ -164,7 +164,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <div>
             <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-primary lg:text-4xl">
-              From Our Knowledge Base
+              Today's Trending Articles
             </h2>
           </div>
           <ArticleGrid topics={trendingTopics} />
