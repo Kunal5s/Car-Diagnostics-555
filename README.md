@@ -9,18 +9,27 @@ This project requires **two environment variables** to be set up for the AI feat
 
 ### 1. Required Environment Variables
 
-You need to set up these two secrets on your hosting platform (e.g., Vercel, Firebase App Hosting). For local development, create a `.env` file in the root of your project.
+This project requires two API keys to function correctly. How you set them depends on whether you are running the project locally (in this development environment) or on a live hosting platform like Vercel.
 
--   `GOOGLE_API_KEY`: Your API key for the Google Gemini model. You can get this from [Google AI Studio](https://aistudio.google.com/app/apikey).
--   `UNSPLASH_API_KEY`: Your API key for the Unsplash API, used to fetch article images. You can get this by creating a free developer account on the [Unsplash Developers](https://unsplash.com/developers) page.
+#### **For Local Development (Mandatory)**
 
-Your local `.env` file should look like this:
+For the website to work in this development environment, you **must** use a local environment file.
+
+1.  A `.env` file has been created for you in the project's root directory.
+2.  Open the `.env` file.
+3.  Replace `YOUR_GOOGLE_API_KEY_HERE` with your actual Google Gemini API key. You can get this from [Google AI Studio](https://aistudio.google.com/app/apikey).
+4.  The Unsplash key you provided has already been added.
+
+The file content should look like this after you add your key:
 ```
-GOOGLE_API_KEY="your_google_api_key_here"
-UNSPLASH_API_KEY="your_unsplash_api_key_here"
+GOOGLE_API_KEY="abCdeFgHijklmN..."
+UNSPLASH_API_KEY="eZSpDCjtVCHL9J8-w44SoUqQvHFmcL2R9sESsNprG5M"
 ```
+> **IMPORTANT:** Without adding your Google API key to the `.env` file, the article generation will fail in this local environment.
 
-The Supabase connection details have been configured directly in the code, so you do not need to set them as environment variables.
+#### **For Production Hosting (e.g., Vercel)**
+
+When you deploy your website to a hosting service like Vercel or Firebase App Hosting, you must set the `GOOGLE_API_KEY` and `UNSPLASH_API_KEY` as environment variables in your project's settings on that platform. The `.env` file is not used in production.
 
 ### 2. Supabase Database Setup
 
