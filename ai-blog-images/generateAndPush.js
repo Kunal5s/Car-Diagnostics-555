@@ -130,8 +130,7 @@ async function generateAndCommit(topic) {
     console.log('  - Generating image...');
     const encodedPrompt = encodeURIComponent(prompt);
     const seed = Math.floor(Math.random() * 1000000); // Random seed for variety
-    // Switched to the 'turbo' model which is more responsive.
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=turbo&width=512&height=512&nologo=true&seed=${seed}`;
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux-realism&width=512&height=512&nologo=true&seed=${seed}`;
     console.log(`  - Fetching from URL: ${imageUrl}`);
     
     const imageResponse = await fetch(imageUrl);
