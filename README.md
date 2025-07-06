@@ -5,22 +5,20 @@ This is a Next.js application built in Firebase Studio. It uses a powerful AI sy
 
 ## Getting Started
 
-This project requires **two environment variables** and a **one-time database setup** for all features to work correctly.
+This project requires **one environment variable** and a **one-time database setup** for all features to work correctly.
 
-### 1. Required Environment Variables
+### 1. Required Environment Variable
 
-For the website to generate its content, you **must** create a `.env` file in the project's root directory and add two API keys.
+For the website to generate its content, you **must** create a `.env` file in the project's root directory and add your OpenRouter API key.
 
 The file content should look like this:
 ```
 OPENROUTER_API_KEY="your_openrouter_api_key_here"
-PEXELS_API_KEY="your_pexels_api_key_here"
 ```
 
 1.  **`OPENROUTER_API_KEY`**: Your API key for the OpenRouter service, which is used to generate article content with the LLaMA 3 model. You can get a free key from the [OpenRouter website](https://openrouter.ai/).
-2.  **`PEXELS_API_KEY`**: Your API key for the Pexels API, used to fetch relevant, high-quality article images. You can get a free key from the [Pexels API](https://www.pexels.com/api/) page.
 
-> **IMPORTANT:** Without these keys in a `.env` file (for local development) or set as environment variables in your hosting provider (for production), the article and image generation will fail.
+> **IMPORTANT:** Without this key in a `.env` file (for local development) or set as an environment variable in your hosting provider (for production), the article generation will fail.
 
 ### 2. Supabase Database Setup (Mandatory)
 
@@ -78,8 +76,7 @@ FOR ALL USING (true) WITH CHECK (true);
 This application uses a hybrid content strategy that provides fresh daily content while ensuring maximum reliability and performance.
 
 -   **Dynamic AI Generation:** When a user visits an article page for the first time on any given day, the content is generated in real-time by the powerful `meta-llama/llama-3-70b-instruct` model via OpenRouter.
--   **Dynamic Image Fetching:** At the same time, an image relevant to the article's topic is fetched from the Pexels API.
--   **Supabase Smart Caching:** Once an article and its image are generated/fetched, they are automatically saved (cached) in your Supabase database for 24 hours. Any other user who visits that same article on the same day will be served the content instantly from the Supabase cache, not from the AI.
+-   **Supabase Smart Caching:** Once an article is generated, it is automatically saved (cached) in your Supabase database for 24 hours. Any other user who visits that same article on the same day will be served the content instantly from the Supabase cache, not from the AI.
 -   **Reliability & Performance:** This "generate-once, serve-many" approach dramatically reduces API calls, lowers costs, and ensures the site is fast and reliable, avoiding the errors and timeouts common with live AI generation on every page load.
 -   **Static Topic Base:** The site is built on a stable foundation of 60 curated article topics. This ensures that all category pages and article URLs are permanent and SEO-friendly.
 -   **Daily Homepage Refresh:** To keep the experience fresh, the homepage automatically shuffles the article topics every 24 hours to feature a new set of 6 "trending" articles.

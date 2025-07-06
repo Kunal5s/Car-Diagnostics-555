@@ -4,7 +4,6 @@
 import type { ArticleTopic, FullArticle, ArticleFromDb } from './definitions';
 import { slugify } from "./utils";
 import { generateArticle } from "@/ai/flows/generate-article";
-import { getImageForQuery } from './pexels';
 import { supabase } from './supabase';
 import { differenceInHours } from 'date-fns';
 
@@ -74,23 +73,13 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
 
 // This function adds a slug to each static topic.
 export async function getAllTopics(): Promise<ArticleTopic[]> {
-  const { data: articlesFromDb, error } = await supabase
-    .from('articles')
-    .select('slug, image_url');
-
-  if (error) {
-    console.error("Supabase error fetching image URLs:", error.message);
-  }
-
-  const safeArticlesFromDb = articlesFromDb || [];
-  const imageUrlMap = new Map(safeArticlesFromDb.map(a => [a.slug, a.image_url]));
-
+  // No longer need to fetch from Supabase here as we are not displaying unique images in the grid.
   return allArticleTopics.map(topic => {
       const slug = `${slugify(topic.title)}-${topic.id}`;
       return {
           ...topic,
           slug,
-          imageUrl: imageUrlMap.get(slug) || null
+          imageUrl: null // No image URL needed for the grid view
       };
   });
 }
@@ -140,7 +129,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
     // 1. Check for a cached version in Supabase.
     const { data, error } = await supabase
         .from('articles')
-        .select('*')
+        .select('slug, summary, content, generated_at')
         .eq('slug', slug)
         .single();
     
@@ -149,7 +138,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         // Fallback to generating, but log the error.
     }
 
-    const cachedArticle = data as ArticleFromDb | null;
+    const cachedArticle = data as Omit<ArticleFromDb, 'id' | 'title' | 'category' | 'image_url'> | null;
 
     // 2. Check if the cache is fresh (less than 24 hours old).
     if (cachedArticle && differenceInHours(new Date(), new Date(cachedArticle.generated_at)) < 24) {
@@ -159,7 +148,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
             slug: cachedArticle.slug,
             summary: cachedArticle.summary || '',
             content: cachedArticle.content || '',
-            imageUrl: cachedArticle.image_url
+            imageUrl: null // No image URL
         };
     }
 
@@ -170,19 +159,12 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         summary: "Error: Could not generate summary. Please check API key.",
         content: `<h2>Article Generation Failed</h2><p>There was an error generating the content for this topic. This is often due to an issue with the <strong>OpenRouter API key</strong> provided in the environment variables. Please ensure it is correctly configured and has available credits.</p><p><strong>Topic attempted:</strong> ${staticTopic.title}</p>`,
     };
-    let imageUrl = 'https://placehold.co/1200x600.png';
-
+    
     try {
-        const [generatedData, fetchedImageUrl] = await Promise.all([
-            generateArticle({ topic: staticTopic.title }),
-            getImageForQuery(staticTopic.title + " " + staticTopic.category)
-        ]);
-
+        const generatedData = await generateArticle({ topic: staticTopic.title });
         if (generatedData) articleData = generatedData;
-        if (fetchedImageUrl) imageUrl = fetchedImageUrl;
-
     } catch (e: any) {
-        console.error(`Failed to generate content or image for topic: ${staticTopic.title}`, e.message);
+        console.error(`Failed to generate content for topic: ${staticTopic.title}`, e.message);
     }
     
     const newArticleForDb = {
@@ -191,15 +173,14 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         category: staticTopic.category,
         summary: articleData.summary,
         content: articleData.content,
-        image_url: imageUrl,
-        generated_at: new Date().toISOString()
+        generated_at: new Date().toISOString(),
+        image_url: null // Ensure image_url is not set
     };
     
     // 4. Save the newly generated article to Supabase cache (upsert).
     const { error: upsertError } = await supabase.from('articles').upsert(newArticleForDb);
     if (upsertError) {
         console.error("Supabase upsert error:", upsertError.message);
-        // If saving fails, we still return the generated content to the user.
     } else {
         console.log(`[Cache WRITE] Saved generated article "${slug}" to Supabase.`);
     }
@@ -208,6 +189,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         ...staticTopic,
         slug: slug,
         ...articleData,
-        imageUrl: imageUrl,
+        imageUrl: null, // No image URL
     };
 }

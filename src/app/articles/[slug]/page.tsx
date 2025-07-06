@@ -1,6 +1,5 @@
 
 import React from 'react';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import ReactMarkdown from 'react-markdown';
@@ -32,14 +31,6 @@ export async function generateMetadata({ params }: { params: { slug:string } }):
     openGraph: {
       title: article.title,
       description: article.summary,
-      images: [
-        {
-          url: article.imageUrl || '',
-          width: 1200,
-          height: 630,
-          alt: article.title,
-        },
-      ],
     },
   }
 }
@@ -83,20 +74,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     <div className="container mx-auto max-w-4xl px-4 py-12">
         <article>
             <Breadcrumbs items={breadcrumbItems} />
-            {article.imageUrl && (
-              <div className="relative mb-8 h-56 w-full overflow-hidden rounded-lg md:h-80">
-                <Image
-                  src={article.imageUrl}
-                  alt={article.title}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  data-ai-hint={`${article.category} car`}
-                />
-              </div>
-            )}
-            <header className="mb-8">
+            <header className="my-8">
             <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
                 {article.title}
             </h1>
