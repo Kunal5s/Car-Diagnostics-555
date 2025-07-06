@@ -119,7 +119,8 @@ async function generateAndCommit(topic) {
   console.log(`\nProcessing topic: "${topic.title}"...`);
   try {
     const slug = `${slugify(topic.title)}-${topic.id}`;
-    const prompt = `A professional, photorealistic image of a ${topic.category} system in a modern car, related to the topic: ${topic.title}. High detail, clean background.`;
+    // Using a more concise and effective keyword-driven prompt
+    const prompt = `photorealistic, modern car's ${topic.category} system, automotive diagnostics, high detail, studio lighting`;
 
     // Define repository paths (simplified without date for stable URLs)
     const imagePath = `public/images/${slug}.jpg`;
@@ -129,10 +130,13 @@ async function generateAndCommit(topic) {
     console.log('  - Generating image...');
     const encodedPrompt = encodeURIComponent(prompt);
     const seed = Math.floor(Math.random() * 1000000); // Random seed for variety
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=dreamshaper&width=512&height=512&nologo=true&seed=${seed}`;
+    // Switched to a more reliable model and added better logging
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=deliberate&width=512&height=512&nologo=true&seed=${seed}`;
+    console.log(`  - Fetching from: ${imageUrl}`);
+    
     const imageResponse = await fetch(imageUrl);
     if (!imageResponse.ok) {
-      throw new Error(`Failed to fetch image: ${imageResponse.statusText}`);
+      throw new Error(`Failed to fetch image: ${imageResponse.statusText} (status: ${imageResponse.status})`);
     }
     const imageBuffer = await imageResponse.buffer();
 
