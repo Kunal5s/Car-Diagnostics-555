@@ -52,11 +52,14 @@ export async function generateArticle(
   input: GenerateArticleInput
 ): Promise<GenerateArticleOutput> {
   
-  if (!process.env.OPENROUTER_API_KEY) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+
+  // This is a much more robust check for the API key.
+  if (!apiKey || apiKey.trim() === '') {
       console.error("OpenRouter API key is not set in environment variables.");
       return {
         summary: "Error: API key not configured.",
-        content: `<h2>Article Generation Failed</h2><p>The <strong>OpenRouter API key</strong> is missing. Please ensure it is correctly configured in the <strong>.env</strong> file.</p>`,
+        content: `<h2>Article Generation Failed: API Key Missing</h2><p>The <strong>OpenRouter API key</strong> is missing or has not been set. Please add your API key to the <strong>.env</strong> file at the root of your project.</p><p>Example: <code>OPENROUTER_API_KEY="your_real_api_key"</code></p>`,
       };
   }
 
@@ -64,7 +67,7 @@ export async function generateArticle(
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
             'HTTP-Referer': 'https://car-diagnostics-ai.vercel.app',
             'X-Title': 'Car Diagnostics BrainAi',
@@ -102,8 +105,15 @@ export async function generateArticle(
 
   } catch (error) {
     console.error("Error in generateArticle:", error);
-    // Ensure we return a valid structure even on error, to avoid crashing the caller
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+
+    if (errorMessage.includes("status 401")) {
+         return {
+            summary: "Error: Invalid API Key.",
+            content: `<h2>Article Generation Failed: Invalid API Key</h2><p>The API request was rejected, likely due to an invalid API key. Please double-check that the <strong>OPENROUTER_API_KEY</strong> in your <strong>.env</strong> file is correct, active, and has funds.</p><p><strong>Topic attempted:</strong> ${input.topic}</p>`,
+         };
+    }
+
     return {
       summary: "Error: Could not generate summary.",
       content: `<h2>Article Generation Failed</h2><p>There was an error generating the content for this topic. This could be due to a network issue or a problem with the AI service.</p><p><strong>Topic attempted:</strong> ${input.topic}</p><p><strong>Details:</strong> ${errorMessage}</p><p>For developers: Check the server logs for more details.</p>`,
