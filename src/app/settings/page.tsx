@@ -4,7 +4,7 @@ import { SettingsInfo } from './settings-info';
 
 export const metadata: Metadata = {
   title: 'Content Strategy',
-  description: 'Learn about how this application manages and displays content.',
+  description: 'Learn about how this application manages and displays content to ensure a reliable and engaging experience.',
 };
 
 export default function SettingsPage() {

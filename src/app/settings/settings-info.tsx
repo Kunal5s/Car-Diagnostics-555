@@ -1,8 +1,7 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bot, FileText, RefreshCw } from 'lucide-react';
+import { Bot, FileText, RefreshCw, KeyRound } from 'lucide-react';
 
 export function SettingsInfo() {
   return (
@@ -33,9 +32,10 @@ export function SettingsInfo() {
               To keep the experience fresh for returning users, the homepage automatically shuffles the article library every 24 hours to feature a new set of 6 "trending" articles. This provides the feeling of a dynamic, constantly updated site without the risks of live content generation.
             </p>
         </div>
-        <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground space-y-2">
-           <p className="font-semibold text-foreground">
-              This "best of both worlds" strategy guarantees a professional, crash-free user experience while ensuring the content remains engaging day after day.
+        <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
+           <h3 className="font-semibold text-lg flex items-center text-foreground mb-2"><KeyRound className="mr-2 h-5 w-5" /> No API Keys Needed</h3>
+            <p>
+              This content strategy means you do not need to provide an API key for the site to work. The website is fully functional and will feature different articles on the homepage each day, all without the risk of API failures.
             </p>
         </div>
       </CardContent>
