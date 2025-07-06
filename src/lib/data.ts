@@ -1,72 +1,51 @@
 
 import type { FullArticle, ArticleTopic } from './definitions';
 import allArticlesData from './articles.json';
-import { getImageForQuery } from './image-services';
 
-const articles: Omit<FullArticle, 'imageUrl'>[] = allArticlesData as Omit<FullArticle, 'imageUrl'>[];
+// Type assertion as the JSON now contains the full article data including imageUrl
+const articles: FullArticle[] = allArticlesData as FullArticle[];
 
-// In-memory cache to avoid repeated API calls for the same article during a server's lifetime
-const imageCache = new Map<number, string>();
+// In-memory cache to make subsequent requests faster within the server's lifecycle.
+const articleCache = new Map<string, FullArticle>();
+const topicsCache: ArticleTopic[] = [];
 
-async function enrichArticleWithImage<T extends { id: number; title: string; category: string; slug: string; }>(article: T): Promise<T & { imageUrl: string; imageHint?: string }> {
-  if (imageCache.has(article.id)) {
-    return { ...article, imageUrl: imageCache.get(article.id)! };
+function populateCaches() {
+  if (articleCache.size === 0) {
+    articles.forEach(article => {
+      articleCache.set(article.slug, article);
+      topicsCache.push({
+        id: article.id,
+        title: article.title,
+        category: article.category,
+        slug: article.slug,
+        imageUrl: article.imageUrl,
+        imageHint: article.imageHint
+      });
+    });
   }
-
-  // Use both title and category for a more specific image query
-  const query = `${article.title} ${article.category}`;
-  const imageUrl = await getImageForQuery(query);
-  imageCache.set(article.id, imageUrl);
-
-  const imageHint = article.title.split(' ').slice(0, 2).join(' ');
-
-  return { ...article, imageUrl, imageHint };
 }
 
+// Initial population of the cache
+populateCaches();
 
 export async function getAllArticles(): Promise<FullArticle[]> {
-  const enrichedArticles = await Promise.all(
-    articles.map(article => enrichArticleWithImage(article as FullArticle))
-  );
-  return enrichedArticles;
+  return Array.from(articleCache.values());
 }
 
 export async function getAllTopics(): Promise<ArticleTopic[]> {
-  const enrichedTopics = await Promise.all(
-    articles.map(async (article) => {
-      return await enrichArticleWithImage(article as ArticleTopic);
-    })
-  );
-  return enrichedTopics;
+  return topicsCache;
 }
 
 export async function getHomepageTopics(): Promise<ArticleTopic[]> {
-  const homepageArticles = articles.slice(0, 6);
-  const enrichedTopics = await Promise.all(
-     homepageArticles.map(async (article) => {
-      return await enrichArticleWithImage(article as ArticleTopic);
-    })
-  );
-  return enrichedTopics;
+  // The first 6 articles are considered "trending" for the homepage.
+  return topicsCache.slice(0, 6);
 }
 
 export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
   const lowerCategoryName = categoryName.toLowerCase();
-  const filteredArticles = articles.filter(topic => topic.category.toLowerCase() === lowerCategoryName);
-  
-  const enrichedTopics = await Promise.all(
-     filteredArticles.map(async (article) => {
-      return await enrichArticleWithImage(article as ArticleTopic);
-    })
-  );
-
-  return enrichedTopics;
+  return topicsCache.filter(topic => topic.category.toLowerCase() === lowerCategoryName);
 }
   
 export async function getArticleBySlug(slug: string): Promise<FullArticle | undefined> {
-  const article = articles.find(article => article.slug === slug);
-  if (!article) {
-    return undefined;
-  }
-  return await enrichArticleWithImage(article as FullArticle);
+  return articleCache.get(slug);
 }
