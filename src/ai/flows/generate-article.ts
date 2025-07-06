@@ -64,7 +64,7 @@ export async function generateArticle(
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        'HTTP-Referer': 'https://car-diagnostics-ai.vercel.app', // Replace with your deployed URL
+        'HTTP-Referer': 'https://car-diagnostics-ai.vercel.app', // IMPORTANT: Replace with your deployed URL if different
         'X-Title': 'Car Diagnostics BrainAi',      
       },
       body: JSON.stringify({
