@@ -61,7 +61,13 @@ const allArticleTopics: Omit<ArticleTopic, 'slug'>[] = [
   { id: 51, title: "How Over-the-Air Updates Are Changing Modern Car Ownership", category: "Trends" },
   { id: 52, title: "The Inevitable Rise of Autonomous Driving and Its Safety", category: "Trends" },
   { id: 53, title: "Vehicle-to-Everything (V2X) Communication and the Future of Driving", category: "Trends" },
-  { id: 54, title: "Understanding the Role of Big Data In Modern Vehicles", category: "Trends" }
+  { id: 54, title: "Understanding the Role of Big Data In Modern Vehicles", category: "Trends" },
+  { id: 55, title: "How to Perform a Basic Engine Compression Test and What the Results Mean", category: "Engine" },
+  { id: 56, title: "Understanding Your Car's Suspension System: Shocks, Struts, and When to Replace Them", category: "Maintenance" },
+  { id: 57, title: "Decoding Your Car's Throttle Position Sensor (TPS) and Its Impact on Performance", category: "Sensors" },
+  { id: 58, title: "Fuel Additives: Do They Work and Which Ones Should You Use?", category: "Fuel" },
+  { id: 59, title: "A Glossary of Common EV Terminology: From kWh to J1772", category: "EVs" },
+  { id: 60, title: "The Role of 5G Technology in the Future of Connected and Autonomous Vehicles", category: "Trends" }
 ];
 
 const topicsWithSlugs: ArticleTopic[] = allArticleTopics.map(topic => ({
@@ -124,8 +130,8 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
         return {
             ...topicInfo,
             title: "Database Configuration Error",
-            summary: "There is an issue connecting to the database, likely due to missing permissions.",
-            content: `# Database Configuration Error\n\nWe were unable to connect to the Supabase database. This is usually due to one of two reasons:\n\n1.  **The 'articles' Table is Missing:** Please ensure you have created the table in your Supabase project.\n2.  **Row Level Security (RLS) Policies are Missing:** By default, your database is protected. You must create access policies to allow the website to read and write data.\n\nPlease follow the setup instructions in the project's \`README.md\` file to resolve this issue.`,
+            summary: "There is an issue connecting to the database. This is usually because the Row Level Security (RLS) policies for the 'articles' table have not been set up correctly.",
+            content: `# Database Configuration Error\n\nWe were unable to connect to the Supabase database. This is usually due to one of two reasons:\n\n1.  **The 'articles' Table is Missing:** Please ensure you have created the table in your Supabase project.\n2.  **Row Level Security (RLS) Policies are Missing:** By default, your database is protected. You must create access policies to allow the website to read and write data.\n\nPlease follow the setup instructions in the project's \`README.md\` file to resolve this issue. The README contains the exact SQL script you need to run.`,
             imageUrl: `https://placehold.co/1200x600/ef4444/ffffff?text=Database+Error`
         };
       }
@@ -187,8 +193,9 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
       
       const errorArticle: FullArticle = {
         ...topicInfo,
-        summary: "An error occurred while generating this article.",
-        content: `# Article Generation Failed\n\nWe were unable to generate this article at this time. This is usually due to one of two reasons:\n\n1.  **Missing API Key:** The \`GOOGLE_API_KEY\` has not been set up on the hosting environment.\n2.  **API Error:** There was a temporary issue with the generative AI service.\n\nPlease check your configuration in the README and try again later.`,
+        title: "Article Generation Failed",
+        summary: "An error occurred while generating this article. Please check your API key configuration.",
+        content: `# Article Generation Failed\n\nWe were unable to generate this article at this time. This is usually due to one of two reasons:\n\n1.  **Missing or Invalid API Key:** The \`GOOGLE_API_KEY\` or \`UNSPLASH_API_KEY\` has not been set up correctly in your hosting environment.\n2.  **API Error:** There was a temporary issue with the generative AI service or the image service.\n\nPlease check your configuration in the \`README.md\` file and try again later.`,
         imageUrl: `https://placehold.co/1200x600/f87171/ffffff?text=Generation+Error`
       };
       return errorArticle;
