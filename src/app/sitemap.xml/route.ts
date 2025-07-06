@@ -1,10 +1,10 @@
-import { getAllArticles } from '@/lib/data';
+import { getAllTopics } from '@/lib/data';
 import { categories } from '@/lib/definitions';
 
 const URL = 'https://oudworkstations.dev';
 
 export async function GET() {
-  const articles = await getAllArticles();
+  const articles = await getAllTopics();
 
   const articleUrls = (articles || []).map(article => {
     return `<url><loc>${URL}/articles/${article.slug}</loc><lastmod>${new Date().toISOString()}</lastmod></url>`;

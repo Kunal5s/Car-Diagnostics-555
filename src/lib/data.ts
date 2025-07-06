@@ -55,7 +55,7 @@ const allArticleTopics: Omit<ArticleTopic, 'slug'>[] = [
   { id: 45, title: "How Regenerative Braking Works In Modern Electric Vehicles Today", category: "EVs" },
   { id: 46, title: "Common and Important Maintenance Tasks For Your Electric Vehicle", category: "EVs" },
   { id: 47, title: "Understanding Electric Vehicle Range and How to Maximise It", category: "EVs" },
-  { id: 48, "title": "The Key Differences Between AC and DC Fast Charging", category: "EVs" },
+  { id: 48, title: "The Key Differences Between AC and DC Fast Charging", category: "EVs" },
   { id: 49, title: "The Future of Automotive Technology and AI Car Diagnostics", category: "Trends" },
   { id: 50, title: "Exploring the Latest Innovations in Connected Car Technologies", category: "Trends" },
   { id: 51, title: "How Over-the-Air Updates Are Changing Modern Car Ownership", category: "Trends" },
@@ -165,6 +165,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
       };
 
       try {
+        // Use a spread to remove the id from the object before inserting
         const { id, ...articleToInsert } = newArticle;
         
         const { error: upsertError } = await supabase
@@ -200,8 +201,4 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
       };
       return errorArticle;
     }
-}
-
-export async function getAllArticles(): Promise<ArticleTopic[]> {
-    return topicsWithSlugs;
 }
