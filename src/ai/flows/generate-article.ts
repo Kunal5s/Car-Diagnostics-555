@@ -105,6 +105,13 @@ Topic: ${input.topic}
 
     const data = await response.json();
     const articleJson = JSON.parse(data.choices[0].message.content);
+
+    // FIX: Handle cases where the AI returns content as an array of strings.
+    // This makes the data handling resilient to inconsistent model outputs.
+    if (articleJson && Array.isArray(articleJson.content)) {
+      console.warn("AI returned content as an array. Joining it into a single string to prevent validation errors.");
+      articleJson.content = articleJson.content.join('\n\n');
+    }
     
     // Validate the parsed JSON against our schema
     const validationResult = GenerateArticleOutputSchema.safeParse(articleJson);
@@ -113,7 +120,7 @@ Topic: ${input.topic}
        return {
           summary: "Error: Invalid AI Response",
           content: `<h2>AI Response Error</h2>
-                     <p>The AI generated a response, but it did not match the expected format. This can happen with complex requests.</p>
+                     <p>The AI generated a response, but it did not match the expected format. This can happen with complex requests or inconsistent model behavior.</p>
                      <p><strong>Validation Errors:</strong> ${validationResult.error.toString()}</p>`,
        };
     }
