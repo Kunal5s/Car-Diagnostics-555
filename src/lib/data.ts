@@ -1,3 +1,4 @@
+
 'use server';
 
 import type { FullArticle, ArticleTopic } from './definitions';
@@ -151,13 +152,13 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
         console.log(`Generating article content for: "${topicInfo.title}"`);
         generatedData = await generateArticle({ topic: topicInfo.title });
     } catch (e) {
-        console.error(`Article generation failed for topic: "${topicInfo.title}". This is likely a GOOGLE_API_KEY issue.`, e);
+        console.error(`Article generation failed for topic: "${topicInfo.title}". The API key may be correct, but the Google Cloud project might be misconfigured.`, e);
         return {
             ...topicInfo,
-            title: "Article Generation Failed",
-            summary: "There was an error communicating with the Google AI service.",
-            content: `# AI Service Error\n\nWe were unable to generate this article because of a problem connecting to the Google AI service.\n\n**Common Causes:**\n1.  **Invalid or Missing Google API Key:** Please double-check that the \`GOOGLE_API_KEY\` in your \`.env\` file is correct, has no extra spaces, and the development server has been restarted.\n2.  **API Not Enabled:** Ensure the "Generative Language API" (or a similar name) is enabled in your Google Cloud project.\n3.  **Billing Not Set Up:** The API requires a valid billing account to be associated with your Google Cloud project.\n\nPlease verify your key and project settings and try again.`,
-            imageUrl: `https://placehold.co/1200x600/f87171/ffffff?text=AI+Error`
+            title: "Google AI Service Error",
+            summary: "Could not connect to the Google AI service. Please check your project settings.",
+            content: `# Google AI Service Connection Failed\n\nYou've correctly provided an API key, but we are still unable to connect to the Google AI service. This almost always means there is a configuration issue in your Google Cloud project.\n\n**Please check these two things in your Google Cloud project:**\n\n1.  **API Service Not Enabled:** The most common reason is that the **"Generative Language API"** (or a similar name like **"Gemini API"**) is not enabled. You must enable it for your key to work.\n\n2.  **Billing Not Connected:** Google's powerful AI models require a billing account to be linked to your project. Please ensure your project has a valid and active billing account.\n\nOnce you have verified these settings, the article generation will work correctly.`,
+            imageUrl: `https://placehold.co/1200x600/f87171/ffffff?text=AI+Config+Error`
         };
     }
 
