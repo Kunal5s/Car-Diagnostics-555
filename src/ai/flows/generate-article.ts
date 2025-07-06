@@ -49,7 +49,7 @@ Topic: '{{{topic}}}'
     safetySettings: [
       {
         category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-        threshold: 'BLOCK_ONLY_HIGH',
+        threshold: 'BLOCK_NONE',
       },
       {
         category: 'HARM_CATEGORY_HATE_SPEECH',
@@ -91,7 +91,7 @@ const generateArticleFlow = ai.defineFlow(
         errorMessage += ` Details: "${finishMessage}".`;
       }
       if (finishReason === 'SAFETY') {
-        errorMessage += ' The content may have been blocked by safety filters. Consider adjusting the safety settings in the prompt configuration.';
+        errorMessage += ' The content may have been blocked by safety filters. This has been relaxed, but may still occur. Please check the prompt configuration.';
       }
       
       // Throw a proper Error object so it can be logged with a stack trace.
