@@ -1,3 +1,4 @@
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
@@ -12,11 +13,13 @@ export default function Loading() {
     <div className="container mx-auto max-w-4xl px-4 py-12">
       <article>
         <Breadcrumbs items={breadcrumbItems} />
+        <div className="flex justify-center items-center mb-8 h-56 w-full bg-muted rounded-lg">
+          <Skeleton className="h-28 w-28 rounded-full" />
+        </div>
         <header className="mb-8">
           <Skeleton className="h-12 w-full mb-4" />
           <Skeleton className="h-6 w-3/4" />
         </header>
-        <Skeleton className="relative mb-8 h-64 w-full rounded-lg md:h-96" />
         <div className="space-y-6">
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-full" />

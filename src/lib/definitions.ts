@@ -17,8 +17,6 @@ export interface ArticleTopic {
   title: string;
   category: string;
   slug: string;
-  imageUrl: string;
-  imageHint?: string;
 }
 
 export interface FullArticle extends ArticleTopic {

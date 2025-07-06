@@ -2,7 +2,7 @@
 import type { FullArticle, ArticleTopic } from './definitions';
 import allArticlesData from './articles.json';
 
-// Type assertion as the JSON now contains the full article data including imageUrl
+// Type assertion
 const articles: FullArticle[] = allArticlesData as FullArticle[];
 
 // In-memory cache to make subsequent requests faster within the server's lifecycle.
@@ -12,14 +12,14 @@ const topicsCache: ArticleTopic[] = [];
 function populateCaches() {
   if (articleCache.size === 0) {
     articles.forEach(article => {
-      articleCache.set(article.slug, article);
+      // Create a slug from the title and id, just in case titles are not unique.
+      const slug = `${article.slug}`;
+      articleCache.set(slug, {...article, slug: slug });
       topicsCache.push({
         id: article.id,
         title: article.title,
         category: article.category,
-        slug: article.slug,
-        imageUrl: article.imageUrl,
-        imageHint: article.imageHint
+        slug: slug,
       });
     });
   }

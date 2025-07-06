@@ -1,8 +1,8 @@
+
 'use client';
 
-import Image from "next/image";
 import Link from "next/link";
-import { type ArticleTopic } from "@/lib/definitions";
+import { type ArticleTopic, categoryDetails } from "@/lib/definitions";
 import {
   Card,
   CardContent,
@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { motion } from 'framer-motion';
+import { cn } from "@/lib/utils";
 
 interface ArticleCardProps {
   topic: ArticleTopic;
@@ -32,22 +33,19 @@ const cardVariants = {
 
 export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
   const articleUrl = `/articles/${topic.slug}`;
-  const imageUrl = topic.imageUrl;
+  const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === topic.category.toLowerCase());
+  const Icon = categoryInfo?.icon;
 
   return (
     <motion.div variants={cardVariants}>
       <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
         <CardHeader className="p-0">
           <Link href={articleUrl} className="block relative h-48 w-full group bg-muted">
-              <Image
-                src={imageUrl}
-                alt={topic.title}
-                data-ai-hint={topic.imageHint}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority={priority}
-              />
+              {categoryInfo && Icon && (
+                <div className={cn("flex h-full items-center justify-center rounded-t-lg", categoryInfo.color)}>
+                  <Icon className={cn("h-20 w-20 transition-transform duration-300 group-hover:scale-110", categoryInfo.iconColor)} />
+                </div>
+              )}
           </Link>
         </CardHeader>
         <CardContent className="flex-grow p-6">
