@@ -1,4 +1,3 @@
-
 import {
   Car,
   Cog,
@@ -23,17 +22,6 @@ export interface ArticleTopic {
 export interface FullArticle extends ArticleTopic {
   summary: string;
   content: string;
-}
-
-export interface ArticleFromDb {
-  id: number;
-  slug: string;
-  title: string;
-  category: string;
-  summary: string | null;
-  content: string | null;
-  image_url: string | null;
-  generated_at: string;
 }
 
 export interface CategoryInfo {

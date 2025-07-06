@@ -1,11 +1,8 @@
-
 'use server';
 
-import type { ArticleTopic, FullArticle, ArticleFromDb } from './definitions';
+import type { ArticleTopic, FullArticle } from './definitions';
 import { slugify } from "./utils";
 import { generateArticle } from "@/ai/flows/generate-article";
-import { supabase } from './supabase';
-import { differenceInHours } from 'date-fns';
 
 // This is the static list of all 60 topics. It serves as the foundation of our site.
 const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
@@ -73,7 +70,6 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
 
 // This function adds a slug to each static topic.
 export async function getAllTopics(): Promise<ArticleTopic[]> {
-  // No longer need to fetch from Supabase here as we are not displaying unique images in the grid.
   return allArticleTopics.map(topic => {
       const slug = `${slugify(topic.title)}-${topic.id}`;
       return {
@@ -118,42 +114,15 @@ export async function getTopicsByCategory(categoryName: string): Promise<Article
   return topics.filter(topic => topic.category.toLowerCase() === categoryName.toLowerCase());
 }
 
-// This is the core function for getting a single article.
-// It uses a "stale-while-revalidate" caching strategy with Supabase.
+// This function gets a single article by generating it live.
+// There is no caching. This is simpler but may be slow on first load.
 export async function getArticleBySlug(slug: string): Promise<FullArticle | null> {
     const staticTopic = allArticleTopics.find(topic => `${slugify(topic.title)}-${topic.id}` === slug);
     if (!staticTopic) {
         return null; // Topic does not exist in our static list.
     }
 
-    // 1. Check for a cached version in Supabase.
-    const { data, error } = await supabase
-        .from('articles')
-        .select('slug, summary, content, generated_at')
-        .eq('slug', slug)
-        .single();
-    
-    if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found"
-        console.error("Supabase error fetching article:", error.message);
-        // Fallback to generating, but log the error.
-    }
-
-    const cachedArticle = data as Omit<ArticleFromDb, 'id' | 'title' | 'category' | 'image_url'> | null;
-
-    // 2. Check if the cache is fresh (less than 24 hours old).
-    if (cachedArticle && differenceInHours(new Date(), new Date(cachedArticle.generated_at)) < 24) {
-        console.log(`[Cache HIT] Serving article "${slug}" from Supabase.`);
-        return {
-            ...staticTopic,
-            slug: cachedArticle.slug,
-            summary: cachedArticle.summary || '',
-            content: cachedArticle.content || '',
-            imageUrl: null // No image URL
-        };
-    }
-
-    // 3. If no cache or cache is stale, generate a new article.
-    console.log(`[Cache MISS] Generating new article for "${slug}".`);
+    console.log(`[Live Generation] Generating new article for "${slug}".`);
     
     let articleData = {
         summary: "Error: Could not generate summary. Please check API key.",
@@ -165,24 +134,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         if (generatedData) articleData = generatedData;
     } catch (e: any) {
         console.error(`Failed to generate content for topic: ${staticTopic.title}`, e.message);
-    }
-    
-    const newArticleForDb = {
-        slug: slug,
-        title: staticTopic.title,
-        category: staticTopic.category,
-        summary: articleData.summary,
-        content: articleData.content,
-        generated_at: new Date().toISOString(),
-        image_url: null // Ensure image_url is not set
-    };
-    
-    // 4. Save the newly generated article to Supabase cache (upsert).
-    const { error: upsertError } = await supabase.from('articles').upsert(newArticleForDb);
-    if (upsertError) {
-        console.error("Supabase upsert error:", upsertError.message);
-    } else {
-        console.log(`[Cache WRITE] Saved generated article "${slug}" to Supabase.`);
     }
 
     return {
