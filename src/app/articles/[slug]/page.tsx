@@ -71,11 +71,11 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 {contentWithoutTitle ? (
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>
                 ) : (
-                    <Alert>
+                    <Alert variant="destructive">
                         <Terminal className="h-4 w-4" />
-                        <AlertTitle>Content Not Available</AlertTitle>
+                        <AlertTitle>Content Generation Failed</AlertTitle>
                         <AlertDescription>
-                        The full content for this article is not available at the moment. Please check back later.
+                          We were unable to generate the content for this article at the moment. This might be due to a configuration issue or a temporary problem with the AI service. Please try again later.
                         </AlertDescription>
                     </Alert>
                 )}
