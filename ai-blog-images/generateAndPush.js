@@ -1,7 +1,7 @@
 
-import fetch from 'node-fetch';
-import sharp from 'sharp';
-import { Octokit } from '@octokit/rest';
+const fetch = require('node-fetch');
+const sharp = require('sharp');
+const { Octokit } = require('@octokit/rest');
 
 // --- CONFIGURATION ---
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // Recommended: Set in .env file in root
@@ -119,9 +119,9 @@ async function generateAndCommit(topic) {
   console.log(`\nProcessing topic: "${topic.title}"...`);
   try {
     const slug = `${slugify(topic.title)}-${topic.id}`;
-    const prompt = `photorealistic, ${topic.title}, high detail, cinematic lighting, professional automotive photography`;
+    // A simplified and more direct prompt.
+    const prompt = `${topic.title}, photorealistic, high detail, professional automotive photography`;
 
-    // Using a list of your recommended models to improve image variety and quality.
     const recommendedModels = [
       'flux-realism',
       'dreamlike-photoreal',
@@ -129,16 +129,14 @@ async function generateAndCommit(topic) {
       'portrait-plus'
     ];
     
-    // Pick a random model from the list for each image.
     const model = recommendedModels[Math.floor(Math.random() * recommendedModels.length)];
     console.log(`  - Using model: ${model}`);
 
     const imagePath = `public/images/${slug}.jpg`;
 
-    // 1. Generate image from prompt using Pollinations AI
     console.log('  - Generating image...');
     const encodedPrompt = encodeURIComponent(prompt);
-    const seed = Math.floor(Math.random() * 1000000); // Random seed for variety
+    const seed = Math.floor(Math.random() * 1000000);
     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${model}&width=512&height=512&nologo=true&seed=${seed}`;
     console.log(`  - Fetching from URL: ${imageUrl}`);
     
@@ -147,18 +145,17 @@ async function generateAndCommit(topic) {
         const errorBody = await imageResponse.text();
         throw new Error(`Failed to fetch image from Pollinations. Status: ${imageResponse.status} ${imageResponse.statusText}. Response: ${errorBody}`);
     }
+
     const imageBuffer = await imageResponse.arrayBuffer();
 
-    // 2. Compress the image using Sharp to 512px and low quality
     console.log('  - Compressing image...');
     const compressedImageBuffer = await sharp(Buffer.from(imageBuffer))
       .resize(512, 512)
-      .jpeg({ quality: 30 }) // Low quality for small file size
+      .jpeg({ quality: 30 })
       .toBuffer();
 
     console.log(`  - Compressed image size: ${(compressedImageBuffer.length / 1024).toFixed(2)} KB`);
 
-    // 3. Push the image to the GitHub repository
     console.log(`  - Pushing image to GitHub...`);
     await pushToGitHub(
       imagePath,

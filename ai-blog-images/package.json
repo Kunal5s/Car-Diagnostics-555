@@ -1,6 +1,5 @@
 {
   "name": "ai-blog-images",
-  "type": "module",
   "main": "generateAndPush.js",
   "dependencies": {
     "@octokit/rest": "^20.0.0",
