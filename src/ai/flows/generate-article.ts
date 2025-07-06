@@ -37,17 +37,34 @@ const prompt = ai.definePrompt({
 
 Topic: '{{{topic}}}'
 
-**Strict Requirements:**
-1.  **Uniqueness:** The generated article must be original and pass plagiarism checks. Do not copy-paste content.
-2.  **Length:** The article must be substantial and detailed, aiming for a length of at least 1500 words.
-3.  **Markdown Structure:** The response MUST be in well-structured Markdown format. This is critical for SEO and readability.
-    - Start with a single H1 for the main title (e.g., '# Title of the Article'). This MUST be the first line.
-    - Use multiple H2 headings for main sections (e.g., '## Section Title').
-    - Use H3 headings for sub-sections (e.g., '### Sub-section Title').
-    - Do NOT write the words "H1", "H2", etc. in the text. Use only Markdown syntax ('#', '##').
-4.  **Summary:** Provide a concise, SEO-friendly summary for the article (approximately 160 characters). It must also be unique.
+**Instructions:**
+1.  **Content:** The article should be substantial, detailed, and well-researched. Ensure it is original and passes plagiarism checks.
+2.  **Markdown Structure:** The response MUST be in well-structured Markdown format.
+    - Start with a single H1 heading for the main title (e.g., '# Title of the Article'). This MUST be the very first line of the 'content' field.
+    - Use H2 headings for main sections and H3 headings for sub-sections. This hierarchical structure is critical for readability and SEO.
+3.  **Summary:** Provide a concise, unique, and SEO-friendly summary for the article (approximately 160 characters).
 
-**IMPORTANT:** The final output must strictly conform to the specified JSON schema. The 'content' field must contain the full article in the structured Markdown format.`,
+**Output Format:** Your final output MUST be a valid JSON object that strictly conforms to the requested schema. Pay close attention to creating a 'content' field with the full article in structured Markdown, and a 'summary' field.`,
+  config: {
+    safetySettings: [
+      {
+        category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+        threshold: 'BLOCK_ONLY_HIGH',
+      },
+      {
+        category: 'HARM_CATEGORY_HATE_SPEECH',
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+      },
+      {
+        category: 'HARM_CATEGORY_HARASSMENT',
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+      },
+      {
+        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+      },
+    ],
+  },
 });
 
 const generateArticleFlow = ai.defineFlow(
@@ -59,7 +76,7 @@ const generateArticleFlow = ai.defineFlow(
   async (input) => {
     const {output} = await prompt(input);
     if (!output) {
-      throw new Error('Failed to generate article content. The AI model returned no output.');
+      throw new Error('Failed to generate article content. The AI model returned no output, possibly due to safety filters or an internal error.');
     }
     return output;
   }
