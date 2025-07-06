@@ -1,32 +1,45 @@
 
 import type { FullArticle, ArticleTopic } from './definitions';
 import allArticlesData from './articles.json';
-import { getImageForQuery } from './pexels';
+import { getPexelsImage } from './pexels';
+import { getUnsplashImage } from './unsplash';
+import { getPollinationsImage } from './pollinations';
 
 
 let articleCache: FullArticle[] | null = null;
-const pexelsCache = new Map<string, string>();
+const imageCache = new Map<string, string>();
 
 
 async function fetchAndCacheArticles(): Promise<FullArticle[]> {
-  console.log("Fetching images from Pexels and caching articles...");
-
-  // Use a temporary cache for the duration of this function call
-  const tempPexelsCache = new Map<string, string>();
+  console.log("Fetching images from various sources and caching articles...");
 
   const articlesWithImages: FullArticle[] = await Promise.all(
     (allArticlesData as FullArticle[]).map(async (article) => {
       const query = article.imageHint || article.title;
-      let imageUrl = pexelsCache.get(query) || tempPexelsCache.get(query);
+      let imageUrl = imageCache.get(query);
 
       if (!imageUrl) {
         try {
-          const pexelsUrl = await getImageForQuery(query);
-          if (pexelsUrl) {
-            imageUrl = pexelsUrl;
-            tempPexelsCache.set(query, imageUrl);
+          const random = Math.random();
+          let fetchedUrl: string | null = null;
+          
+          if (random < 0.5) { // 50% chance for Unsplash
+            console.log(`- Image source: Unsplash for query "${query}"`);
+            fetchedUrl = await getUnsplashImage(query);
+          } else if (random < 0.8) { // 30% chance for Pexels
+            console.log(`- Image source: Pexels for query "${query}"`);
+            fetchedUrl = await getPexelsImage(query);
+          } else { // 20% chance for Pollinations.ai
+            console.log(`- Image source: Pollinations.ai for query "${query}"`);
+            fetchedUrl = await getPollinationsImage(query);
+          }
+
+          if (fetchedUrl) {
+            imageUrl = fetchedUrl;
+            imageCache.set(query, imageUrl);
           } else {
-            // Fallback to placeholder if Pexels returns nothing
+            console.warn(`All image sources failed for query "${query}". Falling back to placeholder.`);
+            // Fallback to placeholder if all sources fail
             imageUrl = `https://placehold.co/720x405.png`;
           }
         } catch (error) {
@@ -41,9 +54,6 @@ async function fetchAndCacheArticles(): Promise<FullArticle[]> {
       };
     })
   );
-  
-  // Update the main cache after all promises are resolved
-  tempPexelsCache.forEach((value, key) => pexelsCache.set(key, value));
   
   articleCache = articlesWithImages;
   console.log("Finished fetching and caching images.");
