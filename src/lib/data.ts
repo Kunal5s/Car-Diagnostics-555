@@ -73,10 +73,10 @@ const allArticleTopics: Omit<FullArticle, 'slug' | 'imageUrl' | 'summary' | 'con
 
 const articlesFilePath = path.join(process.cwd(), 'src', 'data', 'articles.json');
 let cachedArticles: FullArticle[] | null = null;
-let generationPromise: Promise<FullArticle[]> | null = null;
+const lockFilePath = path.join(process.cwd(), 'src', 'data', '.generating.lock');
 
-async function generateAndCacheArticles(): Promise<FullArticle[]> {
-  console.log("Generating articles and images for the first time. This may take a while...");
+async function performGeneration(): Promise<FullArticle[]> {
+  console.log("Generating articles and images. This may take a while...");
   
   try {
     await fs.mkdir(path.dirname(articlesFilePath), { recursive: true });
@@ -126,13 +126,39 @@ async function generateAndCacheArticles(): Promise<FullArticle[]> {
     console.log(`✅ Successfully generated and saved ${articles.length} articles to ${articlesFilePath}`);
   } catch (error) {
     console.error("❌ Failed to write articles cache file:", error);
+    throw error;
   }
   
   return articles;
 }
 
 
-async function loadArticles(): Promise<FullArticle[]> {
+export async function triggerArticleGeneration(): Promise<{ success: boolean; message: string }> {
+    try {
+        await fs.access(lockFilePath);
+        return { success: false, message: "Generation is already in progress. Please wait." };
+    } catch (e) {
+        // Lock file doesn't exist, so we can proceed.
+    }
+
+    try {
+        await fs.writeFile(lockFilePath, 'locked');
+        await performGeneration();
+        cachedArticles = null;
+        return { success: true, message: `Successfully generated ${allArticleTopics.length} articles.` };
+    } catch (error: any) {
+        console.error("Article generation failed:", error);
+        return { success: false, message: error.message || "An unknown error occurred during generation." };
+    } finally {
+        try {
+            await fs.unlink(lockFilePath);
+        } catch (e) {
+            // Ignore if lock file was not created or already removed
+        }
+    }
+}
+
+export async function getArticles(): Promise<FullArticle[]> {
   if (cachedArticles) {
     return cachedArticles;
   }
@@ -142,28 +168,16 @@ async function loadArticles(): Promise<FullArticle[]> {
     const articles: FullArticle[] = JSON.parse(data);
     
     if (articles && articles.length > 0) {
-      console.log(`Loaded ${articles.length} articles from file cache.`);
       cachedArticles = articles;
       return cachedArticles;
     }
   } catch (error) {
-    console.log("Article cache file not found or is empty. Generating new articles...");
+    // This is an expected state if content hasn't been generated yet.
   }
 
-  const newArticles = await generateAndCacheArticles();
-  cachedArticles = newArticles;
-  return newArticles;
+  return [];
 }
 
-export async function getArticles(): Promise<FullArticle[]> {
-  if (cachedArticles) {
-    return cachedArticles;
-  }
-  if (!generationPromise) {
-    generationPromise = loadArticles();
-  }
-  return generationPromise;
-}
 
 export async function getAllTopics(): Promise<FullArticle[]> {
   return await getArticles();
@@ -171,6 +185,8 @@ export async function getAllTopics(): Promise<FullArticle[]> {
 
 export async function getHomepageTopics(): Promise<FullArticle[]> {
   const articles = await getArticles();
+  if (articles.length === 0) return [];
+  
   const now = new Date();
   const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
   
