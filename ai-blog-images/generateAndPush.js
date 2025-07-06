@@ -119,8 +119,8 @@ async function generateAndCommit(topic) {
   console.log(`\nProcessing topic: "${topic.title}"...`);
   try {
     const slug = `${slugify(topic.title)}-${topic.id}`;
-    // Using a more concise and effective keyword-driven prompt
-    const prompt = `photorealistic, modern car's ${topic.category} system, automotive diagnostics, high detail, studio lighting`;
+    // Using the full title for a more specific and individual prompt.
+    const prompt = `photorealistic, ${topic.title}, high detail, cinematic lighting, professional automotive photography`;
 
     // Define repository paths (simplified without date for stable URLs)
     const imagePath = `public/images/${slug}.jpg`;
@@ -130,26 +130,27 @@ async function generateAndCommit(topic) {
     console.log('  - Generating image...');
     const encodedPrompt = encodeURIComponent(prompt);
     const seed = Math.floor(Math.random() * 1000000); // Random seed for variety
-    // Switched to a more reliable model and added better logging
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=deliberate&width=512&height=512&nologo=true&seed=${seed}`;
-    console.log(`  - Fetching from: ${imageUrl}`);
+    // Switched to the 'turbo' model which is more responsive.
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=turbo&width=512&height=512&nologo=true&seed=${seed}`;
+    console.log(`  - Fetching from URL: ${imageUrl}`);
     
     const imageResponse = await fetch(imageUrl);
     if (!imageResponse.ok) {
-      throw new Error(`Failed to fetch image: ${imageResponse.statusText} (status: ${imageResponse.status})`);
+        const errorBody = await imageResponse.text();
+        throw new Error(`Failed to fetch image from Pollinations. Status: ${imageResponse.status} ${imageResponse.statusText}. Response: ${errorBody}`);
     }
-    const imageBuffer = await imageResponse.buffer();
+    const imageBuffer = await imageResponse.arrayBuffer();
 
     // 2. Compress the image using Sharp to 512px and low quality
     console.log('  - Compressing image...');
-    const compressedImageBuffer = await sharp(imageBuffer)
+    const compressedImageBuffer = await sharp(Buffer.from(imageBuffer))
       .resize(512, 512)
       .jpeg({ quality: 30 }) // Low quality for small file size
       .toBuffer();
 
     console.log(`  - Compressed image size: ${(compressedImageBuffer.length / 1024).toFixed(2)} KB`);
 
-    // 3. Create simple Markdown article content
+    // 3. Create simple Markdown article content (optional, can be removed if not needed)
     const articleContent = `---
 title: "${topic.title}"
 image: /images/${slug}.jpg
@@ -166,11 +167,12 @@ This is an AI-generated placeholder for the article on **"${topic.title}"**.
       `feat: add image for "${slug}"`,
       'base64'
     );
-    await pushToGitHub(
-      articlePath,
-      articleContent,
-      `feat: add article for "${slug}"`
-    );
+    // This part is optional, only uncomment if you want to push markdown files too.
+    // await pushToGitHub(
+    //   articlePath,
+    //   articleContent,
+    //   `feat: add article for "${slug}"`
+    // );
 
     console.log(`✅ Successfully processed and uploaded assets for "${topic.title}"`);
   } catch (error) {
@@ -191,7 +193,7 @@ async function main() {
   for (const topic of allArticleTopics) {
     await generateAndCommit(topic);
     // Add a small delay to avoid hitting API rate limits
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
   }
 
   console.log('\n--- Script Finished ---');
