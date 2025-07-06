@@ -82,7 +82,7 @@ After running this script, your database will be correctly configured to work wi
 
 This application uses a hybrid content strategy to provide fresh daily content while ensuring maximum reliability and performance.
 
--   **Dynamic AI Generation:** When a user visits an article page for the first time on any given day, the content is generated in real-time by an AI model via OpenRouter.
+-   **Dynamic AI Generation:** When a user visits an article page for the first time on any given day, the content is generated in real-time by the powerful `meta-llama/llama-3-70b-instruct` model via OpenRouter.
 -   **Dynamic Image Fetching:** At the same time, an image relevant to the article's topic is fetched from the Unsplash API.
 -   **Supabase Smart Caching:** Once an article and its image are generated/fetched, they are automatically saved (cached) in your Supabase database for 24 hours. Any other user who visits that same article on the same day will be served the content instantly from the Supabase cache, not from the AI.
 -   **Reliability & Performance:** This "generate-once, serve-many" approach dramatically reduces API calls, lowers costs, and ensures the site is fast and reliable, avoiding the errors and timeouts common with live AI generation on every page load.

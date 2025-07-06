@@ -63,7 +63,7 @@ export async function generateArticle(
         'X-Title': 'Car Diagnostics BrainAi',       // Recommended by OpenRouter
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite-preview-06-17",
+        model: "meta-llama/llama-3-70b-instruct", // Using LLaMA 3 as requested
         response_format: { type: "json_object" }, // Enforce JSON output
         messages: [
           {
