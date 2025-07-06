@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow for generating SEO-friendly articles using a direct API call.
@@ -46,23 +47,28 @@ export async function generateArticle(
     };
   }
   
-  const prompt = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the given topic.
+  const prompt = `You are an expert automotive writer. Your single most important goal is to write an exceptionally long and detailed article about the provided topic.
 
-Your highest priority is to meet the required length. The article MUST be extremely detailed and comprehensive, with a strict minimum word count of 1700 words. Do not write an article shorter than 1700 words under any circumstances. Failure to meet the 1700-word minimum will result in a failed task. The word count is the most critical requirement.
+**CRITICAL REQUIREMENT: The article's content MUST be a minimum of 1700 words.** This is not a suggestion. It is a strict rule. Do not provide a shorter article. The word count is the absolute highest priority.
 
-Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
-- The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the content.
-- You MUST include multiple H2 (##) headings to structure the main sections of the article.
-- Within each H2 section, you MUST use several H3 (###) headings to break down the content into sub-sections.
-- For even deeper nesting where necessary, you can use H4, H5, and H6 headings.
-- The use of this hierarchical heading structure (H1 -> H2 -> H3 etc.) is MANDATORY and must be followed strictly.
-- Start the article with a compelling introduction (immediately following the H1 heading).
-- Before the final conclusion, you MUST include a section with an H2 heading titled 'Key Takeaways' that summarizes the main points of the article in a bulleted list.
-- End the article with a final 'Conclusion' section under an H2 heading.
+To achieve this length, you must follow this mandatory structure:
+1.  **Main Title (H1):** Start with an H1 heading for the article title.
+2.  **Introduction:** A detailed introduction of at least 150 words.
+3.  **Main Body (Minimum 5 H2 Sections):**
+    *   The core of the article must contain AT LEAST FIVE distinct H2 (##) sections.
+    *   Each H2 section MUST be thoroughly explored.
+    *   Within EACH H2 section, you MUST include AT LEAST THREE H3 (###) sub-sections to break down the topic in extreme detail.
+    *   Each H3 sub-section should be a well-developed paragraph or set of paragraphs. Use bullet points, numbered lists, and bold text where appropriate to add detail and depth.
+4.  **Key Takeaways Section (H2):** Before the conclusion, you MUST include an H2 section titled 'Key Takeaways'. This section should contain a detailed bulleted list summarizing the most critical points from the entire article.
+5.  **Conclusion (H2):** A final H2 section titled 'Conclusion' that summarizes the article and provides final thoughts. This should be at least 100 words.
 
-You must also provide a concise, SEO-friendly summary for the article (approximately 160 characters).
+**Output Format:**
+- You must provide a concise, SEO-friendly summary (around 160 characters) for the 'summary' field.
+- The entire article, following the strict structure and word count mentioned above, must be in the 'content' field as a single Markdown string.
+- The final output MUST be a valid JSON object that conforms to the specified schema.
 
-The final output must be a valid JSON object that conforms to the specified schema, containing a 'summary' and a 'content' field.
+Remember: 1700 words is the minimum. Go into extreme detail. Explain every concept thoroughly. Assume the reader is a beginner.
+
 Topic: ${input.topic}
 `;
 
