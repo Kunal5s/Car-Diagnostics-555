@@ -163,20 +163,28 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
     }
 
     let imageUrl: string | null = null;
+    let imageError = false;
     try {
         console.log(`Fetching image for article: "${topicInfo.title}"`);
         imageUrl = await getImageForQuery(topicInfo.title);
+        if (!imageUrl) {
+            imageError = true;
+        }
     } catch (e) {
         console.error(`Image fetch failed for article "${topicInfo.title}". This is likely an UNSPLASH_API_KEY issue.`, e);
-        // Gracefully fail by just logging the error and using a placeholder.
+        imageError = true;
     }
     
     const newArticle: FullArticle = {
         ...topicInfo,
         summary: generatedData.summary,
         content: generatedData.content,
-        imageUrl: imageUrl || `https://placehold.co/1200x600/334155/ffffff?text=${encodeURIComponent(topicInfo.title)}`
+        imageUrl: imageUrl || `https://placehold.co/1200x600/fca5a5/b91c1c?text=Unsplash+Key+Error`
     };
+
+    if (imageError) {
+        newArticle.content += `\n\n---\n\n**Developer Note:** The article image could not be loaded. This is usually because the \`UNSPLASH_API_KEY\` is missing or invalid in your \`.env\` file.`;
+    }
 
     try {
         const { id, ...articleToInsert } = newArticle;
