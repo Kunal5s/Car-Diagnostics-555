@@ -82,14 +82,15 @@ export async function getAllTopics(): Promise<ArticleTopic[]> {
     console.error("Supabase error fetching image URLs:", error.message);
   }
 
-  const imageUrlMap = new Map(articlesFromDb?.map(a => [a.slug, a.image_url]));
+  const safeArticlesFromDb = articlesFromDb || [];
+  const imageUrlMap = new Map(safeArticlesFromDb.map(a => [a.slug, a.image_url]));
 
   return allArticleTopics.map(topic => {
       const slug = `${slugify(topic.title)}-${topic.id}`;
       return {
           ...topic,
           slug,
-          imageUrl: imageUrlMap.get(slug) || `https://placehold.co/1200x600.png`
+          imageUrl: imageUrlMap.get(slug) || null
       };
   });
 }
