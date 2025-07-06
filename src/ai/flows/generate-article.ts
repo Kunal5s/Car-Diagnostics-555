@@ -70,8 +70,7 @@ export async function generateArticle(
             'X-Title': 'Car Diagnostics BrainAi',
         },
         body: JSON.stringify({
-            model: 'meta-llama/llama-3-70b-instruct',
-            response_format: { type: "json_object" },
+            model: 'qwen/qwen-2-7b-instruct',
             messages: [
                 { role: "system", content: SYSTEM_PROMPT },
                 { role: "user", content: `Generate an article on the topic: "${input.topic}"` }
