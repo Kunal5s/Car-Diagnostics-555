@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview An AI flow for generating SEO-friendly articles.
+ * @fileOverview An AI flow for generating SEO-friendly articles using a direct API call.
  *
  * - generateArticle - A function that handles the article generation process.
  * - GenerateArticleInput - The input type for the generateArticle function.
@@ -9,7 +9,7 @@
 
 import {z} from 'zod';
 
-// Define the input and output schemas using Zod, same as before.
+// Define the input and output schemas using Zod.
 const GenerateArticleInputSchema = z.object({
   topic: z.string().describe('The topic of the article to generate.'),
 });
@@ -28,8 +28,25 @@ const GenerateArticleOutputSchema = z.object({
 export type GenerateArticleOutput = z.infer<typeof GenerateArticleOutputSchema>;
 
 
-// The prompt for the AI model.
-const SYSTEM_PROMPT = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the given topic.
+// The main exported function that will be called by the application.
+// It now uses a direct fetch call to the OpenRouter API.
+export async function generateArticle(
+  input: GenerateArticleInput
+): Promise<GenerateArticleOutput> {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+
+  if (!apiKey || apiKey.trim() === '') {
+    const errorMsg = "The OpenRouter API key is missing. Please add `OPENROUTER_API_KEY=\"your_key_here\"` to the `.env` file in the project's root directory and restart the application.";
+    console.error(errorMsg);
+    return {
+      summary: "Error: Configuration Issue",
+      content: `<h2>API Key Not Found</h2>
+                 <p>${errorMsg}</p>
+                 <p>For developers: Ensure the environment variable is set correctly on your deployment platform or in your local .env file.</p>`,
+    };
+  }
+  
+  const prompt = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the given topic.
 
 Your highest priority is to meet the required length. The article MUST be extremely detailed and comprehensive, with a strict minimum word count of 1700 words. Do not write an article shorter than 1700 words under any circumstances. Failure to meet the 1700-word minimum will result in a failed task. The word count is the most critical requirement.
 
@@ -45,80 +62,74 @@ Your response MUST be in well-structured Markdown format. The structure is absol
 
 You must also provide a concise, SEO-friendly summary for the article (approximately 160 characters).
 
-The final output must be a valid JSON object that conforms to the specified schema, containing a 'summary' and a 'content' field.`;
-
-// The function that calls the OpenRouter API.
-export async function generateArticle(
-  input: GenerateArticleInput
-): Promise<GenerateArticleOutput> {
-  
-  const apiKey = process.env.OPENROUTER_API_KEY;
-
-  // This is a much more robust check for the API key.
-  if (!apiKey || apiKey.trim() === '') {
-      console.error("OpenRouter API key is not set in environment variables.");
-      return {
-        summary: "Error: API key not configured.",
-        content: `<h2>Article Generation Failed: API Key Missing</h2><p>The <strong>OpenRouter API key</strong> is missing or has not been set. Please add your API key to the <strong>.env</strong> file at the root of your project.</p><p>Example: <code>OPENROUTER_API_KEY="your_real_api_key"</code></p>`,
-      };
-  }
+The final output must be a valid JSON object that conforms to the specified schema, containing a 'summary' and a 'content' field.
+Topic: ${input.topic}
+`;
 
   try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-            'HTTP-Referer': 'https://car-diagnostics-ai.vercel.app',
-            'X-Title': 'Car Diagnostics BrainAi',
-        },
-        body: JSON.stringify({
-            model: 'meta-llama/llama-3-70b-instruct',
-            response_format: { "type": "json_object" },
-            messages: [
-                { role: "system", content: SYSTEM_PROMPT },
-                { role: "user", content: `Generate an article on the topic: "${input.topic}"` }
-            ]
-        })
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3-70b-instruct',
+        response_format: { "type": "json_object" },
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+      }),
     });
 
     if (!response.ok) {
         const errorBody = await response.text();
         console.error("OpenRouter API error:", response.status, errorBody);
-
-        if (response.status === 401) {
-            return {
-                summary: "Error: Invalid API Key.",
-                content: `<h2>Article Generation Failed: Invalid API Key</h2><p>The API request was rejected with a <strong>401 Unauthorized</strong> error. This is almost always due to an invalid or missing API key. Please double-check that the <strong>OPENROUTER_API_KEY</strong> in your <strong>.env</strong> file is correct, active, and has funds.</p><p><strong>Topic attempted:</strong> ${input.topic}</p>`,
-            };
-        }
         
-        // Throw a generic error for other statuses to be caught by the catch block
-        throw new Error(`OpenRouter API request failed with status ${response.status}. Body: ${errorBody}`);
+        let displayError: string;
+        if (response.status === 401) {
+            displayError = `The OpenRouter API request was rejected due to an **invalid or missing API key**. Please verify your key in the <strong>.env</strong> file and ensure it has funds.`
+        } else if (response.status === 429) {
+            displayError = `The request was rejected due to **rate limiting**. You may have exceeded the free tier limits for the AI model. Please check your OpenRouter account.`
+        } else {
+            displayError = `The request failed with status code ${response.status}. This could be a network issue or a problem with the AI service.`
+        }
+
+        return {
+            summary: "Error: Could not generate content.",
+            content: `<h2>Article Generation Failed</h2>
+                        <p>${displayError}</p>
+                        <p><strong>Topic attempted:</strong> ${input.topic}</p>
+                        <p><strong>Error Details:</strong> ${errorBody}</p>`,
+        };
     }
 
-    const jsonResponse = await response.json();
-    const content = jsonResponse.choices[0].message.content;
+    const data = await response.json();
+    const articleJson = JSON.parse(data.choices[0].message.content);
     
-    // Sometimes the response can be a string that needs parsing, sometimes it's already an object.
-    const data = typeof content === 'string' ? JSON.parse(content) : content;
-    
-    const parsedResult = GenerateArticleOutputSchema.safeParse(data);
-
-    if (!parsedResult.success) {
-        console.error("Failed to parse AI response:", parsedResult.error.toString());
-        throw new Error("AI response did not match the expected format.");
+    // Validate the parsed JSON against our schema
+    const validationResult = GenerateArticleOutputSchema.safeParse(articleJson);
+    if (!validationResult.success) {
+      console.error("AI output failed Zod validation:", validationResult.error);
+       return {
+          summary: "Error: Invalid AI Response",
+          content: `<h2>AI Response Error</h2>
+                     <p>The AI generated a response, but it did not match the expected format. This can happen with complex requests.</p>
+                     <p><strong>Validation Errors:</strong> ${validationResult.error.toString()}</p>`,
+       };
     }
-    
-    return parsedResult.data;
 
-  } catch (error) {
-    console.error("Error in generateArticle:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+    return validationResult.data;
 
+  } catch (error: any) {
+    console.error("Error executing API call:", error);
+    const errorMessage = error.message || 'An unknown error occurred.';
     return {
-      summary: "Error: Could not generate summary.",
-      content: `<h2>Article Generation Failed</h2><p>There was an error generating the content for this topic. This could be due to a network issue or a problem with the AI service.</p><p><strong>Topic attempted:</strong> ${input.topic}</p><p><strong>Details:</strong> ${errorMessage}</p><p>For developers: Check the server logs for more details.</p>`,
+      summary: "Error: Could not generate content.",
+      content: `<h2>Article Generation Failed</h2>
+                 <p>An unexpected error occurred while trying to generate the article.</p>
+                 <p><strong>Topic attempted:</strong> ${input.topic}</p>
+                 <p><strong>Error Details:</strong> ${errorMessage}</p>
+                 <p>For developers: Check the server logs for more details.</p>`,
     };
   }
 }
