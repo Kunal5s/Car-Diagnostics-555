@@ -1,3 +1,4 @@
+
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
 
@@ -8,7 +9,8 @@ import {googleAI} from '@genkit-ai/googleai';
 export const ai = genkit({
   plugins: [
     googleAI({
-      apiKey: process.env.GOOGLE_API_KEY || 'AIzaSyDM0rK_YM9MynGMNogRPfqxCuiIdoLNAOI',
+      apiKey: process.env.GOOGLE_API_KEY, // API Key is read from environment variables
     }),
   ],
 });
+

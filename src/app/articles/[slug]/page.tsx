@@ -49,7 +49,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === article.category.toLowerCase());
   const Icon = categoryInfo?.icon;
 
-  // Defensively handle missing content to prevent crashes
+  // Defensively handle missing content and prevent crashes by checking if article.content exists.
   const contentWithoutTitle = article.content ? article.content.replace(/^# .*\n\n?/, '') : '';
 
   return (
@@ -73,9 +73,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 ) : (
                     <Alert variant="destructive">
                         <Terminal className="h-4 w-4" />
-                        <AlertTitle>Content Generation Failed</AlertTitle>
+                        <AlertTitle>Content Not Available</AlertTitle>
                         <AlertDescription>
-                          We were unable to generate the content for this article at the moment. This might be due to a configuration issue or a temporary problem with the AI service. Please try again later.
+                          The content for this article could not be loaded at this time. Please check back later.
                         </AlertDescription>
                     </Alert>
                 )}
@@ -84,3 +84,4 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     </div>
   );
 }
+

@@ -24,7 +24,7 @@ export function SettingsInfo() {
         <div className="space-y-2">
             <h3 className="font-semibold text-lg">No API Keys Required</h3>
             <p className="text-sm text-muted-foreground">
-                All articles and images you see on this website were pre-generated and are included as part of the application. This ensures the website is always fast, reliable, and does not require any setup or API keys from you to function.
+                All articles you see on this website were pre-generated and are included as part of the application. This ensures the website is always fast, reliable, and does not require any setup or API keys from you to function.
             </p>
         </div>
         <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground space-y-2">
@@ -33,10 +33,11 @@ export function SettingsInfo() {
                  <span className="font-mono text-sm font-semibold text-foreground">src/lib/articles.json</span>
             </div>
             <p>
-              The content is loaded directly from a static JSON file within the project, making data fetching instantaneous.
+              The content is loaded directly from a static JSON file within the project, making data fetching instantaneous and 100% reliable.
             </p>
         </div>
       </CardContent>
     </Card>
   );
 }
+

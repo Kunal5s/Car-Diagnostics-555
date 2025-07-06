@@ -12,9 +12,10 @@ export default function SettingsPage() {
     <div className="container mx-auto max-w-2xl px-4 py-12">
       <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-primary md:text-5xl">How It Works</h1>
       <p className="mb-8 text-lg text-muted-foreground">
-        This application comes with a pre-generated library of 54 high-quality articles about car diagnostics, complete with unique AI-generated images.
+        This application comes with a pre-generated library of 54 high-quality articles about car diagnostics, written by an advanced AI.
       </p>
       <SettingsInfo />
     </div>
   );
 }
+
