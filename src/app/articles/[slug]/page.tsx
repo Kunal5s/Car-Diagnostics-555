@@ -8,6 +8,8 @@ import type { Metadata } from 'next';
 import { getArticleBySlug, getAllTopics } from '@/lib/data';
 import { categoryDetails } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Terminal } from 'lucide-react';
 
 export async function generateStaticParams() {
   const topics = await getAllTopics();
@@ -47,8 +49,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === article.category.toLowerCase());
   const Icon = categoryInfo?.icon;
 
-  // Remove H1 from markdown content as it's already in the header
-  const contentWithoutTitle = article.content.replace(/^# .*\n\n?/, '');
+  // Defensively handle missing content to prevent crashes
+  const contentWithoutTitle = article.content ? article.content.replace(/^# .*\n\n?/, '') : '';
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
@@ -66,7 +68,17 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             <p className="text-lg text-muted-foreground">{article.summary}</p>
             </header>
             <div className="prose prose-lg dark:prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>
+                {contentWithoutTitle ? (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>
+                ) : (
+                    <Alert>
+                        <Terminal className="h-4 w-4" />
+                        <AlertTitle>Content Not Available</AlertTitle>
+                        <AlertDescription>
+                        The full content for this article is not available at the moment. Please check back later.
+                        </AlertDescription>
+                    </Alert>
+                )}
             </div>
         </article>
     </div>
