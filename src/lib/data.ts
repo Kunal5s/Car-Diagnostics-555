@@ -55,7 +55,7 @@ const allArticleTopics: Omit<ArticleTopic, 'slug'>[] = [
   { id: 45, title: "How Regenerative Braking Works In Modern Electric Vehicles Today", category: "EVs" },
   { id: 46, title: "Common and Important Maintenance Tasks For Your Electric Vehicle", category: "EVs" },
   { id: 47, title: "Understanding Electric Vehicle Range and How to Maximise It", category: "EVs" },
-  { id: 48, title: "The Key Differences Between AC and DC Fast Charging", category: "EVs" },
+  { id: 48, "title": "The Key Differences Between AC and DC Fast Charging", category: "EVs" },
   { id: 49, title: "The Future of Automotive Technology and AI Car Diagnostics", category: "Trends" },
   { id: 50, title: "Exploring the Latest Innovations in Connected Car Technologies", category: "Trends" },
   { id: 51, title: "How Over-the-Air Updates Are Changing Modern Car Ownership", category: "Trends" },
@@ -105,6 +105,11 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    const topicInfo = topicsWithSlugs.find(p => p.slug === slug);
+    if (!topicInfo) {
+      return undefined;
+    }
+
     try {
       const { data: cachedArticle, error } = await supabase
         .from('articles')
@@ -115,6 +120,14 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
       
       if (error && error.code !== 'PGRST116') {
         console.error("Supabase select error:", error);
+        // This is a special error to guide the user to configure the database correctly.
+        return {
+            ...topicInfo,
+            title: "Database Configuration Error",
+            summary: "There is an issue connecting to the database, likely due to missing permissions.",
+            content: `# Database Configuration Error\n\nWe were unable to connect to the Supabase database. This is usually due to one of two reasons:\n\n1.  **The 'articles' Table is Missing:** Please ensure you have created the table in your Supabase project.\n2.  **Row Level Security (RLS) Policies are Missing:** By default, your database is protected. You must create access policies to allow the website to read and write data.\n\nPlease follow the setup instructions in the project's \`README.md\` file to resolve this issue.`,
+            imageUrl: `https://placehold.co/1200x600/ef4444/ffffff?text=Database+Error`
+        };
       }
       
       if (cachedArticle) {
@@ -127,11 +140,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | unde
     
     console.log(`Cache miss for article "${slug}". Generating new article...`);
     
-    const topicInfo = topicsWithSlugs.find(p => p.slug === slug);
-    if (!topicInfo) {
-      return undefined;
-    }
-
     try {
       const generatedData = await generateArticle({ topic: topicInfo.title });
       
