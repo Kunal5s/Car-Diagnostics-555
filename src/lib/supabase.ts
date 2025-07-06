@@ -1,13 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.SUPABASE_URL
-const supabaseKey = process.env.SUPABASE_ANON_KEY
+const supabaseUrl = 'https://fefoagehpraawvfzzoag.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlZm9hZ2VocHJhYXd2Znp6b2FnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3ODc3NDUsImV4cCI6MjA2NzM2Mzc0NX0.8wpL7EfVzFTMY5UmErVFHL5KlOX2_tSwfe06MUJXvAA';
 
-if (!supabaseUrl || !supabaseKey) {
-  console.warn('Supabase URL or Key is missing. AI article generation will be disabled.');
-}
-
-// Important: The client is exported even if the keys are missing.
-// This allows the application to build and run.
-// The functions that use this client must handle the case where keys are not provided.
-export const supabase = createClient(supabaseUrl!, supabaseKey!)
+export const supabase = createClient(supabaseUrl, supabaseKey);
