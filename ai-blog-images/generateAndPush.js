@@ -129,7 +129,7 @@ async function generateAndCommit(topic) {
     console.log('  - Generating image...');
     const encodedPrompt = encodeURIComponent(prompt);
     const seed = Math.floor(Math.random() * 1000000); // Random seed for variety
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux-schnell&width=512&height=512&nologo=true&seed=${seed}`;
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=dreamshaper&width=512&height=512&nologo=true&seed=${seed}`;
     const imageResponse = await fetch(imageUrl);
     if (!imageResponse.ok) {
       throw new Error(`Failed to fetch image: ${imageResponse.statusText}`);
