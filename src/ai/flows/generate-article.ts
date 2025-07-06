@@ -21,6 +21,8 @@ export interface GenerateArticleOutput {
 
 const promptTemplate = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: '{TOPIC}'.
 
+Your highest priority is to meet the required length. The article MUST be extremely detailed and comprehensive, with a strict minimum word count of 1600 words. Do not write an article shorter than 1600 words under any circumstances.
+
 IMPORTANT: You must follow this output format EXACTLY.
 
 First, on the very first line, write a concise, SEO-friendly summary for the article (approximately 160 characters).
@@ -28,8 +30,6 @@ First, on the very first line, write a concise, SEO-friendly summary for the art
 After the summary, on a new line, you MUST add the exact separator '|||ARTICLE_SEPARATOR|||'.
 
 After the separator, write the full article.
-
-The article MUST be at least 1600 words long.
 
 The article's content MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
 - The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the article content.
