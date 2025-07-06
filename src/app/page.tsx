@@ -124,7 +124,7 @@ const faqItems = [
   },
   {
     question: "Do I need API keys to use this site?",
-    answer: "As a visitor, you do not need any keys. For the website owner to deploy and run this application, they must provide their own API keys for OpenRouter (for content) and Unsplash (for images) in an environment file. The site will not function without them.",
+    answer: "As a visitor, you do not need any keys. For the website owner to deploy and run this application, they must provide their own API keys for OpenRouter (for content) and Pexels (for images) in an environment file. The site will not function without them.",
   },
   {
     question: "Is my vehicle compatible?",
