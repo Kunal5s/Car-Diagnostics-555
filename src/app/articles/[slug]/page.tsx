@@ -1,5 +1,6 @@
 
 import React from 'react';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import ReactMarkdown from 'react-markdown';
@@ -29,6 +30,7 @@ export async function generateMetadata({ params }: { params: { slug:string } }):
     openGraph: {
       title: article.title,
       description: article.summary,
+      images: article.imageUrl ? [article.imageUrl] : [],
     },
   }
 }
@@ -53,6 +55,19 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     <div className="container mx-auto max-w-4xl px-4 py-12">
         <article>
             <Breadcrumbs items={breadcrumbItems} />
+            
+            {article.imageUrl && (
+              <div className="relative h-80 w-full mb-8 rounded-lg overflow-hidden shadow-lg">
+                <Image
+                  src={article.imageUrl}
+                  alt={article.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            )}
+
             <header className="my-8">
             <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
                 {article.title}

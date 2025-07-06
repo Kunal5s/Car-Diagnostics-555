@@ -1,3 +1,4 @@
+
 'use server';
 
 import type { ArticleTopic, FullArticle } from './definitions';
@@ -57,15 +58,20 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
   { id: 36, "title": "Understanding the Important Role of Big Data In Modern Connected Vehicles", category: "Trends" }
 ];
 
+// Helper to construct the image URL from the dedicated image repository
+function getImageUrl(slug: string): string {
+    return `https://raw.githubusercontent.com/kunal5s/ai-blog-images/main/public/images/${slug}.jpg`;
+}
 
-// This function adds a slug to each static topic.
+
+// This function adds a slug and an image URL to each static topic.
 export async function getAllTopics(): Promise<ArticleTopic[]> {
   return allArticleTopics.map(topic => {
       const slug = `${slugify(topic.title)}-${topic.id}`;
       return {
           ...topic,
           slug,
-          imageUrl: null // No image URL needed for the grid view
+          imageUrl: getImageUrl(slug)
       };
   });
 }
@@ -129,6 +135,11 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
             console.log(`[Cache] HIT for "${slug}". Loading from file.`);
             const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
             const article = JSON.parse(cachedData) as FullArticle;
+            // Ensure the cached article has the correct image URL
+            if (!article.imageUrl) {
+                article.imageUrl = getImageUrl(slug);
+            }
+
             if (article.content && !article.content.includes("Article Generation Failed")) {
                 return article;
             }
@@ -158,7 +169,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         ...staticTopic,
         slug: slug,
         ...articleData,
-        imageUrl: null, // No image URL
+        imageUrl: getImageUrl(slug),
     };
 
     try {

@@ -2,6 +2,7 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import { type ArticleTopic, categoryDetails } from "@/lib/definitions";
 import {
   Card,
@@ -13,7 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ImageIcon } from "lucide-react";
 import { motion } from 'framer-motion';
-import { cn } from "@/lib/utils";
 
 interface ArticleCardProps {
   topic: ArticleTopic;
@@ -37,17 +37,26 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
   const categoryInfo = categoryDetails.find(
     (c) => c.name.toLowerCase() === topic.category.toLowerCase()
   ) || null;
-  
-  const Icon = categoryInfo?.icon || ImageIcon;
 
   return (
     <motion.div variants={cardVariants}>
       <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
         <CardHeader className="p-0">
           <Link href={articleUrl} className="block relative h-48 w-full group bg-muted overflow-hidden rounded-t-lg">
-             <div className={cn("flex h-full w-full items-center justify-center rounded-t-lg", categoryInfo?.color || 'bg-muted')}>
-                <Icon className={cn("h-16 w-16 transition-transform duration-300 group-hover:scale-110", categoryInfo?.iconColor || 'text-muted-foreground')} />
-            </div>
+             {topic.imageUrl ? (
+                <Image
+                  src={topic.imageUrl}
+                  alt={topic.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  priority={priority}
+                />
+             ) : (
+                <div className="flex h-full w-full items-center justify-center bg-muted rounded-t-lg">
+                    <ImageIcon className="h-16 w-16 text-muted-foreground" />
+                </div>
+             )}
           </Link>
         </CardHeader>
         <CardContent className="flex-grow p-6">
