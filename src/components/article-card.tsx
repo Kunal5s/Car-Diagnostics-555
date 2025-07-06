@@ -2,6 +2,7 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import { type ArticleTopic, categoryDetails } from "@/lib/definitions";
 import {
   Card,
@@ -40,12 +41,23 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
     <motion.div variants={cardVariants}>
       <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
         <CardHeader className="p-0">
-          <Link href={articleUrl} className="block relative h-48 w-full group bg-muted">
-              {categoryInfo && Icon && (
-                <div className={cn("flex h-full items-center justify-center rounded-t-lg", categoryInfo.color)}>
+          <Link href={articleUrl} className="block relative h-48 w-full group bg-muted overflow-hidden rounded-t-lg">
+            {topic.imageUrl ? (
+              <Image
+                src={topic.imageUrl}
+                alt={topic.title}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                priority={priority}
+              />
+            ) : (
+              categoryInfo && Icon && (
+                <div className={cn("flex h-full items-center justify-center", categoryInfo.color)}>
                   <Icon className={cn("h-20 w-20 transition-transform duration-300 group-hover:scale-110", categoryInfo.iconColor)} />
                 </div>
-              )}
+              )
+            )}
           </Link>
         </CardHeader>
         <CardContent className="flex-grow p-6">

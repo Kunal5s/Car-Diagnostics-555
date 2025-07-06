@@ -7,7 +7,7 @@ import { generateArticle } from "@/ai/flows/generate-article";
 import { supabase } from './supabase';
 import { getImageForQuery } from './pexels';
 
-const allArticleTopics: Omit<ArticleTopic, 'slug'>[] = [
+const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
   { id: 1, title: "Advanced Methods for Diagnosing Common Engine Performance Issues Today", category: "Engine" },
   { id: 2, title: "A Step-by-Step Guide for Safely Resolving Engine Overheating", category: "Engine" },
   { id: 3, title: "Understanding When to Replace Your Car's Critical Timing Belt", category: "Engine" },
@@ -91,20 +91,51 @@ function seededShuffle(array: any[], seed: number) {
   return array;
 }
 
+async function enhanceTopicsWithImages(topics: ArticleTopic[]): Promise<ArticleTopic[]> {
+  const slugs = topics.map(t => t.slug);
+  if (slugs.length === 0) {
+    return topics;
+  }
+
+  try {
+    const { data: cachedArticles, error } = await supabase
+      .from('articles')
+      .select('slug, image_url')
+      .in('slug', slugs);
+
+    if (error) {
+      console.error("Supabase error enhancing topics with images:", error);
+      return topics;
+    }
+
+    const imageUrlMap = new Map(cachedArticles.map(a => [a.slug, a.image_url]));
+
+    return topics.map(topic => ({
+      ...topic,
+      imageUrl: imageUrlMap.get(topic.slug) || null,
+    }));
+  } catch (e) {
+    console.error("Critical error enhancing topics with images:", e);
+    return topics;
+  }
+}
+
 export async function getAllTopics(): Promise<ArticleTopic[]> {
-  return topicsWithSlugs;
+  return enhanceTopicsWithImages(topicsWithSlugs);
 }
 
 export async function getHomepageTopics(): Promise<ArticleTopic[]> {
   const now = new Date();
   const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
   const shuffledTopics = seededShuffle([...topicsWithSlugs], seed);
-  return shuffledTopics.slice(0, 6);
+  const homepageTopics = shuffledTopics.slice(0, 6);
+  return enhanceTopicsWithImages(homepageTopics);
 }
 
 export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
   const lowerCategoryName = categoryName.toLowerCase();
-  return topicsWithSlugs.filter(topic => topic.category.toLowerCase() === lowerCategoryName);
+  const topicsForCategory = topicsWithSlugs.filter(topic => topic.category.toLowerCase() === lowerCategoryName);
+  return enhanceTopicsWithImages(topicsForCategory);
 }
   
 export async function getArticleBySlug(slug: string): Promise<FullArticle | undefined> {
