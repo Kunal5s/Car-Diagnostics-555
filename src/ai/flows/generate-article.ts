@@ -31,7 +31,7 @@ export type GenerateArticleOutput = z.infer<typeof GenerateArticleOutputSchema>;
 // The prompt for the AI model.
 const SYSTEM_PROMPT = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the given topic.
 
-Your highest priority is to meet the required length. The article MUST be extremely detailed and comprehensive, with a strict minimum word count of 1600 words. Do not write an article shorter than 1600 words under any circumstances.
+Your highest priority is to meet the required length. The article MUST be extremely detailed and comprehensive, with a strict minimum word count of 1500 words. Do not write an article shorter than 1500 words under any circumstances.
 
 Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
 - The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the content.
