@@ -72,6 +72,9 @@ Remember: 1700 words is the minimum. Go into extreme detail. Explain every conce
 Topic: ${input.topic}
 `;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 50000); // 50-second timeout
+
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -85,6 +88,7 @@ Topic: ${input.topic}
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.7,
       }),
+      signal: controller.signal,
     });
 
     if (!response.ok) {
@@ -113,7 +117,6 @@ Topic: ${input.topic}
     const articleJson = JSON.parse(data.choices[0].message.content);
 
     // FIX: Handle cases where the AI returns content as an array of strings.
-    // This makes the data handling resilient to inconsistent model outputs.
     if (articleJson && Array.isArray(articleJson.content)) {
       console.warn("AI returned content as an array. Joining it into a single string to prevent validation errors.");
       articleJson.content = articleJson.content.join('\n\n');
@@ -134,6 +137,17 @@ Topic: ${input.topic}
     return validationResult.data;
 
   } catch (error: any) {
+    if (error.name === 'AbortError') {
+      console.error("API call timed out.");
+      return {
+        summary: "Error: Request Timed Out",
+        content: `<h2>Article Generation Timed Out</h2>
+                   <p>The request to the AI service took too long to respond and was cancelled. This can happen during periods of high demand or with very complex requests.</p>
+                   <p>If you are deploying on a platform like Vercel, this might also be due to Serverless Function execution limits on your plan (e.g., 10-15 seconds on the Hobby tier).</p>
+                   <p>Please try again in a few moments.</p>`,
+      };
+    }
+    
     console.error("Error executing API call:", error);
     const errorMessage = error.message || 'An unknown error occurred.';
     return {
@@ -144,5 +158,7 @@ Topic: ${input.topic}
                  <p><strong>Error Details:</strong> ${errorMessage}</p>
                  <p>For developers: Check the server logs for more details.</p>`,
     };
+  } finally {
+      clearTimeout(timeoutId);
   }
 }
