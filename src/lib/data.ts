@@ -1,6 +1,7 @@
 
 'use server';
 
+import 'dotenv/config';
 import type { ArticleTopic, FullArticle } from './definitions';
 import { slugify } from "./utils";
 import { generateArticle } from "@/ai/flows/generate-article";
@@ -73,7 +74,7 @@ function getFinalImageUrl(slug: string): string {
 
 async function generateAndUploadImage(slug: string, title: string, category: string): Promise<string | null> {
     if (!GITHUB_TOKEN) {
-        console.error("[Image Gen] GITHUB_TOKEN is not set. Skipping image generation.");
+        console.error("[Image Gen] GITHUB_TOKEN is not set. Skipping image generation. Please check your .env file and restart the server.");
         return null;
     }
 
