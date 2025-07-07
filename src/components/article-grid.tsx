@@ -1,14 +1,17 @@
 
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import { type ArticleTopic } from '@/lib/definitions';
 import { ArticleCard } from './article-card';
 import { Card, CardContent } from './ui/card';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { triggerArticleGeneration } from '@/app/actions';
 
 interface ArticleGridProps {
   topics: ArticleTopic[];
+  proactiveGeneration?: boolean;
 }
 
 const containerVariants = {
@@ -21,9 +24,57 @@ const containerVariants = {
   },
 };
 
-// This is now a simple, "dumb" component that just displays the topics it's given.
-// All generation logic is handled on the server when an article page is visited for the first time.
-export function ArticleGrid({ topics }: ArticleGridProps) {
+export function ArticleGrid({ topics: initialTopics, proactiveGeneration = false }: ArticleGridProps) {
+  const [topics, setTopics] = useState(initialTopics);
+  const [isGenerating, setIsGenerating] = useState(false);
+  // Use a ref to ensure the generation logic only runs once per topic list.
+  const generationTriggered = useRef(false);
+
+  useEffect(() => {
+    // When the component receives new topics (e.g., on navigation), update the state.
+    setTopics(initialTopics);
+    // Reset the trigger so that generation can happen on the new page if needed.
+    generationTriggered.current = false;
+  }, [initialTopics]);
+
+  useEffect(() => {
+    // This effect handles the proactive, sequential generation of articles.
+    // It will only run if the proactiveGeneration flag is true and it hasn't run for this set of topics yet.
+    if (!proactiveGeneration || generationTriggered.current) {
+      return;
+    }
+
+    const pendingTopics = topics.filter(t => t.status === 'pending');
+    
+    // Only proceed if there are articles to generate.
+    if (pendingTopics.length > 0) {
+      // Set the ref to true immediately to lock this effect and prevent re-runs.
+      generationTriggered.current = true;
+      setIsGenerating(true);
+
+      const generateSequentially = async () => {
+        // Sequentially process each pending topic to avoid overloading the server.
+        for (const topic of pendingTopics) {
+          const result = await triggerArticleGeneration(topic.slug);
+          if (result && result.status === 'ready') {
+            // Update the state for this specific topic to turn its dot green and show the image.
+            setTopics(prevTopics =>
+              prevTopics.map(t =>
+                t.id === topic.id ? { ...t, status: 'ready', imageUrl: result.imageUrl } : t
+              )
+            );
+          } else {
+            console.error(`[Proactive Gen] Failed to generate or get a ready status for: ${topic.title}`);
+          }
+        }
+        // Hide the loader once all pending topics for this batch have been processed.
+        setIsGenerating(false);
+      };
+
+      generateSequentially();
+    }
+  }, [topics, proactiveGeneration]);
+
   if (!topics || topics.length === 0) {
     return (
       <Card className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground shadow-none border-dashed">
@@ -42,15 +93,23 @@ export function ArticleGrid({ topics }: ArticleGridProps) {
   }
 
   return (
-    <motion.div
-      className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {topics.map((topic, index) => (
-        <ArticleCard key={topic.id} topic={topic} priority={index < 3} />
-      ))}
-    </motion.div>
+    <div>
+        {isGenerating && (
+            <div className="flex items-center justify-center gap-2 text-muted-foreground mb-6 p-3 rounded-md bg-secondary/50 border border-dashed">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <p className="font-medium">Pollination Models Running… Preparing fresh articles.</p>
+            </div>
+        )}
+        <motion.div
+            className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
+            {topics.map((topic, index) => (
+            <ArticleCard key={topic.id} topic={topic} priority={index < 3} />
+            ))}
+        </motion.div>
+    </div>
   );
 }
