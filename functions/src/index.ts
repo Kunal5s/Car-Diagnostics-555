@@ -1,3 +1,4 @@
+
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import axios from "axios";
@@ -5,10 +6,10 @@ import axios from "axios";
 admin.initializeApp();
 
 // 🔑 Set these in your Firebase environment:
-// firebase functions:config:set keys.together="b918fbcf050bcb2505ab730a1afb688162583d7e477706e102d23ffdbdf3a807"
+// firebase functions:config:set keys.together="YOUR_TOGETHER_AI_KEY"
 // firebase functions:config:set keys.github="YOUR_GITHUB_TOKEN"
 // firebase functions:config:set github.repo="your_username/your_repo"
-const TOGETHER_API_KEY = functions.config().keys.together || "b918fbcf050bcb2505ab730a1afb688162583d7e477706e102d23ffdbdf3a807";
+const TOGETHER_API_KEY = functions.config().keys.together;
 const GITHUB_TOKEN = functions.config().keys.github;
 const GITHUB_REPO = functions.config().github.repo;
 const GITHUB_BRANCH = "main";
@@ -26,8 +27,8 @@ exports.generateAndPushArticles = functions.runWith({ timeoutSeconds: 540, memor
   .onRun(async (context) => {
     console.log("🚀 Starting daily article generation job...");
 
-    if (!GITHUB_TOKEN || !GITHUB_REPO || GITHUB_REPO === 'your_username/your_repo') {
-      console.error("❌ Missing or default GitHub Token/Repo configuration. Set keys.github and github.repo in Firebase environment.");
+    if (!GITHUB_TOKEN || !GITHUB_REPO || GITHUB_REPO === 'your_username/your_repo' || !TOGETHER_API_KEY) {
+      console.error("❌ Missing or default API Key/Repo configuration. Set keys.together, keys.github, and github.repo in Firebase environment.");
       return null;
     }
 
