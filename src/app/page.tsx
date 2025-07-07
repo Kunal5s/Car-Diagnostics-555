@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   keywords: ["AI car diagnostics", "OBD2 error codes", "engine fault scan", "vehicle health report", "car diagnostics tool", "Car Diagnostics BrainAi"],
 };
 
-// Revalidate this page every 20 minutes (1200 seconds)
+// Revalidate this page every 20 minutes (1200 seconds) to fetch new articles
 export const revalidate = 1200;
 
 const howItWorksSteps = [
