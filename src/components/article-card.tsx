@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Circle } from "lucide-react";
 import { motion } from 'framer-motion';
 import { Skeleton } from "./ui/skeleton";
 
@@ -35,7 +35,8 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
   const articleUrl = `/articles/${topic.slug}`;
 
   // Per user request, images are disabled and a placeholder is shown.
-  const hasImage = false; 
+  const hasImage = false;
+  const isPending = topic.status === 'pending';
 
   return (
     <motion.div variants={cardVariants}>
@@ -50,9 +51,17 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
           </Link>
         </CardHeader>
         <CardContent className="flex-grow p-6">
-          <Badge variant="secondary" className="mb-2">
-            {topic.category}
-          </Badge>
+           <div className="flex justify-between items-start mb-2">
+             <Badge variant="secondary" className="whitespace-nowrap">
+                {topic.category}
+             </Badge>
+             {isPending && (
+              <div className="flex items-center space-x-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                <Circle className="h-3 w-3 fill-current" />
+                <span>Pending</span>
+              </div>
+             )}
+           </div>
           <h3 className="mb-2 line-clamp-2 font-semibold leading-tight h-14">
             <Link href={articleUrl} className="hover:text-primary">
               {topic.title}

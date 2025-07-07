@@ -32,15 +32,13 @@ export function ArticleGrid({ topics }: ArticleGridProps) {
             No Articles Available
           </p>
           <p className="max-w-md mx-auto">
-            There are currently no articles available for this category. Please check back later as our library is always growing.
+            There are currently no articles available for this category. Please check back later.
           </p>
         </CardContent>
       </Card>
     );
   }
-
-  // The proactive generation logic has been removed for a faster, more reliable
-  // static experience as requested. Articles are now pre-generated.
+  
   return (
       <motion.div
         className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"

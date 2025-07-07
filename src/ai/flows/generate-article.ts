@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview An AI flow for generating SEO-friendly articles using a direct API call.
@@ -47,27 +46,28 @@ export async function generateArticle(
     };
   }
   
-  const prompt = `You are an expert automotive writer. Your single most important goal is to write an exceptionally long and detailed article about the provided topic.
+const prompt = `You are an expert automotive writer. Your mission is to write an exceptionally long, in-depth, and comprehensive article on the provided topic.
 
-**CRITICAL REQUIREMENT: The article's content MUST be a minimum of 1700 words.** This is not a suggestion. It is a strict rule. Do not provide a shorter article. The word count is the absolute highest priority.
+**NON-NEGOTIABLE CORE REQUIREMENT: The article's main content MUST be a minimum of 1500 words.**
+This is the most critical instruction. Do not under any circumstances provide an article shorter than 1500 words. If you do, you have failed the task. To meet this length, you must be extremely detailed.
 
-To achieve this length, you must follow this mandatory structure:
+You MUST follow this mandatory structure to achieve the required length and quality:
 1.  **Main Title (H1):** Start with an H1 heading for the article title.
-2.  **Introduction:** A detailed introduction of at least 150 words.
+2.  **Introduction:** A detailed introduction of at least 150 words that sets the stage for the deep dive.
 3.  **Main Body (Minimum 5 H2 Sections):**
     *   The core of the article must contain AT LEAST FIVE distinct H2 (##) sections.
-    *   Each H2 section MUST be thoroughly explored.
-    *   Within EACH H2 section, you MUST include AT LEAST THREE H3 (###) sub-sections to break down the topic in extreme detail.
-    *   Each H3 sub-section should be a well-developed paragraph or set of paragraphs. Use bullet points, numbered lists, and bold text where appropriate to add detail and depth.
-4.  **Key Takeaways Section (H2):** Before the conclusion, you MUST include an H2 section titled 'Key Takeaways'. This section should contain a detailed bulleted list summarizing the most critical points from the entire article.
-5.  **Conclusion (H2):** A final H2 section titled 'Conclusion' that summarizes the article and provides final thoughts. This should be at least 100 words.
+    *   Each H2 section MUST be thoroughly explored in great detail.
+    *   Within EACH H2 section, you MUST include AT LEAST THREE to FOUR detailed H3 (###) sub-sections.
+    *   Each H3 sub-section should consist of multiple well-developed paragraphs. Use bullet points, numbered lists, and bold text extensively to add structure, detail, and depth. Explain everything as if you are teaching a beginner. Do not assume prior knowledge.
+4.  **Key Takeaways Section (H2):** Before the conclusion, you MUST include an H2 section titled 'Key Takeaways'. This section should contain a detailed bulleted list summarizing the most important points from the entire article.
+5.  **Conclusion (H2):** A final H2 section titled 'Conclusion' that provides a strong summary and final thoughts. This concluding section must be at least 100 words long.
 
 **Output Format:**
 - You must provide a concise, SEO-friendly summary (around 160 characters) for the 'summary' field.
-- The entire article, following the strict structure and word count mentioned above, must be in the 'content' field as a single Markdown string.
+- The entire article, strictly following the structure and 1500-word minimum requirement, must be in the 'content' field as a single Markdown string.
 - The final output MUST be a valid JSON object that conforms to the specified schema.
 
-Remember: 1700 words is the minimum. Go into extreme detail. Explain every concept thoroughly. Assume the reader is a beginner.
+Final check: Is the article over 1500 words? Is it detailed? Is it structured correctly? Only then should you provide the output.
 
 Topic: ${input.topic}
 `;
