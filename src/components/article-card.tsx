@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CircleDot } from "lucide-react";
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Skeleton } from "./ui/skeleton";
@@ -37,6 +37,8 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
   const articleUrl = `/articles/${topic.slug}`;
   const [imageError, setImageError] = useState(false);
 
+  // Since only ready articles are shown, imageUrl should always be present.
+  // This check is now a safeguard against null/empty strings and loading errors.
   const hasImage = topic.imageUrl && !imageError;
 
   return (
@@ -55,7 +57,9 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
                   onError={() => setImageError(true)}
                 />
              ) : (
-                <Skeleton className="h-full w-full" />
+                <div className="flex items-center justify-center h-full w-full bg-muted">
+                    <Skeleton className="h-full w-full" />
+                </div>
              )}
           </Link>
         </CardHeader>
@@ -72,11 +76,7 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
         <CardFooter className="p-6 pt-0">
           <Button asChild variant="link" className="p-0 text-primary">
             <Link href={articleUrl} className="flex items-center">
-              {topic.status === 'ready' ? (
-                <span className="mr-2 h-2.5 w-2.5 rounded-full bg-green-500" title="Ready to read"></span>
-              ) : (
-                <span className="mr-2 h-2.5 w-2.5 rounded-full bg-yellow-400 animate-pulse" title="Generation in progress"></span>
-              )}
+              <span className="mr-2 h-2.5 w-2.5 rounded-full bg-green-500" title="Ready to read"></span>
               Read More <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </Button>

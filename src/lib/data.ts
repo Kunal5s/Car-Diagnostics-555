@@ -142,11 +142,8 @@ async function generateAndUploadImage(slug: string, title: string, category: str
         throw new Error("Uploaded file content did not contain a download_url.");
 
     } catch (err: any) {
-        // This is the new logic to handle race conditions.
-        // GitHub often returns 422 or 409 for this specific race condition.
         if (err.status === 422 || err.status === 409) { 
             console.warn(`[Image Gen] Race condition detected for "${slug}". File was likely created by another process. Re-fetching content to recover.`);
-            // Try to get the content again, now that it should exist.
             try {
                 const { data } = await octokit.repos.getContent({
                     owner: GITHUB_OWNER,
@@ -183,15 +180,11 @@ export async function getAllTopics(): Promise<ArticleTopic[]> {
       try {
         const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
         const article: FullArticle = JSON.parse(cachedData);
-        // A 'ready' article must have a non-null status field set to 'ready'.
-        // This is the most reliable check.
         if (article.status === 'ready' && article.imageUrl && !article.imageUrl.includes('placehold.co')) {
              return { ...topic, imageUrl: article.imageUrl, status: 'ready' as const };
         }
-        // If file exists but is not ready, it's pending.
         return { ...topic, imageUrl: null, status: 'pending' as const };
       } catch (error) {
-        // If file doesn't exist, it's pending.
         return { ...topic, imageUrl: null, status: 'pending' as const };
       }
     })
@@ -202,6 +195,7 @@ export async function getAllTopics(): Promise<ArticleTopic[]> {
 
 export async function getHomepageTopics(): Promise<ArticleTopic[]> {
   const topics = await getAllTopics();
+  const readyTopics = topics.filter(t => t.status === 'ready');
 
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
@@ -226,13 +220,14 @@ export async function getHomepageTopics(): Promise<ArticleTopic[]> {
       return array;
   }
 
-  const shuffledTopics = seededShuffle([...topics], seed);
+  const shuffledTopics = seededShuffle([...readyTopics], seed);
   return shuffledTopics.slice(0, 4);
 }
 
 export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
   const topics = await getAllTopics();
-  return topics.filter(topic => topic.category.toLowerCase() === categoryName.toLowerCase());
+  const topicsForCategory = topics.filter(topic => topic.category.toLowerCase() === categoryName.toLowerCase());
+  return topicsForCategory.filter(t => t.status === 'ready');
 }
 
 export async function getArticleBySlug(slug: string): Promise<FullArticle | null> {
@@ -247,7 +242,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
     try {
         const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
         const article: FullArticle = JSON.parse(cachedData);
-        // A valid cached article MUST have status: 'ready' and a real image.
         if (article.status === 'ready' && article.imageUrl && !article.imageUrl.includes('placehold.co')) {
             console.log(`[Cache] HIT for "${slug}". Loading from permanent file.`);
             return article;
@@ -268,8 +262,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
     const articleFailed = !articleResult || articleResult.content.includes("Article Generation Failed") || (articleResult.content.split(' ').length < 1000);
     const imageFailed = !imageUrlResult || imageUrlResult.includes('placehold.co');
 
-    // If either process failed, we return the partial data for display, but do NOT cache it.
-    // This allows the system to retry generation on the next visit.
     if (articleFailed || imageFailed) {
         console.error(`[Generation] FAILED for "${slug}". Article OK: ${!articleFailed}, Image OK: ${!imageFailed}. Will NOT cache.`);
         return {
