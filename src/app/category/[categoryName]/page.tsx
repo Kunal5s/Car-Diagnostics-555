@@ -4,7 +4,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { categories, categoryDetails } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
-import { getLiveArticles } from "@/lib/data";
+import { getArticlesByCategory } from "@/lib/data";
 import { Suspense } from "react";
 import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
 
@@ -34,8 +34,8 @@ export async function generateStaticParams() {
 // Revalidate this page every 20 minutes (1200 seconds)
 export const revalidate = 1200;
 
-async function LiveCategoryContent({ categoryName }: { categoryName: string }) {
-    const articles = await getLiveArticles(4, categoryName);
+async function CategoryContent({ categoryName }: { categoryName: string }) {
+    const articles = await getArticlesByCategory(categoryName);
     return <ArticleGrid articles={articles} />;
 }
 
@@ -70,7 +70,7 @@ export default function CategoryPage({
         </div>
       </div>
       <Suspense fallback={<ArticleGridSkeleton count={4} />}>
-        <LiveCategoryContent categoryName={categoryInfo.name} />
+        <CategoryContent categoryName={categoryInfo.name} />
       </Suspense>
     </div>
   );

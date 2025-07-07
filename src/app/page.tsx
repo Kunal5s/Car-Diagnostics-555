@@ -29,7 +29,7 @@ import {
   Wrench,
   Star,
 } from "lucide-react";
-import { getLiveArticles } from "@/lib/data";
+import { getTrendingArticles } from "@/lib/data";
 import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
 
 
@@ -124,15 +124,15 @@ const faqItems = [
   },
   {
     question: "How does the content generation work?",
-    answer: "Our website automatically selects new topics and generates full articles and images for them every 20 minutes. This ensures that every time you visit, you are likely to see new, relevant content without any manual intervention.",
+    answer: "Our backend system automatically generates new topics, full articles, and images daily. This ensures that every time you visit, you are likely to see new, relevant content without any manual intervention.",
   },
   {
     question: "Are articles permanently saved?",
-    answer: "Yes. Once an article is generated for a specific URL (e.g., /articles/my-first-article), it is permanently cached. This ensures that direct links are stable and load instantly, while the main pages (like the homepage) continue to refresh with new selections.",
+    answer: "Yes. Once an article is generated and saved to our content repository on GitHub, it is permanently available. This ensures that direct links are stable and load instantly, while the main pages continue to refresh with new selections.",
   },
   {
-    question: "What is the 20-minute refresh?",
-    answer: "The homepage and category pages feature a selection of articles. This selection is automatically re-generated from our extensive library of topics every 20 minutes to keep the content fresh and highlight different articles.",
+    question: "What is the refresh cycle?",
+    answer: "The homepage and category pages are set to revalidate every 20 minutes. This means they will fetch the latest list of articles from our repository periodically to keep the content fresh and highlight different articles.",
   },
   {
     question: "Is my vehicle compatible?",
@@ -145,8 +145,8 @@ const faqItems = [
 ];
 
 
-async function LiveHomepageContent() {
-  const trendingTopics = await getLiveArticles(4);
+async function HomepageContent() {
+  const trendingTopics = await getTrendingArticles(4);
   return <ArticleGrid articles={trendingTopics} />;
 }
 
@@ -180,7 +180,7 @@ export default function HomePage() {
             </h2>
           </div>
            <Suspense fallback={<ArticleGridSkeleton count={4} />}>
-            <LiveHomepageContent />
+            <HomepageContent />
           </Suspense>
         </div>
       </section>

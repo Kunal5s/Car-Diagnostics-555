@@ -7,8 +7,8 @@ This is a Next.js application built in Firebase Studio. It uses a powerful AI sy
 
 This application uses a sophisticated, automated content pipeline for maximum reliability and freshness.
 
--   **Firebase Function Backend:** A scheduled Firebase Cloud Function runs daily to generate new, high-quality automotive articles using the Together AI model.
--   **GitHub as a CMS:** Generated articles (as JSON files) are automatically committed and pushed to a designated GitHub repository. This repository acts as a lightweight, version-controlled CMS.
+-   **Firebase Function Backend:** A scheduled Firebase Cloud Function runs daily to generate new, high-quality automotive articles using the Together AI model and images using the Pollinations AI model.
+-   **GitHub as a CMS:** Generated articles (as JSON files) and images (as JPGs) are automatically committed and pushed to designated GitHub repositories. These repositories act as a lightweight, version-controlled CMS.
 -   **Live Fetching in Next.js:** The Next.js frontend fetches article content directly from the GitHub repository at request time. This ensures the site always displays the latest available content.
 -   **Intelligent Caching:** Next.js uses incremental static regeneration (ISR) to cache fetched content, providing a fast user experience while periodically refreshing data from GitHub. The homepage and category pages refresh every 20 minutes, while individual articles are cached for 24 hours.
 
@@ -27,8 +27,11 @@ firebase functions:config:set keys.together="YOUR_TOGETHER_AI_KEY"
 # Your GitHub Personal Access Token (with repo scope)
 firebase functions:config:set keys.github="YOUR_GITHUB_TOKEN"
 
-# Your GitHub repository (e.g., "your-username/your-repo-name")
+# Your GitHub repository for article JSON files (e.g., "your-username/your-content-repo")
 firebase functions:config:set github.repo="your_username/your_repo"
+
+# Your GitHub repository for generated images (e.g., "your-username/your-images-repo")
+firebase functions:config:set github.images_repo="your_username/your_images_repo"
 ```
 
 After setting the config, deploy your function:
@@ -43,10 +46,10 @@ Create a `.env` file in the root of the project and add your GitHub repository d
 ```
 # .env
 
-# Your GitHub repository (e.g., "your-username/your-repo-name")
+# Your GitHub repository for article JSON files (e.g., "your-username/your-content-repo")
 GITHUB_REPO="your_username/your_repo"
 
-# Optional: Your GitHub Personal Access Token for higher API rate limits.
+# Optional: Your GitHub Personal Access Token for higher API rate limits on the frontend.
 # This is recommended for production environments.
 GITHUB_TOKEN="YOUR_GITHUB_TOKEN"
 ```

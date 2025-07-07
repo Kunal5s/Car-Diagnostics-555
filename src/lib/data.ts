@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { ArticleTopic, FullArticle } from './definitions';
+import type { FullArticle } from './definitions';
 
 // GitHub configuration - These must be set in your .env.local file
 const GITHUB_REPO = process.env.GITHUB_REPO; // e.g., 'your_username/your_repo'
@@ -12,13 +12,21 @@ const GITHUB_RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_REPO}/main`;
 
 const headers = GITHUB_TOKEN ? { Authorization: `token ${GITHUB_TOKEN}` } : {};
 
+interface GitHubFile {
+    name: string;
+    path: string;
+    sha: string;
+    type: 'file' | 'dir';
+}
+
 /**
- * Fetches a list of all article files from the GitHub repository.
- * @returns An array of file objects from GitHub API.
+ * Fetches a list of all article JSON files from the GitHub repository.
+ * Uses Next.js caching to revalidate every 20 minutes.
+ * @returns An array of GitHub file objects.
  */
-async function getArticleFileList(): Promise<any[]> {
+async function getArticleFileList(): Promise<GitHubFile[]> {
     if (!GITHUB_REPO || GITHUB_REPO === 'your_username/your_repo') {
-        console.warn("GITHUB_REPO environment variable is not set. Cannot fetch articles.");
+        console.warn("GITHUB_REPO environment variable is not set or is default. Cannot fetch articles.");
         return [];
     }
 
@@ -30,18 +38,19 @@ async function getArticleFileList(): Promise<any[]> {
         if (!response.ok) {
             // If repo or directory doesn't exist, return empty array gracefully
             if (response.status === 404) {
-                console.warn("Article directory not found in GitHub repo. It may be empty.");
+                console.warn(`Article directory not found in GitHub repo: ${url}. It may be empty or the repo may be private.`);
                 return [];
             }
             throw new Error(`Failed to fetch article list from GitHub: ${response.statusText}`);
         }
         
-        const files = await response.json();
+        const files: GitHubFile[] = await response.json();
         if (!Array.isArray(files)) {
             console.error("Unexpected response from GitHub API when listing articles:", files);
             return [];
         }
-        return files;
+        // Filter out any non-JSON files or directories
+        return files.filter(file => file.type === 'file' && file.name.endsWith('.json'));
     } catch (error) {
         console.error("Error fetching article list from GitHub:", error);
         return [];
@@ -49,22 +58,16 @@ async function getArticleFileList(): Promise<any[]> {
 }
 
 /**
- * Provides a list of all article topics with their slugs for static page generation.
+ * Provides a list of all article slugs for static page generation.
  */
-export async function getAllTopics(): Promise<ArticleTopic[]> {
+export async function getAllArticleSlugs(): Promise<string[]> {
   const files = await getArticleFileList();
-  return files.map((file: any) => ({
-    id: 0, // Not available from file list
-    title: '', // Not available from file list
-    category: '', // Not available from file list
-    slug: file.name.replace('.json', ''),
-    imageUrl: null,
-    status: 'ready'
-  }));
+  return files.map((file) => file.name.replace('.json', ''));
 }
 
 /**
  * Fetches a single article's full content by its slug from GitHub.
+ * Caches articles for a day once fetched.
  * @param slug The slug of the article to retrieve.
  * @returns A FullArticle object or null if not found.
  */
@@ -73,17 +76,11 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
 
     try {
         const url = `${GITHUB_RAW_BASE}/.cache/articles/${slug}.json`;
-        // Cache articles for a day once fetched
-        const response = await fetch(url, { next: { revalidate: 86400 } });
+        const response = await fetch(url, { headers, next: { revalidate: 86400 } });
         if (!response.ok) {
             return null; // Article not found
         }
-        const article = await response.json() as FullArticle;
-
-        // Dynamically construct the image URL to point to the external image repository.
-        article.imageUrl = `https://raw.githubusercontent.com/kunal5s/ai-blog-images/main/public/images/${slug}.jpg`;
-
-        return article;
+        return await response.json() as FullArticle;
     } catch (error) {
         console.error(`Error fetching article ${slug} from GitHub:`, error);
         return null;
@@ -91,31 +88,42 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
 }
 
 /**
- * Gets a random selection of articles for display on grid pages.
- * @param count The number of articles to return.
- * @param category Optional category to filter by.
- * @returns An array of FullArticle objects.
+ * Fetches all articles from the repository.
+ * @returns A promise that resolves to an array of FullArticle objects.
  */
-export async function getLiveArticles(count: number, category?: string): Promise<FullArticle[]> {
-    let allFiles = await getArticleFileList();
+export async function getAllArticles(): Promise<FullArticle[]> {
+    const files = await getArticleFileList();
+    
+    // Sort files by name descending to get the newest first (assuming slugs contain timestamps)
+    files.sort((a, b) => b.name.localeCompare(a.name));
 
-    // Shuffle the files to ensure randomness
-    for (let i = allFiles.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [allFiles[i], allFiles[j]] = [allFiles[j], allFiles[i]];
-    }
-
-    const articlePromises = allFiles.map((file: any) => {
+    const articlePromises = files.map((file) => {
         const slug = file.name.replace('.json', '');
         return getArticleBySlug(slug);
     });
 
-    let articles = (await Promise.all(articlePromises))
+    const articles = (await Promise.all(articlePromises))
         .filter((a): a is FullArticle => a !== null);
     
-    if (category) {
-        articles = articles.filter(a => a.category.toLowerCase() === category.toLowerCase());
-    }
+    return articles;
+}
 
-    return articles.slice(0, count);
+/**
+ * Gets a specified number of the most recent articles.
+ * @param count The number of trending articles to return.
+ * @returns An array of FullArticle objects.
+ */
+export async function getTrendingArticles(count: number): Promise<FullArticle[]> {
+    const allArticles = await getAllArticles(); // This already sorts by newest
+    return allArticles.slice(0, count);
+}
+
+/**
+ * Gets all articles for a specific category.
+ * @param category The category to filter by.
+ * @returns An array of FullArticle objects.
+ */
+export async function getArticlesByCategory(category: string): Promise<FullArticle[]> {
+    const allArticles = await getAllArticles(); // This already sorts by newest
+    return allArticles.filter(a => a.category.toLowerCase() === category.toLowerCase());
 }

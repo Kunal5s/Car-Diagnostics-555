@@ -1,13 +1,13 @@
-import { getAllTopics } from '@/lib/data';
+import { getAllArticleSlugs } from '@/lib/data';
 import { categories } from '@/lib/definitions';
 
 const URL = 'https://oudworkstations.dev';
 
 export async function GET() {
-  const articles = await getAllTopics();
+  const slugs = await getAllArticleSlugs();
 
-  const articleUrls = (articles || []).map(article => {
-    return `<url><loc>${URL}/articles/${article.slug}</loc><lastmod>${new Date().toISOString()}</lastmod></url>`;
+  const articleUrls = (slugs || []).map(slug => {
+    return `<url><loc>${URL}/articles/${slug}</loc><lastmod>${new Date().toISOString()}</lastmod></url>`;
   }).join('');
 
   const categoryUrls = categories
@@ -23,7 +23,6 @@ export async function GET() {
     '/privacy-policy',
     '/terms-of-service',
     '/disclaimer',
-    '/settings'
   ].map(path => {
     return `<url><loc>${URL}${path}</loc><lastmod>${new Date().toISOString()}</lastmod></url>`;
   }).join('');

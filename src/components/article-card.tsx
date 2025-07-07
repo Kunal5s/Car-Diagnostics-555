@@ -24,7 +24,7 @@ export function ArticleCard({ article, priority = false }: ArticleCardProps) {
   const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === article.category.toLowerCase());
   const Icon = categoryInfo ? categoryInfo.icon : FileQuestion;
   
-  const hasImage = article.imageUrl && !article.imageUrl.includes('placehold.co');
+  const hasImage = !!article.imageUrl;
 
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
@@ -35,7 +35,7 @@ export function ArticleCard({ article, priority = false }: ArticleCardProps) {
                 src={article.imageUrl!}
                 alt={article.title}
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
                 priority={priority}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
@@ -57,6 +57,9 @@ export function ArticleCard({ article, priority = false }: ArticleCardProps) {
             {article.title}
           </Link>
         </h3>
+         <p className="line-clamp-3 text-sm text-muted-foreground h-[60px]">
+            {article.summary}
+          </p>
       </CardContent>
       <CardFooter className="p-6 pt-0">
         <Button asChild variant="link" className="p-0 text-primary">
