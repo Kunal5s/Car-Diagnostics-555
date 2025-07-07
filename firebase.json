@@ -1,3 +1,0 @@
-{
-  "__comment__": "This file is no longer used. The daily cron job has been migrated to a Vercel-native solution in vercel.json and /src/app/api/cron. This file can be safely deleted."
-}
