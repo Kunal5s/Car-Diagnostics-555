@@ -29,10 +29,10 @@ export function ArticleGrid({ topics }: ArticleGridProps) {
         <CardContent className="p-6">
           <AlertCircle className="mx-auto h-10 w-10 text-primary/50 mb-4" />
           <p className="font-semibold text-lg text-foreground mb-2">
-            No Articles Ready
+            No Articles Available
           </p>
           <p className="max-w-md mx-auto">
-            There are no fully generated articles in this category yet. New articles are generated on-demand when they are first visited. Check back soon!
+            There are currently no articles available for this category. Please check back later as our library is always growing.
           </p>
         </CardContent>
       </Card>
