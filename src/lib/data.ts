@@ -199,6 +199,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
     await fs.mkdir(CACHE_DIR, { recursive: true });
     const cacheFilePath = path.join(CACHE_DIR, `${slug}.json`);
 
+    // 1. Check local file cache
     try {
         const stats = await fs.stat(cacheFilePath);
         const lastModified = stats.mtime;
@@ -208,40 +209,65 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         if (ageInHours < CACHE_TTL_HOURS) {
             console.log(`[Cache] HIT for "${slug}". Loading from file.`);
             const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
-            let article: FullArticle = JSON.parse(cachedData);
-
-            if (article.imageUrl && article.content && !article.content.includes("Article Generation Failed")) {
+            const article: FullArticle = JSON.parse(cachedData);
+            // Simple validation to ensure the cached content is not an error message
+            if (article.content && !article.content.includes("Article Generation Failed")) {
                 return article;
             }
-            console.log(`[Cache] Stale or invalid content for "${slug}". Regenerating.`);
+            console.log(`[Cache] Stale or invalid cache content for "${slug}". Regenerating.`);
         }
     } catch (error: any) {
         if (error.code !== 'ENOENT') {
             console.error(`[Cache] Error reading cache file for ${slug}:`, error);
         }
+        // If file doesn't exist (ENOENT), we continue to the generation logic.
     }
     
-    console.log(`[Cache] MISS for "${slug}". Generating new article and image.`);
-    
-    const [articleResult, imageUrlResult] = await Promise.all([
-        generateArticle({ topic: staticTopic.title }).catch(e => {
-            console.error(`Failed to generate content for topic: ${staticTopic.title}`, e.message);
-            return {
-                summary: "Error: Could not generate summary.",
-                content: `<h2>Article Generation Failed</h2><p>There was an error generating the content for this topic.</p><p><strong>Topic attempted:</strong> ${staticTopic.title}</p>`,
-            };
-        }),
-        generateAndUploadImage(slug, staticTopic.title, staticTopic.category)
-    ]);
+    console.log(`[Cache] MISS for "${slug}". Checking remote assets and generating if needed.`);
+
+    // 2. If cache miss, check if image already exists on GitHub to avoid re-generating it
+    const imagePath = `public/images/${slug}.jpg`;
+    let finalImageUrl: string | null = null;
+
+    try {
+        // This check determines if we need to generate a new image
+        await octokit.repos.getContent({
+            owner: GITHUB_OWNER,
+            repo: GITHUB_REPO,
+            path: imagePath,
+            ref: GITHUB_BRANCH,
+        });
+        finalImageUrl = getFinalImageUrl(slug);
+        console.log(`[GitHub] Image already exists for "${slug}". Re-using it.`);
+    } catch (error: any) {
+        if (error.status === 404) {
+            // Image doesn't exist, so we need to generate and upload it.
+            console.log(`[GitHub] Image does not exist for "${slug}". Generating new image.`);
+            finalImageUrl = await generateAndUploadImage(slug, staticTopic.title, staticTopic.category);
+        } else {
+            // Some other error occurred while checking for the image
+            console.error(`[GitHub] Error checking for image existence for "${slug}":`, error.message);
+        }
+    }
+
+    // 3. Generate article content (this is always needed on a cache miss)
+    const articleResult = await generateArticle({ topic: staticTopic.title }).catch(e => {
+        console.error(`Failed to generate content for topic: ${staticTopic.title}`, e.message);
+        return {
+            summary: "Error: Could not generate content.",
+            content: `<h2>Article Generation Failed</h2><p>An unexpected error occurred while trying to generate the article.</p><p><strong>Topic attempted:</strong> ${staticTopic.title}</p><p><strong>Error Details:</strong> ${e.message}</p>`,
+        };
+    });
 
     const fullArticle: FullArticle = {
         ...staticTopic,
         slug: slug,
         summary: articleResult.summary,
         content: articleResult.content,
-        imageUrl: imageUrlResult,
+        imageUrl: finalImageUrl, // Use the determined image URL
     };
 
+    // 4. Write the newly generated content and image URL to the local cache
     try {
         await fs.writeFile(cacheFilePath, JSON.stringify(fullArticle, null, 2));
         console.log(`[Cache] Wrote new cache file for "${slug}".`);
