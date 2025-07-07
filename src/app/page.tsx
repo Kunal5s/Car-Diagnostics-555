@@ -171,7 +171,7 @@ export default async function HomePage() {
               Today's Trending Articles
             </h2>
           </div>
-          <ArticleGrid topics={trendingTopics} proactiveGeneration={true} />
+          <ArticleGrid topics={trendingTopics} />
           <div className="text-center mt-8">
             <Button asChild variant="outline">
               <Link href="/blog">
