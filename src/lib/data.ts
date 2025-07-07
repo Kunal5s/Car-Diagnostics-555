@@ -286,5 +286,3 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
     
     return fullArticle;
 }
-
-    
