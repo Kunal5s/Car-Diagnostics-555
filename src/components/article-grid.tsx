@@ -37,7 +37,7 @@ export function ArticleGrid({ topics, showImageGenerator = false }: ArticleGridP
     if (topicsToGenerate.length === 0) {
         toast({
             title: "Images Already Loaded",
-            description: "All images for the current articles have already been generated.",
+            description: "All article images for the current view have already been generated.",
         });
         setIsGenerating(false);
         return;
@@ -65,6 +65,11 @@ export function ArticleGrid({ topics, showImageGenerator = false }: ArticleGridP
         }
       } catch (error) {
         console.error(`Failed to generate image for ${topic.title}:`, error);
+        toast({
+            variant: "destructive",
+            title: "Image Generation Failed",
+            description: `Could not generate an image for "${topic.title}". Please try again.`,
+        });
         setDisplayTopics(prevTopics =>
           prevTopics.map(t =>
             t.slug === topic.slug ? { ...t, displayState: 'icon' } : t
@@ -77,7 +82,7 @@ export function ArticleGrid({ topics, showImageGenerator = false }: ArticleGridP
     setIsGenerating(false);
     toast({
         title: "Image Generation Complete",
-        description: "All article images have been loaded.",
+        description: "All requested article images have been loaded.",
     });
   };
   
