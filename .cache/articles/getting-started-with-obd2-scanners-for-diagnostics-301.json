@@ -1,10 +1,11 @@
+
 {
   "id": 301,
   "title": "Getting Started with OBD2 Scanners for Diagnostics",
   "category": "OBD2",
   "slug": "getting-started-with-obd2-scanners-for-diagnostics-301",
-  "summary": "Error: Could not generate content.",
-  "content": "<h2>Article Generation Failed</h2>\n                        <p>The request failed with status code 402. This could be a network issue or a problem with the AI service.</p>\n                        <p><strong>Topic attempted:</strong> Getting Started with OBD2 Scanners for Diagnostics</p>\n                        <p><strong>Error Details:</strong> {\"error\":{\"message\":\"This request requires more credits, or fewer max_tokens. You requested up to 6766 tokens, but can only afford 3046. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account\",\"code\":402,\"metadata\":{\"provider_name\":null}},\"user_id\":\"user_2ta6eenp3GBwQk7yY0xUlJ9FCbV\"}</p>",
-  "imageUrl": null,
+  "summary": "New to OBD2 scanners? This guide will walk you through the basics, from plugging in the device to reading and understanding your first trouble code.",
+  "content": "## What is an OBD2 Scanner?\n\nAn On-Board Diagnostics (OBD2) scanner is a device that interfaces with your car's computer. It allows you to read Diagnostic Trouble Codes (DTCs) and access a wealth of data about your vehicle's performance. All cars made since 1996 have an OBD2 port, usually located under the dashboard.\n\n### How to Use a Scanner\n\n1.  Locate the OBD2 port.\n2.  Plug the scanner in.\n3.  Turn the ignition to the 'On' position.\n4.  Follow the scanner's prompts to read codes.",
+  "imageUrl": "https://placehold.co/600x400.png",
   "status": "ready"
 }

@@ -5,10 +5,8 @@ import type { ArticleTopic, FullArticle } from './definitions';
 import { slugify } from "./utils";
 import { promises as fs } from 'fs';
 import path from 'path';
-import { generateArticle } from '@/ai/flows/generate-article';
-import { generateImage } from '@/ai/flows/generate-image';
-import { uploadImageToGitHub } from './github';
 
+// This is the static, complete list of all topics for the site.
 const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>[] = [
     { id: 101, title: "The Ultimate Guide to Engine Diagnostics", category: "Engine" },
     { id: 102, title: "Solving Engine Overheating: A Step-by-Step Manual", category: "Engine" },
@@ -50,111 +48,91 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>[] = [
 
 const CACHE_DIR = path.join(process.cwd(), '.cache', 'articles');
 
+/**
+ * Retrieves a single article from the file cache.
+ * @param slug The slug of the article to retrieve.
+ * @returns A FullArticle object or null if not found.
+ */
 async function getArticleFromCache(slug: string): Promise<FullArticle | null> {
     const cacheFilePath = path.join(CACHE_DIR, `${slug}.json`);
     try {
         await fs.access(cacheFilePath);
         const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
         const article = JSON.parse(cachedData) as FullArticle;
-        // Validate essential fields to ensure cache is not corrupt
+        
+        // Ensure essential fields exist and are valid.
         if (article.slug && article.content && article.summary) {
             return article;
         }
+        console.warn(`[Cache Warning] Corrupt data for slug: ${slug}.`);
         return null;
     } catch (error) {
+        // This is now an expected case if a cache file doesn't exist.
         return null;
     }
 }
 
-async function writeArticleToCache(articleData: FullArticle): Promise<void> {
-    const cacheFilePath = path.join(CACHE_DIR, `${articleData.slug}.json`);
-    try {
-        await fs.mkdir(CACHE_DIR, { recursive: true });
-        await fs.writeFile(cacheFilePath, JSON.stringify(articleData, null, 2), 'utf-8');
-    } catch (error) {
-        console.error(`[Cache Error] Could not write cache file for slug: ${articleData.slug}.`, error);
-    }
-}
-
-async function generateAndCacheArticle(topic: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>, slug: string): Promise<FullArticle> {
-    console.log(`[Live Generation] Generating full content for slug: ${slug}`);
-    
-    const articlePromise = generateArticle({ topic: topic.title });
-    
-    const imagePrompt = `A high-quality, photorealistic, cinematic hero image for an automotive article titled "${topic.title}". Focus on the core concepts of the article. Keywords: ${topic.category}. Style: professional, clean, high-detail.`;
-    const imagePromise = generateImage({ prompt: imagePrompt });
-
-    try {
-        const [articleContent, base64DataUri] = await Promise.all([articlePromise, imagePromise]);
-        
-        if (!articleContent || !articleContent.content || articleContent.content.length < 500) {
-            throw new Error("Generated article content is invalid or too short.");
-        }
-
-        let permanentImageUrl: string | null = null;
-        if (base64DataUri) {
-            const fileName = `${slug}.jpg`;
-            permanentImageUrl = await uploadImageToGitHub(base64DataUri, fileName);
-        }
-
-        const fullArticle: FullArticle = {
-            ...topic,
-            slug,
-            summary: articleContent.summary,
-            content: articleContent.content,
-            imageUrl: permanentImageUrl,
-            status: 'ready'
-        };
-
-        await writeArticleToCache(fullArticle);
-        return fullArticle;
-
-    } catch (error) {
-        console.error(`[Generation Error] Failed to generate or process article for slug ${slug}:`, error);
-        return {
-            ...topic,
-            slug,
-            summary: 'Error: Could not generate this article.',
-            content: `## Article Generation Failed\n\nWe encountered an error while trying to generate this article. This might be a temporary issue with the AI service or network. Please try again later.\n\n**Error Details:** ${error instanceof Error ? error.message : String(error)}`,
-            imageUrl: 'https://placehold.co/600x400.png',
-            status: 'pending'
-        };
-    }
-}
-
+/**
+ * Provides the full list of all article topics with their generated slugs.
+ * This is used for building static pages and sitemaps.
+ */
 export async function getAllTopics(): Promise<ArticleTopic[]> {
     return allArticleTopics.map(topic => {
         const slug = `${slugify(topic.title)}-${topic.id}`;
         return {
             ...topic,
             slug,
-            imageUrl: null,
-            status: 'pending'
+            imageUrl: null, // Default value, will be populated from cache.
+            status: 'pending' // Default value, will be populated from cache.
         };
     });
 }
 
+/**
+ * Gets a single article by its slug. It will only read from the pre-generated cache.
+ * If an article is not in the cache, it returns a placeholder object.
+ * @param slug The slug of the article.
+ * @returns A FullArticle object.
+ */
 export async function getArticleBySlug(slug: string): Promise<FullArticle | null> {
-    const baseTopic = allArticleTopics.find(t => `${slugify(t.title)}-${t.id}` === slug);
-    if (!baseTopic) return null;
-
-    let cachedArticle = await getArticleFromCache(slug);
+    const cachedArticle = await getArticleFromCache(slug);
 
     if (cachedArticle) {
         console.log(`[Cache Hit] Serving article from cache for slug: ${slug}`);
         return cachedArticle;
     }
 
-    return await generateAndCacheArticle(baseTopic, slug);
+    // If not in cache, find the base topic information to create a placeholder.
+    const baseTopic = allArticleTopics.find(t => `${slugify(t.title)}-${t.id}` === slug);
+    if (!baseTopic) {
+        return null; // The slug doesn't correspond to any known topic.
+    }
+    
+    console.warn(`[Cache Miss] No cache file found for slug: ${slug}. Serving placeholder content.`);
+    return {
+        ...baseTopic,
+        slug,
+        summary: "This article is not available at the moment. Please check back later.",
+        content: "## Content Not Available\n\nThis article's content has not been generated or is currently unavailable. Please ensure the cache files in `.cache/articles/` are present and valid.",
+        imageUrl: `https://placehold.co/600x400.png`,
+        status: 'pending'
+    };
 }
 
+/**
+ * Gets a random selection of articles for display on grid pages.
+ * This function now only relies on the pre-generated file cache.
+ * @param count The number of articles to return.
+ * @param category Optional category to filter by.
+ * @returns An array of FullArticle objects.
+ */
 export async function getLiveArticles(count: number, category?: string): Promise<FullArticle[]> {
     let candidateTopics = [...allArticleTopics];
     if (category) {
         candidateTopics = candidateTopics.filter(t => t.category.toLowerCase() === category.toLowerCase());
     }
 
-    // Fisher-Yates shuffle algorithm for randomness
+    // Shuffle the topics to ensure randomness.
     for (let i = candidateTopics.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [candidateTopics[i], candidateTopics[j]] = [candidateTopics[j], candidateTopics[i]];
@@ -164,12 +142,11 @@ export async function getLiveArticles(count: number, category?: string): Promise
 
     const articlePromises = selectedTopics.map(topic => {
         const slug = `${slugify(topic.title)}-${topic.id}`;
-        // This will either get from cache or generate live, ensuring speed and freshness
         return getArticleBySlug(slug);
     });
 
     const articles = await Promise.all(articlePromises);
     
-    // Filter out any nulls that might have occurred from a topic lookup failure (should be rare)
+    // Filter out any nulls that might have occurred.
     return articles.filter((article): article is FullArticle => article !== null);
 }

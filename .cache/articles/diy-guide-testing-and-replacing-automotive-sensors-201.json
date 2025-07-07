@@ -1,10 +1,11 @@
+
 {
   "id": 201,
   "title": "DIY Guide: Testing and Replacing Automotive Sensors",
   "category": "Sensors",
   "slug": "diy-guide-testing-and-replacing-automotive-sensors-201",
-  "summary": "Error: Could not generate content.",
-  "content": "<h2>Article Generation Failed</h2>\n                        <p>The request failed with status code 402. This could be a network issue or a problem with the AI service.</p>\n                        <p><strong>Topic attempted:</strong> DIY Guide: Testing and Replacing Automotive Sensors</p>\n                        <p><strong>Error Details:</strong> {\"error\":{\"message\":\"This request requires more credits, or fewer max_tokens. You requested up to 6766 tokens, but can only afford 3046. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account\",\"code\":402,\"metadata\":{\"provider_name\":null}},\"user_id\":\"user_2ta6eenp3GBwQk7yY0xUlJ9FCbV\"}</p>",
-  "imageUrl": null,
+  "summary": "A hands-on guide for the DIY enthusiast on how to test common automotive sensors and replace them correctly, saving you time and money.",
+  "content": "## Testing Your Sensors\n\nBefore replacing a sensor, it's crucial to test it to confirm it's the source of the problem. A multimeter is an essential tool for this. You can check for resistance, voltage, and continuity according to your vehicle's service manual.\n\n### Common Sensors to Check\n\n- **Oxygen (O2) Sensor:** Measures oxygen in the exhaust.\n- **Mass Airflow (MAF) Sensor:** Measures the amount of air entering the engine.\n- **Throttle Position Sensor (TPS):** Monitors the throttle's position.",
+  "imageUrl": "https://placehold.co/600x400.png",
   "status": "ready"
 }

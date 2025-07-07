@@ -1,0 +1,11 @@
+
+{
+  "id": 101,
+  "title": "The Ultimate Guide to Engine Diagnostics",
+  "category": "Engine",
+  "slug": "the-ultimate-guide-to-engine-diagnostics-101",
+  "summary": "Learn the ins and outs of engine diagnostics, from reading codes to understanding sensor data. This guide covers everything you need to know.",
+  "content": "## Introduction to Engine Diagnostics\n\nEngine diagnostics is the process of using specialized tools to identify issues within a car's engine. Modern vehicles are equipped with an On-Board Diagnostics (OBD2) system that monitors performance and flags problems by generating Diagnostic Trouble Codes (DTCs). Understanding these codes is the first step to resolving engine-related problems.\n\n### Why Diagnostics Matter\n\nRegular diagnostics can help you catch problems early, saving you from costly repairs down the line. It improves fuel efficiency, ensures safety, and prolongs the life of your vehicle. Don't ignore that check engine light!",
+  "imageUrl": "https://placehold.co/600x400.png",
+  "status": "ready"
+}
