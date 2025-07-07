@@ -142,6 +142,26 @@ async function generateAndUploadImage(slug: string, title: string, category: str
         throw new Error("Uploaded file content did not contain a download_url.");
 
     } catch (err: any) {
+        // This is the new logic to handle race conditions.
+        // GitHub often returns 422 or 409 for this specific race condition.
+        if (err.status === 422 || err.status === 409) { 
+            console.warn(`[Image Gen] Race condition detected for "${slug}". File was likely created by another process. Re-fetching content to recover.`);
+            // Try to get the content again, now that it should exist.
+            try {
+                const { data } = await octokit.repos.getContent({
+                    owner: GITHUB_OWNER,
+                    repo: GITHUB_REPO,
+                    path: imagePath,
+                });
+                if (data && 'download_url' in data && data.download_url) {
+                    console.log(`[Image Gen] ✅ Successfully recovered image URL after race condition: ${data.download_url}`);
+                    return data.download_url;
+                }
+            } catch (refetchError: any) {
+                console.error(`[Image Gen] ❌ Failed to re-fetch image after race condition for "${slug}":`, refetchError.message);
+            }
+        }
+        
         console.error(`[Image Gen] ❌ Failed to generate and upload image for "${slug}":`, err.message);
         return placeholderUrl;
     }
