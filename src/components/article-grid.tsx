@@ -8,7 +8,7 @@ import { Card, CardContent } from './ui/card';
 import { AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { generateAndCacheImage } from '@/app/actions';
+import { generateLiveImage } from '@/app/actions';
 
 interface ArticleGridProps {
   topics: ArticleTopic[];
@@ -17,51 +17,48 @@ interface ArticleGridProps {
 
 export function ArticleGrid({ topics, showImageGenerator = false }: ArticleGridProps) {
   const { toast } = useToast();
-  const [localTopics, setLocalTopics] = useState(topics);
+  const [localTopics, setLocalTopics] = useState<ArticleTopic[]>([]);
   const [showImages, setShowImages] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingImageIds, setLoadingImageIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     // When the initial topics prop changes, update the local state.
-    setLocalTopics(topics);
+    // Ensure imageUrl is null initially so it always starts with icons.
+    setLocalTopics(topics.map(t => ({ ...t, imageUrl: null })));
+    setShowImages(false);
   }, [topics]);
 
-  const handleToggleImages = async () => {
-    if (showImages) {
-      setShowImages(false);
-      return;
-    }
-
+  const handleGenerateImages = async () => {
     setShowImages(true);
-    const topicsToUpdate = localTopics.filter(t => !t.imageUrl || t.imageUrl.includes('placehold.co'));
-
-    if (topicsToUpdate.length === 0) {
-      toast({
-        title: "Images Loaded",
-        description: "All images are already available.",
-      });
-      return;
-    }
-
     setIsGenerating(true);
-    setLoadingImageIds(new Set(topicsToUpdate.map(t => t.id)));
+    
+    // Start loading state for all topics in the grid
+    const topicsToGenerate = localTopics;
+    setLoadingImageIds(new Set(topicsToGenerate.map(t => t.id)));
     
     toast({
-        title: "Generating AI Images...",
-        description: `Please wait while ${topicsToUpdate.length} new image(s) are created.`,
+        title: "Generating Live AI Images...",
+        description: `Please wait while ${topicsToGenerate.length} new image(s) are created for this session.`,
     });
 
-    const updatePromises = topicsToUpdate.map(async (topic) => {
+    const updatePromises = topicsToGenerate.map(async (topic) => {
       try {
-        const updatedTopic = await generateAndCacheImage({ slug: topic.slug, title: topic.title, category: topic.category });
-        if (updatedTopic?.imageUrl) {
-          setLocalTopics(prev => prev.map(t => t.id === updatedTopic.id ? updatedTopic : t));
+        const result = await generateLiveImage({ slug: topic.slug, title: topic.title, category: topic.category });
+        if (result?.imageUrl) {
+          // Update only the specific topic with the new URL
+          setLocalTopics(prev => 
+            prev.map(t => t.id === topic.id ? { ...t, imageUrl: result.imageUrl } : t)
+          );
+        } else {
+          // Handle failure for a single image
+           toast({ variant: 'destructive', title: `Image failed for ${topic.title}` });
         }
       } catch (error) {
         console.error(`Failed to generate image for ${topic.title}`, error);
         toast({ variant: 'destructive', title: `Image failed for ${topic.title}` });
       } finally {
+        // Remove from loading set one by one
         setLoadingImageIds(prev => {
           const newSet = new Set(prev);
           newSet.delete(topic.id);
@@ -74,8 +71,18 @@ export function ArticleGrid({ topics, showImageGenerator = false }: ArticleGridP
     setIsGenerating(false);
     toast({
       title: "AI Images Ready",
-      description: "All new images have been generated and cached for future visits.",
+      description: "Live images have been generated for this session.",
     });
+  };
+
+  const handleToggleImages = () => {
+    if (showImages) {
+      // Hide images and reset URLs to null for re-generation next time
+      setShowImages(false);
+      setLocalTopics(prev => prev.map(t => ({...t, imageUrl: null})));
+    } else {
+      handleGenerateImages();
+    }
   };
   
   if (!localTopics || localTopics.length === 0) {
@@ -99,9 +106,9 @@ export function ArticleGrid({ topics, showImageGenerator = false }: ArticleGridP
       {showImageGenerator && (
         <div className="mb-8 flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-6 text-center sm:flex-row">
           <div>
-            <h3 className="font-semibold text-lg text-primary">View with AI-Generated Images</h3>
+            <h3 className="font-semibold text-lg text-primary">View with Live AI-Generated Images</h3>
             <p className="text-sm text-muted-foreground max-w-md">
-              Click the button to toggle between category icons and unique, high-quality images for each article below.
+              Click the button to generate a new, unique set of high-quality images for each article below.
             </p>
           </div>
           <Button onClick={handleToggleImages} disabled={isGenerating}>
