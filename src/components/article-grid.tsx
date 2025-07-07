@@ -55,16 +55,33 @@ export function ArticleGrid({ topics: initialTopics, proactiveGeneration = false
       const generateSequentially = async () => {
         // Sequentially process each pending topic to avoid overloading the server.
         for (const topic of pendingTopics) {
-          const result = await triggerArticleGeneration(topic.slug);
-          if (result && result.status === 'ready') {
-            // Update the state for this specific topic to turn its dot green and show the image.
-            setTopics(prevTopics =>
-              prevTopics.map(t =>
-                t.id === topic.id ? { ...t, status: 'ready', imageUrl: result.imageUrl } : t
-              )
-            );
-          } else {
-            console.error(`[Proactive Gen] Failed to generate or get a ready status for: ${topic.title}`);
+          let success = false;
+          let attempts = 0;
+          const maxAttempts = 3;
+
+          while (!success && attempts < maxAttempts) {
+            attempts++;
+            const result = await triggerArticleGeneration(topic.slug);
+
+            if (result && result.status === 'ready') {
+              // Update the state for this specific topic to turn its dot green and show the image.
+              setTopics(prevTopics =>
+                prevTopics.map(t =>
+                  t.id === topic.id ? { ...t, status: 'ready', imageUrl: result.imageUrl } : t
+                )
+              );
+              success = true; // Mark as successful to exit the while loop
+            } else {
+              // If not successful, and we haven't reached max attempts, wait and retry.
+              if (attempts < maxAttempts) {
+                 console.warn(`[Proactive Gen] Attempt ${attempts} failed for "${topic.title}". Retrying in 2 seconds...`);
+                 await new Promise(resolve => setTimeout(resolve, 2000)); // 2-second delay before retrying
+              }
+            }
+          }
+
+          if (!success) {
+             console.error(`[Proactive Gen] Failed to generate or get a ready status for: ${topic.title} after ${maxAttempts} attempts.`);
           }
         }
         // Hide the loader once all pending topics for this batch have been processed.
