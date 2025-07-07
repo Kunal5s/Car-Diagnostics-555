@@ -71,7 +71,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                   className="object-cover"
                   priority
                   sizes="(max-width: 768px) 100vw, 896px"
-                  data-ai-hint="car engine diagnostics"
+                  data-ai-hint={`${article.category.toLowerCase()} car`}
                 />
             </div>
             

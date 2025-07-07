@@ -34,7 +34,7 @@ export function ArticleCard({ article, priority = false }: ArticleCardProps) {
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               priority={priority}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              data-ai-hint="car engine diagnostics"
+              data-ai-hint={`${article.category.toLowerCase()} car`}
             />
         </Link>
       </CardHeader>
