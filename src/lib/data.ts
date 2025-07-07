@@ -122,6 +122,18 @@ async function generateAndCacheArticle(topic: Omit<ArticleTopic, 'slug' | 'image
     }
 }
 
+export async function getAllTopics(): Promise<ArticleTopic[]> {
+    return allArticleTopics.map(topic => {
+        const slug = `${slugify(topic.title)}-${topic.id}`;
+        return {
+            ...topic,
+            slug,
+            imageUrl: null,
+            status: 'pending'
+        };
+    });
+}
+
 export async function getArticleBySlug(slug: string): Promise<FullArticle | null> {
     const baseTopic = allArticleTopics.find(t => `${slugify(t.title)}-${t.id}` === slug);
     if (!baseTopic) return null;
