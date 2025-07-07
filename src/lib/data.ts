@@ -25,15 +25,15 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>[] = [
   { id: 11, title: "The Correct Procedure for Clearing OBD2 Codes After Vehicle Repair", category: "OBD2" },
   { id: 12, title: "Using Modern Bluetooth OBD2 Scanners with Your Android or iOS Smartphone", category: "OBD2" },
   // Alerts
-  { id: 14, title: "A Guide to Understanding Why Your Car's Battery and Alternator Lights Matter", category: "Alerts" },
-  { id: 16, title: "How to Correctly Respond to a Flashing Check Engine Light on Your Dashboard", category: "Alerts" },
-  { id: 20, title: "A Guide to Understanding the Meaning Behind Your Vehicle's Oil Pressure Light", category: "Alerts" },
   { id: 13, title: "A Detailed Guide to Decoding Your Car's ABS and Traction Control Lights", category: "Alerts" },
+  { id: 14, title: "A Guide to Understanding Why Your Car's Battery and Alternator Lights Matter", category: "Alerts" },
+  { id: 15, title: "What to Do When Your Dashboard Warning Lights Come On", category: "Alerts" },
+  { id: 16, title: "How to Correctly Respond to a Flashing Check Engine Light on Your Dashboard", category: "Alerts" },
   // Apps
   { id: 17, title: "A Review of the Top Car Diagnostic Mobile Apps for iOS and Android", category: "Apps" },
   { id: 18, title: "How Modern Car Diagnostic Apps Can Save You Hundreds on Repairs", category: "Apps" },
   { id: 19, title: "Using Car Apps to Diligently Track Maintenance and Overall Vehicle Health", category: "Apps" },
-  { id: 20, "title": "A Step-by-Step Guide on Connecting Your Car to a Diagnostic App", category: "Apps" },
+  { id: 20, title: "A Step-by-Step Guide on Connecting Your Car to a Diagnostic App", category: "Apps" },
   // Maintenance
   { id: 21, title: "Essential DIY Car Maintenance Tips for Every Responsible Car Owner", category: "Maintenance" },
   { id: 22, title: "How to Properly Check and Change Your Car's Most Essential Fluids", category: "Maintenance" },
@@ -51,8 +51,8 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>[] = [
   { id: 32, title: "The Key Differences Between AC and DC Fast Charging for Electric Vehicles", category: "EVs" },
   // Trends
   { id: 33, title: "The Exciting Future of Automotive Technology and AI Car Diagnostics", category: "Trends" },
-  { id: 34, title: "How Over-the-Air Software Updates Are Changing Modern Car Ownership Experience", category: "Trends" },
-  { id: 35, title: "Vehicle-to-Everything (V2X) Communication and the Future of Driving Safety", category: "Trends" },
+  { id: 34, "title": "How Over-the-Air Software Updates Are Changing Modern Car Ownership Experience", category: "Trends" },
+  { id: 35, "title": "Vehicle-to-Everything (V2X) Communication and the Future of Driving Safety", category: "Trends" },
   { id: 36, "title": "Understanding the Important Role of Big Data In Modern Connected Vehicles", category: "Trends" }
 ];
 
@@ -143,9 +143,9 @@ export async function getHomepageTopics(): Promise<ArticleTopic[]> {
 }
 
 export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
-  const topics = await getAllTopics();
-  const categoryTopics = topics.filter(topic => topic.category.toLowerCase() === categoryName.toLowerCase());
+  const allReadyTopics = await getAllTopics();
+  const categoryTopics = allReadyTopics.filter(topic => topic.category.toLowerCase() === categoryName.toLowerCase());
 
-  // Ensure we return up to 4 articles for the category
+  // Return the first 4 available articles for that category
   return categoryTopics.slice(0, 4);
 }
