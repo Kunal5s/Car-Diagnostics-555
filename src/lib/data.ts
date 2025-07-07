@@ -71,30 +71,36 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>[] = [
 const CACHE_DIR = path.join(process.cwd(), '.cache', 'articles');
 
 async function generateAndUploadImage(slug: string, title: string, category: string): Promise<string | null> {
-    if (!process.env.GITHUB_TOKEN) {
+    if (!GITHUB_TOKEN) {
         console.error("[Image Gen] GITHUB_TOKEN is not set. Skipping image generation. Please check your .env file and restart the server.");
-        return null;
+        return `https://placehold.co/600x400.png`;
     }
 
     const imagePath = `public/images/${slug}.jpg`;
     
     // Check if image already exists on GitHub first
     try {
-        await octokit.repos.getContent({
+        const { data } = await octokit.repos.getContent({
             owner: GITHUB_OWNER,
             repo: GITHUB_REPO,
             path: imagePath,
             ref: GITHUB_BRANCH,
         });
-        const existingUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${imagePath}`;
-        console.log(`[Image Gen] Image already exists for "${slug}". Re-using: ${existingUrl}`);
-        return existingUrl;
+
+        // The structure of the response for a file is an object, not an array.
+        // Also, need to access the download_url property.
+        if (data && 'download_url' in data && data.download_url) {
+            console.log(`[Image Gen] Image already exists for "${slug}". Re-using: ${data.download_url}`);
+            return data.download_url;
+        }
     } catch (error: any) {
         if (error.status !== 404) {
              console.error(`[Image Gen] Error checking for existing image for "${slug}":`, error.message);
-             return null; // Don't proceed if there's an API error other than "not found"
+             // Return placeholder on error to not block article generation
+             return `https://placehold.co/600x400.png`;
         }
         // If 404, continue to generate the image
+        console.log(`[Image Gen] No existing image found for "${slug}". Generating a new one.`);
     }
 
     const imageModel = 'flux-realism';
@@ -108,7 +114,7 @@ async function generateAndUploadImage(slug: string, title: string, category: str
         const seed = Math.floor(Math.random() * 1000000);
         const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${imageModel}&width=512&height=512&nologo=true&seed=${seed}`;
         
-        const response = await fetch(pollinationsUrl, { signal: AbortSignal.timeout(30000) }); // 30-second timeout
+        const response = await fetch(pollinationsUrl, { signal: AbortSignal.timeout(45000) }); // 45-second timeout
         if (!response.ok) {
             throw new Error(`Pollinations API request failed with status ${response.status}: ${await response.text()}`);
         }
@@ -121,7 +127,7 @@ async function generateAndUploadImage(slug: string, title: string, category: str
 
         const commitMessage = `feat: add image for article ${slug}`;
         
-        await octokit.repos.createOrUpdateFileContents({
+        const { data: { content } } = await octokit.repos.createOrUpdateFileContents({
             owner: GITHUB_OWNER,
             repo: GITHUB_REPO,
             path: imagePath,
@@ -130,13 +136,16 @@ async function generateAndUploadImage(slug: string, title: string, category: str
             branch: GITHUB_BRANCH,
         });
 
-        const finalUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${imagePath}`;
-        console.log(`[Image Gen]   - ✅ Successfully uploaded image. URL: ${finalUrl}`);
-        return finalUrl;
+        if (content && 'download_url' in content && content.download_url) {
+            const finalUrl = content.download_url;
+            console.log(`[Image Gen]   - ✅ Successfully uploaded image. URL: ${finalUrl}`);
+            return finalUrl;
+        }
+        throw new Error("Uploaded file content did not contain a download_url.");
 
     } catch (err: any) {
         console.error(`[Image Gen] ❌ Failed to generate and upload image for "${slug}":`, err.message);
-        return null;
+        return `https://placehold.co/600x400.png`;
     }
 }
 
@@ -175,7 +184,12 @@ export async function getHomepageTopics(): Promise<ArticleTopic[]> {
   const topics = await getAllTopics();
 
   const now = new Date();
-  const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+  // The seed is based on the day of the year, ensuring it changes every 24 hours.
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = (now.getTime() - start.getTime()) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  const seed = now.getFullYear() * 1000 + dayOfYear;
   
   function seededShuffle(array: any[], seed: number) {
       let currentIndex = array.length, temporaryValue, randomIndex;
@@ -217,57 +231,60 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         const article: FullArticle = JSON.parse(cachedData);
         // A valid cached article has content AND a valid image URL.
         if (article.content && !article.content.includes("Article Generation Failed") && article.imageUrl && article.imageUrl.startsWith('http')) {
-            console.log(`[Cache] HIT for "${slug}". Loading from file.`);
+            console.log(`[Cache] HIT for "${slug}". Loading from permanent file.`);
             return { ...article, status: 'ready' };
         }
     } catch (error: any) {
         if (error.code !== 'ENOENT') {
             console.error(`[Cache] Error reading cache file for ${slug}:`, error);
         }
+        // If file doesn't exist or is invalid, proceed to generate.
     }
     
     console.log(`[Cache] MISS for "${slug}". Generating content and image in parallel.`);
 
     // Run article and image generation in parallel
-    const [articleResult, imageUrl] = await Promise.all([
+    const [articleResult, imageUrlResult] = await Promise.all([
         generateArticle({ topic: staticTopic.title }),
         generateAndUploadImage(slug, staticTopic.title, staticTopic.category)
     ]);
     
     const articleFailed = !articleResult || articleResult.content.includes("Article Generation Failed");
-    const imageFailed = !imageUrl;
+    const imageFailed = !imageUrlResult || !imageUrlResult.startsWith('http');
 
     // If either process failed, we return the partial data for display, but do NOT cache it.
     // This allows the system to retry generation on the next visit.
     if (articleFailed || imageFailed) {
-        console.error(`[Generation] FAILED for "${slug}". Article Success: ${!articleFailed}, Image Success: ${!imageFailed}. Will not cache.`);
+        console.error(`[Generation] FAILED for "${slug}". Article Success: ${!articleFailed}, Image Success: ${!imageFailed}. Will NOT cache.`);
         return {
             ...staticTopic,
             slug: slug,
             summary: articleFailed ? "Error: Could not generate summary." : articleResult.summary,
             content: articleFailed ? "<h2>Article Generation Failed</h2><p>Could not generate the article content at this time. Please try again later.</p>" : articleResult.content,
-            imageUrl: imageUrl, // Can be null if it failed
+            imageUrl: imageUrlResult, // Can be a placeholder if it failed
             status: 'pending',
         };
     }
 
-    console.log(`[Generation] SUCCESS for "${slug}". Caching results.`);
+    console.log(`[Generation] SUCCESS for "${slug}". Caching results permanently.`);
     const fullArticle: FullArticle = {
         ...staticTopic,
         slug: slug,
         summary: articleResult.summary,
         content: articleResult.content,
-        imageUrl: imageUrl,
+        imageUrl: imageUrlResult,
         status: 'ready',
     };
 
     // Only write to cache if BOTH generation processes were successful.
     try {
         await fs.writeFile(cacheFilePath, JSON.stringify(fullArticle, null, 2));
-        console.log(`[Cache] Wrote new cache file for "${slug}".`);
+        console.log(`[Cache] Wrote new permanent cache file for "${slug}".`);
     } catch(e) {
-        console.error(`[Cache] FAILED to write cache file for "${slug}".`, e)
+        console.error(`[Cache] FAILED to write permanent cache file for "${slug}".`, e)
     }
     
     return fullArticle;
 }
+
+    

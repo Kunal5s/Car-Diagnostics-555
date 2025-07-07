@@ -127,8 +127,8 @@ const faqItems = [
     answer: "Yes. For content and image generation to work, you must provide your own API key for OpenRouter (for content) and a GitHub Personal Access Token (for image uploads) in a `.env` file. The site will show an error if it needs to generate articles and the keys are missing.",
   },
   {
-    question: "Why was the separate image generation script removed?",
-    answer: "The old script was unreliable and required manual work. The new, integrated 'generate-on-demand' system is fully automatic. It ensures that an image is always created and available the very first time an article is viewed, providing a much better user experience.",
+    question: "What is the 24-hour refresh on the homepage?",
+    answer: "The homepage features 4 'trending' articles. This selection is automatically shuffled every 24 hours to keep the content fresh and highlight different topics from our knowledge base. All other articles remain available on the 'Explore All Articles' page.",
   },
   {
     question: "Is my vehicle compatible?",
