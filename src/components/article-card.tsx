@@ -12,9 +12,10 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ImageOff } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { Skeleton } from "./ui/skeleton";
 
 interface ArticleCardProps {
   topic: ArticleTopic;
@@ -54,9 +55,7 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
                   onError={() => setImageError(true)}
                 />
              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-secondary">
-                  <ImageOff className="h-10 w-10 text-muted-foreground/50" />
-                </div>
+                <Skeleton className="h-full w-full" />
              )}
           </Link>
         </CardHeader>
