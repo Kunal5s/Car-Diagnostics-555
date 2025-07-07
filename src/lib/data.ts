@@ -78,7 +78,12 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         if (!response.ok) {
             return null; // Article not found
         }
-        return await response.json() as FullArticle;
+        const article = await response.json() as FullArticle;
+
+        // Dynamically construct the image URL to point to the external image repository.
+        article.imageUrl = `https://raw.githubusercontent.com/kunal5s/ai-blog-images/main/public/images/${slug}.jpg`;
+
+        return article;
     } catch (error) {
         console.error(`Error fetching article ${slug} from GitHub:`, error);
         return null;

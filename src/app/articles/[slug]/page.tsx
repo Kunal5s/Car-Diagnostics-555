@@ -55,7 +55,18 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         <article>
             <Breadcrumbs items={breadcrumbItems} />
             
-            {/* The image component that was here has been removed as per user request */}
+            {article.imageUrl && (
+              <div className="relative mb-8 h-64 w-full overflow-hidden rounded-lg md:h-96">
+                <Image
+                  src={article.imageUrl}
+                  alt={article.title}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 896px"
+                />
+              </div>
+            )}
 
             <header className="my-8">
             <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
