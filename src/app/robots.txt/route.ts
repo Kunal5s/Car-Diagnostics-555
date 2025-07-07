@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-const URL = 'https://oudworkstations.dev';
+const URL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:9002';
 
 export async function GET(req: NextRequest) {
   const robots = `
