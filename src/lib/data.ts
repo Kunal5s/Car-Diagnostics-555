@@ -93,7 +93,7 @@ export async function getAllTopics(): Promise<ArticleTopic[]> {
             const cachedArticle = await getArticleFromCache(topic.slug);
             return {
                 ...topic,
-                status: (cachedArticle && cachedArticle.content && cachedArticle.imageUrl) ? 'ready' : 'pending', 
+                status: (cachedArticle && cachedArticle.content) ? 'ready' : 'pending', 
                 imageUrl: cachedArticle?.imageUrl || null,
             };
         })

@@ -17,28 +17,28 @@ import { Skeleton } from "./ui/skeleton";
 
 interface ArticleCardProps {
   topic: ArticleTopic;
-  displayState: 'icon' | 'image';
+  showImage: boolean;
+  isLoading: boolean;
   priority?: boolean;
 }
 
-export function ArticleCard({ topic, displayState, priority = false }: ArticleCardProps) {
+export function ArticleCard({ topic, showImage, isLoading, priority = false }: ArticleCardProps) {
   const articleUrl = `/articles/${topic.slug}`;
   
   const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === topic.category.toLowerCase());
   const Icon = categoryInfo ? categoryInfo.icon : FileQuestion;
   
-  const hasImage = displayState === 'image' && topic.imageUrl;
+  const hasImage = showImage && topic.imageUrl && !topic.imageUrl.includes('placehold.co');
 
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <CardHeader className="p-0">
         <Link href={articleUrl} className="block relative h-48 w-full group bg-muted overflow-hidden rounded-t-lg">
-           {displayState === 'icon' && (
-              <div className="flex items-center justify-center h-full w-full bg-secondary/40">
-                <Icon className="h-16 w-16 text-muted-foreground/50" />
-              </div>
-           )}
-           {hasImage && (
+           {isLoading ? (
+             <div className="flex items-center justify-center h-full w-full">
+                <Skeleton className="h-full w-full" />
+             </div>
+           ) : hasImage ? (
               <Image
                 src={topic.imageUrl!}
                 alt={topic.title}
@@ -47,6 +47,10 @@ export function ArticleCard({ topic, displayState, priority = false }: ArticleCa
                 priority={priority}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
+           ) : (
+              <div className="flex items-center justify-center h-full w-full bg-secondary/40">
+                <Icon className="h-16 w-16 text-muted-foreground/50" />
+              </div>
            )}
         </Link>
       </CardHeader>
