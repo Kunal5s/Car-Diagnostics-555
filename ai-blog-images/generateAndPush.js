@@ -1,3 +1,4 @@
+
 // DEPRECATED: This script is no longer in use.
 // Image generation logic has been moved into the main application's
 // data fetching layer at `src/lib/data.ts`.
@@ -8,3 +9,5 @@
 //
 // This file is kept to avoid breaking changes but can be safely removed.
 console.log("This script is deprecated and no longer used.");
+
+    

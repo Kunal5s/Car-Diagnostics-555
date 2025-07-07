@@ -265,7 +265,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
     };
 
     // 4. Write to cache ONLY IF image generation was successful
-    if (fullArticle.imageUrl) {
+    if (fullArticle.imageUrl && !fullArticle.content.includes("Article Generation Failed")) {
         try {
             await fs.writeFile(cacheFilePath, JSON.stringify(fullArticle, null, 2));
             console.log(`[Cache] Wrote new cache file for "${slug}".`);
@@ -273,8 +273,10 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
             console.error(`[Cache] Error writing cache file for ${slug}:`, error);
         }
     } else {
-        console.warn(`[Cache] SKIPPING cache write for "${slug}" because image generation failed.`);
+        console.warn(`[Cache] SKIPPING cache write for "${slug}" because image or content generation failed.`);
     }
     
     return fullArticle;
 }
+
+    

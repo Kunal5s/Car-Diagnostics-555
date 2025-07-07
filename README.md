@@ -1,3 +1,4 @@
+
 # Car Diagnostics AI
 
 This is a Next.js application built in Firebase Studio. It uses a powerful AI system to generate a complete library of in-depth automotive articles live, on-demand. This provides users with the freshest content possible, directly from the AI.
@@ -31,3 +32,5 @@ This application uses a dynamic content strategy to ensure every article is as f
 -   **No Database Needed:** This simplified approach removes the need for any external database setup.
 -   **Static Topic Base:** The site is built on a stable foundation of curated article topics, ensuring all URLs are permanent and SEO-friendly.
 -   **Daily Homepage Refresh:** The homepage automatically shuffles topics every 24 hours to feature a new set of 6 "trending" articles.
+
+    
