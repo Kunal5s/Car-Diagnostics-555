@@ -29,7 +29,7 @@ import {
   Wrench,
   Star,
 } from "lucide-react";
-import { getLiveArticles } from "@/lib/data";
+import { getRecentArticles } from "@/lib/data";
 import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
 
 
@@ -37,9 +37,6 @@ export const metadata: Metadata = {
   description: "Detect engine problems instantly with Car Diagnostics BrainAi. Get smart analysis, vehicle health reports, and expert-written articles on maintenance and repair.",
   keywords: ["AI car diagnostics", "OBD2 error codes", "engine fault scan", "vehicle health report", "car diagnostics tool", "Car Diagnostics BrainAi"],
 };
-
-// Revalidate this page every 20 minutes (1200 seconds) to fetch new articles
-export const revalidate = 1200;
 
 const howItWorksSteps = [
   {
@@ -132,7 +129,7 @@ const faqItems = [
   },
   {
     question: "What is the refresh cycle?",
-    answer: "The homepage and category pages are set to revalidate every 20 minutes. This means they will fetch the latest list of articles from our repository periodically to keep the content fresh and highlight different articles.",
+    answer: "A Vercel Cron Job runs daily to generate a new article and commit it to our GitHub repository. This automatically triggers a new deployment on Vercel, ensuring the site is always updated with the latest content.",
   },
   {
     question: "Is my vehicle compatible?",
@@ -146,7 +143,7 @@ const faqItems = [
 
 
 async function HomepageContent() {
-  const trendingArticles = await getLiveArticles(null, 4);
+  const trendingArticles = await getRecentArticles(6);
   return <ArticleGrid articles={trendingArticles} />;
 }
 
@@ -176,10 +173,10 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div>
             <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-primary lg:text-4xl">
-              Today's Trending Articles
+              Recently Added Articles
             </h2>
           </div>
-           <Suspense fallback={<ArticleGridSkeleton count={4} />}>
+           <Suspense fallback={<ArticleGridSkeleton count={6} />}>
             <HomepageContent />
           </Suspense>
         </div>

@@ -2,7 +2,7 @@
 import { ArticleGrid } from "@/components/article-grid";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { getAllCachedArticles } from "@/lib/data";
+import { getAllArticles } from "@/lib/data";
 import { Suspense } from "react";
 import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
 
@@ -11,11 +11,8 @@ export const metadata: Metadata = {
   description: 'Explore our complete library of AI-generated articles on car diagnostics, maintenance, and technology.',
 };
 
-// Revalidate this page every 20 minutes (1200 seconds) to fetch new articles
-export const revalidate = 1200;
-
 async function AllArticlesContent() {
-  const articles = await getAllCachedArticles();
+  const articles = await getAllArticles();
   return <ArticleGrid articles={articles} />;
 }
 

@@ -1,21 +1,42 @@
 
 # Car Diagnostics AI
 
-This is a Next.js application built in Firebase Studio. It uses a sophisticated file-based caching system to display a complete library of in-depth, pre-generated automotive articles.
+This is a Next.js application built in Firebase Studio. It features a fully automated content pipeline that uses AI to generate and publish new articles daily.
 
-## Content Strategy: Stable, Fast, and Reliable
+## Fully Automated Architecture (Vercel Cron + GitHub)
 
-This application is designed for maximum performance and reliability by using a local, file-based content cache.
+This application is designed for a "set it and forget it" content strategy, ensuring the site remains fresh and up-to-date with minimal human intervention.
 
--   **Pre-Generated Content:** All articles and their associated metadata are stored in a single JSON file located at `/src/lib/articles.json`. This acts as the application's lightweight, built-in CMS.
--   **No Live Generation:** The application reads directly from the cached file and does **not** perform live AI generation or fetching during a user's visit. This guarantees a fast, error-free experience.
--   **No External Dependencies:** This simplified approach removes the need for external API keys, databases, or complex data-fetching logic during runtime. The app works perfectly "out of the box."
+-   **Daily Content Generation**: A Vercel Cron Job runs automatically every day to generate a new, in-depth automotive article.
+-   **AI-Powered**: The cron job uses Google's Gemini model via Genkit to create high-quality, SEO-friendly articles complete with a relevant hero image.
+-   **Git as CMS**: Generated articles are saved as individual JSON files directly into the `/_articles` directory of this GitHub repository. This acts as a permanent, version-controlled database.
+-   **Automatic Redeployment**: Committing a new article to the repository automatically triggers a new deployment on Vercel, ensuring the latest content is always live.
+-   **Fast & Reliable**: The Next.js application reads directly from the local `/_articles` files at build time. This makes the website extremely fast and reliable, with no external database or complex data-fetching logic during a user's visit.
 
 ## Getting Started
 
-This project is configured to run without any external API keys or environment variables.
+To run this project, you need to set up the following environment variables in your Vercel project settings.
 
-To run the development server:
+### Required Environment Variables
+
+Create a `.env.local` file for local development or add these directly to your Vercel project's "Environment Variables" section.
+
+-   `GOOGLE_API_KEY`: Your API key for Google AI Studio (Gemini).
+-   `CRON_SECRET`: A secret string to secure your cron job endpoint. Generate a strong, random string for this.
+-   `GITHUB_TOKEN`: A GitHub Personal Access Token with `repo` scope to allow the cron job to commit articles to the repository.
+-   `GITHUB_REPO_OWNER`: The owner of the GitHub repository (e.g., your GitHub username).
+-   `GITHUB_REPO_NAME`: The name of the GitHub repository.
+
+```bash
+# .env.local
+GOOGLE_API_KEY="your_google_api_key"
+CRON_SECRET="your_secret_cron_job_string"
+GITHUB_TOKEN="your_github_personal_access_token"
+GITHUB_REPO_OWNER="your_github_username"
+GITHUB_REPO_NAME="your_github_repository_name"
+```
+
+### Running the Development Server
 
 ```bash
 npm run dev
@@ -23,12 +44,8 @@ npm run dev
 
 Open [http://localhost:9002](http://localhost:9002) with your browser to see the result.
 
-## Future Expansion: Automated Content Updates
+### Manually Triggering the Cron Job
 
-While the application currently uses a static content file, it can be expanded with an automated content pipeline. A separate, scheduled process (like a Vercel Cron Job or a GitHub Action) can be created to:
+To test the article generation process without waiting for the scheduled time, you can trigger it manually by visiting the following URL in your browser (after deployment):
 
-1.  Generate new articles and images using an AI model (e.g., Together AI).
-2.  Commit the updated `articles.json` file back to the GitHub repository.
-3.  Deploying this change will automatically update the content on the live website.
-
-This architecture decouples the content generation from the web application, ensuring the user-facing site remains fast and stable at all times.
+`https://<your-vercel-domain>/api/cron?secret=<your_cron_secret>`
