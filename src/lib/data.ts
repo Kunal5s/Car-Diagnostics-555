@@ -164,7 +164,7 @@ export async function getAllTopics(): Promise<ArticleTopic[]> {
         const article: FullArticle = JSON.parse(cachedData);
         // A 'ready' article must have a non-null status field set to 'ready'.
         // This is the most reliable check.
-        if (article.status === 'ready' && article.imageUrl) {
+        if (article.status === 'ready' && article.imageUrl && !article.imageUrl.includes('placehold.co')) {
              return { ...topic, imageUrl: article.imageUrl, status: 'ready' as const };
         }
         // If file exists but is not ready, it's pending.
@@ -226,8 +226,8 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
     try {
         const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
         const article: FullArticle = JSON.parse(cachedData);
-        // A valid cached article MUST have status: 'ready'. This is the most reliable check.
-        if (article.status === 'ready') {
+        // A valid cached article MUST have status: 'ready' and a real image.
+        if (article.status === 'ready' && article.imageUrl && !article.imageUrl.includes('placehold.co')) {
             console.log(`[Cache] HIT for "${slug}". Loading from permanent file.`);
             return article;
         }
@@ -244,18 +244,18 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         generateAndUploadImage(slug, staticTopic.title, staticTopic.category)
     ]);
     
-    const articleFailed = !articleResult || articleResult.content.includes("Article Generation Failed");
+    const articleFailed = !articleResult || articleResult.content.includes("Article Generation Failed") || (articleResult.content.split(' ').length < 1500);
     const imageFailed = !imageUrlResult || imageUrlResult.includes('placehold.co');
 
     // If either process failed, we return the partial data for display, but do NOT cache it.
     // This allows the system to retry generation on the next visit.
     if (articleFailed || imageFailed) {
-        console.error(`[Generation] FAILED for "${slug}". Article Success: ${!articleFailed}, Image Success: ${!imageFailed}. Will NOT cache.`);
+        console.error(`[Generation] FAILED for "${slug}". Article OK: ${!articleFailed}, Image OK: ${!imageFailed}. Will NOT cache.`);
         return {
             ...staticTopic,
             slug: slug,
             summary: articleFailed ? "Error: Could not generate summary." : articleResult.summary,
-            content: articleFailed ? "<h2>Article Generation Failed</h2><p>Could not generate the article content at this time. Please try again later.</p>" : articleResult.content,
+            content: articleFailed ? "<h2>Article Generation Failed</h2><p>Could not generate the article content at this time. This could be due to a network issue, API error, or the generated content not meeting quality standards (e.g., word count). Please try again later.</p>" : articleResult.content,
             imageUrl: imageUrlResult, 
             status: 'pending',
         };

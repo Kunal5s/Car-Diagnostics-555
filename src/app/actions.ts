@@ -1,3 +1,4 @@
+
 'use server';
 
 import { getArticleBySlug } from '@/lib/data';

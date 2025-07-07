@@ -54,5 +54,3 @@ export function ArticleGrid({ topics }: ArticleGridProps) {
     </motion.div>
   );
 }
-
-    
