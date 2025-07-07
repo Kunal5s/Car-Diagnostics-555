@@ -32,7 +32,9 @@ export async function generateStaticParams() {
 }
 
 async function CategoryContent({ categoryName }: { categoryName: string }) {
-    const articles = await getArticlesByCategory(categoryName);
+    // Fetch all articles for the category, then slice to show only the 4 most recent.
+    // The `getAllArticles` function in `data.ts` sorts by ID descending, so the newest are first.
+    const articles = (await getArticlesByCategory(categoryName)).slice(0, 4);
     return <ArticleGrid articles={articles} />;
 }
 
@@ -66,7 +68,7 @@ export default function CategoryPage({
           </p>
         </div>
       </div>
-      <Suspense fallback={<ArticleGridSkeleton count={6} />}>
+      <Suspense fallback={<ArticleGridSkeleton count={4} />}>
         <CategoryContent categoryName={categoryInfo.name} />
       </Suspense>
     </div>
