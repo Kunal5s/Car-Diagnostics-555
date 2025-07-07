@@ -38,30 +38,28 @@ export function ArticleGrid({ topics }: ArticleGridProps) {
 
       setIsGenerating(true);
 
-      // Trigger all generations in parallel
-      await Promise.all(
-        pendingTopics.map(async (topic) => {
-          try {
-            const result = await triggerArticleGeneration(topic.slug);
-            if (result && result.imageUrl && result.status === 'ready') {
-              // Update the state for this specific topic to turn its dot green
-              setCurrentTopics((prev) =>
-                prev.map((p) =>
-                  p.id === topic.id
-                    ? { ...p, status: 'ready', imageUrl: result.imageUrl }
-                    : p
-                )
-              );
-            }
-          } catch (error) {
-            console.error(
-              `Client-side trigger failed for ${topic.slug}:`,
-              error
+      // Sequentially trigger generation to avoid overwhelming the server and keep the UI responsive.
+      for (const topic of pendingTopics) {
+        try {
+          const result = await triggerArticleGeneration(topic.slug);
+          if (result && result.imageUrl && result.status === 'ready') {
+            // Update the state for this specific topic to turn its dot green
+            setCurrentTopics((prev) =>
+              prev.map((p) =>
+                p.id === topic.id
+                  ? { ...p, status: 'ready', imageUrl: result.imageUrl }
+                  : p
+              )
             );
-            // Optionally, handle the error in the UI, e.g., show a failed state
           }
-        })
-      );
+        } catch (error) {
+          console.error(
+            `Client-side trigger failed for ${topic.slug}:`,
+            error
+          );
+          // Optionally, handle the error in the UI, e.g., show a failed state
+        }
+      }
 
       setIsGenerating(false);
     };
