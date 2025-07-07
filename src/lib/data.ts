@@ -210,11 +210,11 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
             console.log(`[Cache] HIT for "${slug}". Loading from file.`);
             const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
             const article: FullArticle = JSON.parse(cachedData);
-            // Simple validation to ensure the cached content is not an error message
-            if (article.content && !article.content.includes("Article Generation Failed")) {
+            // Simple validation to ensure the cached content is not an error or missing an image
+            if (article.content && !article.content.includes("Article Generation Failed") && article.imageUrl) {
                 return article;
             }
-            console.log(`[Cache] Stale or invalid cache content for "${slug}". Regenerating.`);
+            console.log(`[Cache] Stale or invalid cache for "${slug}". Regenerating.`);
         }
     } catch (error: any) {
         if (error.code !== 'ENOENT') {
@@ -230,7 +230,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
     let finalImageUrl: string | null = null;
 
     try {
-        // This check determines if we need to generate a new image
         await octokit.repos.getContent({
             owner: GITHUB_OWNER,
             repo: GITHUB_REPO,
@@ -241,11 +240,9 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         console.log(`[GitHub] Image already exists for "${slug}". Re-using it.`);
     } catch (error: any) {
         if (error.status === 404) {
-            // Image doesn't exist, so we need to generate and upload it.
             console.log(`[GitHub] Image does not exist for "${slug}". Generating new image.`);
             finalImageUrl = await generateAndUploadImage(slug, staticTopic.title, staticTopic.category);
         } else {
-            // Some other error occurred while checking for the image
             console.error(`[GitHub] Error checking for image existence for "${slug}":`, error.message);
         }
     }
@@ -267,12 +264,16 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         imageUrl: finalImageUrl, // Use the determined image URL
     };
 
-    // 4. Write the newly generated content and image URL to the local cache
-    try {
-        await fs.writeFile(cacheFilePath, JSON.stringify(fullArticle, null, 2));
-        console.log(`[Cache] Wrote new cache file for "${slug}".`);
-    } catch (error) {
-        console.error(`[Cache] Error writing cache file for ${slug}:`, error);
+    // 4. Write to cache ONLY IF image generation was successful
+    if (fullArticle.imageUrl) {
+        try {
+            await fs.writeFile(cacheFilePath, JSON.stringify(fullArticle, null, 2));
+            console.log(`[Cache] Wrote new cache file for "${slug}".`);
+        } catch (error) {
+            console.error(`[Cache] Error writing cache file for ${slug}:`, error);
+        }
+    } else {
+        console.warn(`[Cache] SKIPPING cache write for "${slug}" because image generation failed.`);
     }
     
     return fullArticle;
