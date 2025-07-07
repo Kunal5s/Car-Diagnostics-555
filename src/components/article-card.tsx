@@ -71,9 +71,14 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
           </h3>
         </CardContent>
         <CardFooter className="p-6 pt-0">
-          <Button asChild variant="link" className="p-0">
-            <Link href={articleUrl}>
-              Read More <ArrowRight className="ml-2 h-4 w-4" />
+          <Button asChild variant="link" className="p-0 text-primary">
+            <Link href={articleUrl} className="flex items-center">
+              {topic.status === 'ready' ? (
+                <span className="mr-2 h-2.5 w-2.5 rounded-full bg-green-500" title="Ready to read"></span>
+              ) : (
+                <span className="mr-2 h-2.5 w-2.5 rounded-full bg-yellow-400 animate-pulse" title="Generation in progress"></span>
+              )}
+              Read More <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </Button>
         </CardFooter>

@@ -20,7 +20,7 @@ const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 // This is the static list of all topics. It serves as the foundation of our site.
 // There are 4 unique topics per category.
-const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
+const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>[] = [
   // Engine
   { id: 1, title: "Advanced Diagnostic Techniques for Modern Common Engine Performance Issues", category: "Engine" },
   { id: 2, title: "A Comprehensive Step-by-Step Guide for Resolving Engine Overheating", category: "Engine" },
@@ -69,18 +69,16 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
 ];
 
 const CACHE_DIR = path.join(process.cwd(), '.cache', 'articles');
-const CACHE_TTL_HOURS = 24;
-
 
 async function generateAndUploadImage(slug: string, title: string, category: string): Promise<string | null> {
-    if (!GITHUB_TOKEN) {
+    if (!process.env.GITHUB_TOKEN) {
         console.error("[Image Gen] GITHUB_TOKEN is not set. Skipping image generation. Please check your .env file and restart the server.");
         return null;
     }
 
     const imagePath = `public/images/${slug}.jpg`;
     
-    // Check if image already exists on GitHub
+    // Check if image already exists on GitHub first
     try {
         await octokit.repos.getContent({
             owner: GITHUB_OWNER,
@@ -96,6 +94,7 @@ async function generateAndUploadImage(slug: string, title: string, category: str
              console.error(`[Image Gen] Error checking for existing image for "${slug}":`, error.message);
              return null; // Don't proceed if there's an API error other than "not found"
         }
+        // If 404, continue to generate the image
     }
 
     const imageModel = 'flux-realism';
@@ -150,25 +149,26 @@ export async function getAllTopics(): Promise<ArticleTopic[]> {
     slug: `${slugify(topic.title)}-${topic.id}`,
   }));
 
-  const topicsWithImages = await Promise.all(
+  const topicsWithStatus = await Promise.all(
     topicsWithSlugs.map(async (topic) => {
       const cacheFilePath = path.join(CACHE_DIR, `${topic.slug}.json`);
       try {
         const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
         const article: FullArticle = JSON.parse(cachedData);
-        // Only return an imageUrl if it's valid.
+        // A 'ready' article must have a valid image URL.
         if (article.imageUrl && article.imageUrl.startsWith('http')) {
-             return { ...topic, imageUrl: article.imageUrl };
+             return { ...topic, imageUrl: article.imageUrl, status: 'ready' as const };
         }
-        return { ...topic, imageUrl: null };
+        // If there's a cached file but no image, it's still pending.
+        return { ...topic, imageUrl: null, status: 'pending' as const };
       } catch (error) {
-        // If file doesn't exist, imageUrl is null
-        return { ...topic, imageUrl: null };
+        // If file doesn't exist, it's pending.
+        return { ...topic, imageUrl: null, status: 'pending' as const };
       }
     })
   );
 
-  return topicsWithImages;
+  return topicsWithStatus;
 }
 
 export async function getHomepageTopics(): Promise<ArticleTopic[]> {
@@ -211,13 +211,14 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
     await fs.mkdir(CACHE_DIR, { recursive: true });
     const cacheFilePath = path.join(CACHE_DIR, `${slug}.json`);
 
+    // Check cache first
     try {
         const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
         const article: FullArticle = JSON.parse(cachedData);
-        // A valid article has content and an image URL
-        if (article.content && !article.content.includes("Article Generation Failed") && article.imageUrl) {
+        // A valid cached article has content AND a valid image URL.
+        if (article.content && !article.content.includes("Article Generation Failed") && article.imageUrl && article.imageUrl.startsWith('http')) {
             console.log(`[Cache] HIT for "${slug}". Loading from file.`);
-            return article;
+            return { ...article, status: 'ready' };
         }
     } catch (error: any) {
         if (error.code !== 'ENOENT') {
@@ -233,19 +234,20 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         generateAndUploadImage(slug, staticTopic.title, staticTopic.category)
     ]);
     
-    // Check if either process failed
     const articleFailed = !articleResult || articleResult.content.includes("Article Generation Failed");
     const imageFailed = !imageUrl;
 
+    // If either process failed, we return the partial data for display, but do NOT cache it.
+    // This allows the system to retry generation on the next visit.
     if (articleFailed || imageFailed) {
         console.error(`[Generation] FAILED for "${slug}". Article Success: ${!articleFailed}, Image Success: ${!imageFailed}. Will not cache.`);
-        // Return the partial data for display on the page, but don't cache it
         return {
             ...staticTopic,
             slug: slug,
-            summary: articleFailed ? "Error generating summary." : articleResult.summary,
-            content: articleFailed ? "<h2>Article Generation Failed</h2><p>Could not generate the article content. Please try again later.</p>" : articleResult.content,
+            summary: articleFailed ? "Error: Could not generate summary." : articleResult.summary,
+            content: articleFailed ? "<h2>Article Generation Failed</h2><p>Could not generate the article content at this time. Please try again later.</p>" : articleResult.content,
             imageUrl: imageUrl, // Can be null if it failed
+            status: 'pending',
         };
     }
 
@@ -256,11 +258,16 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         summary: articleResult.summary,
         content: articleResult.content,
         imageUrl: imageUrl,
+        status: 'ready',
     };
 
-    // Only write to cache if both were successful
-    await fs.writeFile(cacheFilePath, JSON.stringify(fullArticle, null, 2));
-    console.log(`[Cache] Wrote new cache file for "${slug}".`);
+    // Only write to cache if BOTH generation processes were successful.
+    try {
+        await fs.writeFile(cacheFilePath, JSON.stringify(fullArticle, null, 2));
+        console.log(`[Cache] Wrote new cache file for "${slug}".`);
+    } catch(e) {
+        console.error(`[Cache] FAILED to write cache file for "${slug}".`, e)
+    }
     
     return fullArticle;
 }

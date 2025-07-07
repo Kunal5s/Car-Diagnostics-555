@@ -17,6 +17,7 @@ export interface ArticleTopic {
   category: string;
   slug: string;
   imageUrl: string | null;
+  status: 'ready' | 'pending';
 }
 
 export interface FullArticle extends ArticleTopic {
