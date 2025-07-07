@@ -16,14 +16,13 @@ export interface ArticleTopic {
   id: number;
   title: string;
   category: string;
-  slug: string;
-  imageUrl: string | null;
-  status: 'ready' | 'pending';
 }
 
 export interface FullArticle extends ArticleTopic {
+  slug: string;
   summary: string;
   content: string;
+  imageUrl: string;
 }
 
 export interface CategoryInfo {

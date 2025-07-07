@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: { slug:string } }):
     openGraph: {
       title: article.title,
       description: article.summary,
-      images: article.imageUrl ? [article.imageUrl] : [],
+      images: [article.imageUrl],
     },
   }
 }
@@ -48,6 +48,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     { label: article.title },
   ];
   
+  // Remove the H1 title from the markdown content, as we render it separately.
   const contentWithoutTitle = article.content.replace(/^\s*#\s*[^\n]*\n*/, '');
 
   return (
@@ -62,18 +63,17 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <p className="text-lg text-muted-foreground">{article.summary}</p>
             </header>
 
-            {article.imageUrl && (
-               <div className="relative mb-8 h-64 w-full overflow-hidden rounded-lg md:h-96">
-                  <Image
-                    src={article.imageUrl}
-                    alt={article.title}
-                    fill
-                    className="object-cover"
-                    priority
-                    sizes="(max-width: 768px) 100vw, 896px"
-                  />
-              </div>
-            )}
+            <div className="relative mb-8 h-64 w-full overflow-hidden rounded-lg md:h-96">
+                <Image
+                  src={article.imageUrl}
+                  alt={article.title}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 896px"
+                  data-ai-hint="car engine diagnostics"
+                />
+            </div>
             
             <div className="prose prose-lg dark:prose-invert max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>

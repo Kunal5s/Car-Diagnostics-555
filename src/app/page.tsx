@@ -29,7 +29,7 @@ import {
   Wrench,
   Star,
 } from "lucide-react";
-import { getTrendingArticles } from "@/lib/data";
+import { getLiveArticles } from "@/lib/data";
 import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
 
 
@@ -146,8 +146,8 @@ const faqItems = [
 
 
 async function HomepageContent() {
-  const trendingTopics = await getTrendingArticles(4);
-  return <ArticleGrid articles={trendingTopics} />;
+  const trendingArticles = await getLiveArticles(null, 4);
+  return <ArticleGrid articles={trendingArticles} />;
 }
 
 

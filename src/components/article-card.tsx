@@ -11,7 +11,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, FileQuestion } from "lucide-react";
-import { Skeleton } from "./ui/skeleton";
 
 interface ArticleCardProps {
   article: FullArticle;
@@ -24,26 +23,19 @@ export function ArticleCard({ article, priority = false }: ArticleCardProps) {
   const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === article.category.toLowerCase());
   const Icon = categoryInfo ? categoryInfo.icon : FileQuestion;
   
-  const hasImage = !!article.imageUrl;
-
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <CardHeader className="p-0">
         <Link href={articleUrl} className="block relative h-48 w-full group bg-muted overflow-hidden rounded-t-lg">
-           {hasImage ? (
-              <Image
-                src={article.imageUrl!}
-                alt={article.title}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                priority={priority}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
-           ) : (
-              <div className="flex items-center justify-center h-full w-full bg-secondary/40">
-                <Icon className="h-16 w-16 text-muted-foreground/50" />
-              </div>
-           )}
+            <Image
+              src={article.imageUrl}
+              alt={article.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              priority={priority}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              data-ai-hint="car engine diagnostics"
+            />
         </Link>
       </CardHeader>
       <CardContent className="flex-grow p-6">

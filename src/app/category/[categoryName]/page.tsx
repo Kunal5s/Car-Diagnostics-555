@@ -4,7 +4,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { categories, categoryDetails } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
-import { getArticlesByCategory } from "@/lib/data";
+import { getLiveArticles } from "@/lib/data";
 import { Suspense } from "react";
 import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
 
@@ -35,7 +35,7 @@ export async function generateStaticParams() {
 export const revalidate = 1200;
 
 async function CategoryContent({ categoryName }: { categoryName: string }) {
-    const articles = await getArticlesByCategory(categoryName);
+    const articles = await getLiveArticles(categoryName, 4);
     return <ArticleGrid articles={articles} />;
 }
 
