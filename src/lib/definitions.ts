@@ -7,7 +7,6 @@ import {
   Smartphone,
   Wrench,
   Zap,
-  TrendingUp,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -99,14 +98,6 @@ export const categoryDetails: CategoryInfo[] = [
     color: 'bg-amber-500/10',
     iconColor: 'text-amber-500',
   },
-  {
-    name: 'Trends',
-    description: 'Latest automotive trends',
-    icon: TrendingUp,
-    href: '/category/trends',
-    color: 'bg-pink-600/10',
-    iconColor: 'text-pink-600',
-  },
 ];
 
 export const categories = [
@@ -118,5 +109,4 @@ export const categories = [
   "Maintenance",
   "Fuel",
   "EVs",
-  "Trends",
 ];

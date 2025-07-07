@@ -1,0 +1,11 @@
+
+{
+  "id": 204,
+  "title": "The Relationship Between Crankshaft and Camshaft Sensors",
+  "category": "Sensors",
+  "slug": "the-relationship-between-crankshaft-and-camshaft-sensors-204",
+  "summary": "Understand how the crankshaft and camshaft position sensors work together as a team to ensure your engine runs with precision and efficiency.",
+  "content": "Content for The Relationship Between Crankshaft and Camshaft Sensors goes here. This article delves into the synergistic relationship between two of the most important sensors in an engine: the crankshaft position (CKP) sensor and the camshaft position (CMP) sensor. It explains that while the CKP sensor tracks the crankshaft's rotation and piston position, the CMP sensor monitors the camshaft's position to determine which cylinder is on its power stroke. The ECU uses the combined data from these two sensors to precisely control ignition timing and fuel injection for each cylinder. The guide covers the common symptoms of failure for each sensor and explains why a fault in one can often affect the other, leading to starting issues, stalling, and poor engine performance.",
+  "imageUrl": null,
+  "status": "ready"
+}

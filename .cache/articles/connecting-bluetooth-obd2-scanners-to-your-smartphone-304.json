@@ -1,0 +1,11 @@
+
+{
+  "id": 304,
+  "title": "Connecting Bluetooth OBD2 Scanners to Your Smartphone",
+  "category": "OBD2",
+  "slug": "connecting-bluetooth-obd2-scanners-to-your-smartphone-304",
+  "summary": "Turn your smartphone into a powerful diagnostic tool. This guide shows you how to pair a Bluetooth OBD2 scanner with apps on iOS and Android.",
+  "content": "Content for Connecting Bluetooth OBD2 Scanners to Your Smartphone goes here. This user-friendly guide explains how to leverage the power of a smartphone for car diagnostics. It details the process of choosing a Bluetooth OBD2 adapter, ensuring compatibility with either an Android or iOS device. The article provides a step-by-step walkthrough of the pairing process, from plugging the adapter into the car's OBD2 port to connecting it via the phone's Bluetooth settings. It also reviews some of the most popular and powerful companion apps, like Torque Pro and OBD Fusion, showcasing how they can be used to read codes, create custom live data dashboards, and track vehicle performance, all from the convenience of your phone.",
+  "imageUrl": null,
+  "status": "ready"
+}

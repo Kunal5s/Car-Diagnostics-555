@@ -1,0 +1,11 @@
+
+{
+  "id": 301,
+  "title": "Getting Started with OBD2 Scanners for Diagnostics",
+  "category": "OBD2",
+  "slug": "getting-started-with-obd2-scanners-for-diagnostics-301",
+  "summary": "A beginner's guide to using OBD2 scanners. Learn how to connect to your car, read trouble codes, and take your first step into DIY diagnostics.",
+  "content": "Content for Getting Started with OBD2 Scanners for Diagnostics goes here. This article serves as the perfect starting point for anyone new to vehicle diagnostics. It demystifies the OBD2 port, explaining where to find it in your car and how to connect a scanner. The guide walks the reader through the basic functions of an entry-level OBD2 scanner, including how to read and interpret Diagnostic Trouble Codes (DTCs), what the 'pending' and 'permanent' code statuses mean, and how to view the readiness monitors for emissions testing. It also explains the difference between a code reader and a scan tool, helping beginners choose the right device for their needs and empowering them to understand what's happening under the hood.",
+  "imageUrl": null,
+  "status": "ready"
+}

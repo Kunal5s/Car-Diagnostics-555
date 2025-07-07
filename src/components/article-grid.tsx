@@ -39,6 +39,8 @@ export function ArticleGrid({ topics }: ArticleGridProps) {
     );
   }
 
+  // The proactive generation logic has been removed for a faster, more reliable
+  // static experience as requested. Articles are now pre-generated.
   return (
       <motion.div
         className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"

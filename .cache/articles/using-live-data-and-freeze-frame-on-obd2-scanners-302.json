@@ -1,0 +1,11 @@
+
+{
+  "id": 302,
+  "title": "Using Live Data and Freeze Frame on OBD2 Scanners",
+  "category": "OBD2",
+  "slug": "using-live-data-and-freeze-frame-on-obd2-scanners-302",
+  "summary": "Go beyond basic code reading. This guide unlocks the power of live data and freeze frame information to diagnose complex car problems accurately.",
+  "content": "Content for Using Live Data and Freeze Frame on OBD2 Scanners goes here. This advanced guide teaches car enthusiasts how to use two of the most powerful features of modern scan tools. It explains that 'Freeze Frame' data provides a snapshot of the exact engine conditions (RPM, temperature, speed, etc.) at the moment a fault code was triggered, offering crucial clues to the root cause of the problem. The article then explores 'Live Data,' showing readers how to monitor sensor inputs in real-time to diagnose intermittent issues and verify that a repair has worked correctly. It covers key parameters to watch, such as fuel trims and O2 sensor voltages, turning your scan tool from a simple code reader into a professional-grade diagnostic instrument.",
+  "imageUrl": null,
+  "status": "ready"
+}

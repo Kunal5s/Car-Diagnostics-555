@@ -1,0 +1,11 @@
+
+{
+  "id": 303,
+  "title": "The Right Way to Clear OBD2 Codes After a Repair",
+  "category": "OBD2",
+  "slug": "the-right-way-to-clear-obd2-codes-after-a-repair-303",
+  "summary": "Just fixed your car? Learn the correct procedure for clearing OBD2 codes and resetting the system to ensure the problem is truly solved.",
+  "content": "Content for The Right Way to Clear OBD2 Codes After a Repair goes here. This article addresses a common question for DIY mechanics: what to do after the repair is done. It explains that simply clearing the check engine light with a scanner is only part of the process. The guide details the importance of performing a drive cycle to allow the vehicle's computer to run its self-tests and verify that the repair was successful. It explains what emissions readiness monitors are and why they need to be in a 'ready' state after clearing codes. The article also contrasts clearing codes with a scanner versus disconnecting the battery, highlighting the pros and cons of each method and providing best practices for ensuring a complete and verified repair.",
+  "imageUrl": null,
+  "status": "ready"
+}
