@@ -159,7 +159,7 @@ const faqItems = [
 
 
 async function HomepageContent() {
-  const trendingArticles = await getRecentArticles(6);
+  const trendingArticles = await getRecentArticles(4);
   return <ArticleGrid articles={trendingArticles} />;
 }
 
@@ -192,7 +192,7 @@ export default function HomePage() {
               Recently Added Articles
             </h2>
           </div>
-           <Suspense fallback={<ArticleGridSkeleton count={6} />}>
+           <Suspense fallback={<ArticleGridSkeleton count={4} />}>
             <HomepageContent />
           </Suspense>
         </div>
