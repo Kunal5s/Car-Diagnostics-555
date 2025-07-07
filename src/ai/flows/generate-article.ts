@@ -61,7 +61,7 @@ export const generateArticleFlow = ai.defineFlow(
     outputSchema: GenerateArticleOutputSchema,
   },
   async (input) => {
-    const imagePrompt = `A photorealistic, high-resolution hero image for a technical automotive blog post about "${input.topic}". The image should be clean, modern, professional, and visually interesting with cinematic lighting. Focus on a single strong visual element related to the topic. Avoid text or clutter.`;
+    const imagePrompt = `A photorealistic, high-resolution hero image for a technical automotive blog post about "${input.topic}" in the "${input.category}" category. The image should be clean, modern, professional, and visually interesting with cinematic lighting. Focus on a single strong visual element related to the topic. Avoid text or clutter.`;
 
     // Generate the article text and the image in parallel to save time.
     const [articleResponse, imageResponse] = await Promise.all([
@@ -89,7 +89,7 @@ export const generateArticleFlow = ai.defineFlow(
         imageUrl = imageResponse.media.url;
     } else {
         console.warn('Gemini image generation failed, falling back to Pollinations AI.');
-        const fallbackPrompt = `A photorealistic, high-resolution hero image for a technical automotive blog post about "${input.topic}". The image should be clean, modern, professional, and visually interesting with cinematic lighting.`;
+        const fallbackPrompt = `A photorealistic, high-resolution hero image for a technical automotive blog post about "${input.topic}" in the "${input.category}" category. The image should be clean, modern, professional, and visually interesting with cinematic lighting.`;
         imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fallbackPrompt)}?width=600&height=400&nologo=true`;
     }
 
