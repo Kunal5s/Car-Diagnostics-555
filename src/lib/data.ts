@@ -70,10 +70,12 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>[] = [
 
 const CACHE_DIR = path.join(process.cwd(), '.cache', 'articles');
 
-async function generateAndUploadImage(slug: string, title: string, category: string): Promise<string | null> {
+async function generateAndUploadImage(slug: string, title: string, category: string): Promise<string> {
+    const placeholderUrl = `https://placehold.co/600x400.png`;
+
     if (!GITHUB_TOKEN) {
         console.error("[Image Gen] GITHUB_TOKEN is not set. Skipping image generation. Please check your .env file and restart the server.");
-        return `https://placehold.co/600x400.png`;
+        return placeholderUrl;
     }
 
     const imagePath = `public/images/${slug}.jpg`;
@@ -87,8 +89,6 @@ async function generateAndUploadImage(slug: string, title: string, category: str
             ref: GITHUB_BRANCH,
         });
 
-        // The structure of the response for a file is an object, not an array.
-        // Also, need to access the download_url property.
         if (data && 'download_url' in data && data.download_url) {
             console.log(`[Image Gen] Image already exists for "${slug}". Re-using: ${data.download_url}`);
             return data.download_url;
@@ -96,10 +96,8 @@ async function generateAndUploadImage(slug: string, title: string, category: str
     } catch (error: any) {
         if (error.status !== 404) {
              console.error(`[Image Gen] Error checking for existing image for "${slug}":`, error.message);
-             // Return placeholder on error to not block article generation
-             return `https://placehold.co/600x400.png`;
+             return placeholderUrl;
         }
-        // If 404, it means the file doesn't exist, so we proceed to generate it.
         console.log(`[Image Gen] No existing image found for "${slug}". Generating a new one.`);
     }
 
@@ -114,7 +112,7 @@ async function generateAndUploadImage(slug: string, title: string, category: str
         const seed = Math.floor(Math.random() * 1000000);
         const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${imageModel}&width=512&height=512&nologo=true&seed=${seed}`;
         
-        const response = await fetch(pollinationsUrl, { signal: AbortSignal.timeout(45000) }); // 45-second timeout
+        const response = await fetch(pollinationsUrl, { signal: AbortSignal.timeout(45000) });
         if (!response.ok) {
             throw new Error(`Pollinations API request failed with status ${response.status}: ${await response.text()}`);
         }
@@ -145,7 +143,7 @@ async function generateAndUploadImage(slug: string, title: string, category: str
 
     } catch (err: any) {
         console.error(`[Image Gen] ❌ Failed to generate and upload image for "${slug}":`, err.message);
-        return `https://placehold.co/600x400.png`;
+        return placeholderUrl;
     }
 }
 
@@ -164,11 +162,12 @@ export async function getAllTopics(): Promise<ArticleTopic[]> {
       try {
         const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
         const article: FullArticle = JSON.parse(cachedData);
-        // A 'ready' article must have a valid image URL.
-        if (article.imageUrl && article.imageUrl.startsWith('http')) {
+        // A 'ready' article must have a non-null status field set to 'ready'.
+        // This is the most reliable check.
+        if (article.status === 'ready' && article.imageUrl) {
              return { ...topic, imageUrl: article.imageUrl, status: 'ready' as const };
         }
-        // If there's a cached file but no image, it's still pending.
+        // If file exists but is not ready, it's pending.
         return { ...topic, imageUrl: null, status: 'pending' as const };
       } catch (error) {
         // If file doesn't exist, it's pending.
@@ -184,7 +183,6 @@ export async function getHomepageTopics(): Promise<ArticleTopic[]> {
   const topics = await getAllTopics();
 
   const now = new Date();
-  // The seed is based on the day of the year, ensuring it changes every 24 hours.
   const start = new Date(now.getFullYear(), 0, 0);
   const diff = (now.getTime() - start.getTime()) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
   const oneDay = 1000 * 60 * 60 * 24;
@@ -225,32 +223,29 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
     await fs.mkdir(CACHE_DIR, { recursive: true });
     const cacheFilePath = path.join(CACHE_DIR, `${slug}.json`);
 
-    // Check cache first
     try {
         const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
         const article: FullArticle = JSON.parse(cachedData);
-        // A valid cached article has content AND a valid image URL.
-        if (article.content && !article.content.includes("Article Generation Failed") && article.imageUrl && article.imageUrl.startsWith('http')) {
+        // A valid cached article MUST have status: 'ready'. This is the most reliable check.
+        if (article.status === 'ready') {
             console.log(`[Cache] HIT for "${slug}". Loading from permanent file.`);
-            return { ...article, status: 'ready' };
+            return article;
         }
     } catch (error: any) {
         if (error.code !== 'ENOENT') {
             console.error(`[Cache] Error reading cache file for ${slug}:`, error);
         }
-        // If file doesn't exist or is invalid, proceed to generate.
     }
     
     console.log(`[Cache] MISS for "${slug}". Generating content and image in parallel.`);
 
-    // Run article and image generation in parallel
     const [articleResult, imageUrlResult] = await Promise.all([
         generateArticle({ topic: staticTopic.title }),
         generateAndUploadImage(slug, staticTopic.title, staticTopic.category)
     ]);
     
     const articleFailed = !articleResult || articleResult.content.includes("Article Generation Failed");
-    const imageFailed = !imageUrlResult || !imageUrlResult.startsWith('http');
+    const imageFailed = !imageUrlResult || imageUrlResult.includes('placehold.co');
 
     // If either process failed, we return the partial data for display, but do NOT cache it.
     // This allows the system to retry generation on the next visit.
@@ -261,7 +256,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
             slug: slug,
             summary: articleFailed ? "Error: Could not generate summary." : articleResult.summary,
             content: articleFailed ? "<h2>Article Generation Failed</h2><p>Could not generate the article content at this time. Please try again later.</p>" : articleResult.content,
-            imageUrl: imageUrlResult, // Can be a placeholder if it failed
+            imageUrl: imageUrlResult, 
             status: 'pending',
         };
     }
@@ -276,7 +271,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         status: 'ready',
     };
 
-    // Only write to cache if BOTH generation processes were successful.
     try {
         await fs.writeFile(cacheFilePath, JSON.stringify(fullArticle, null, 2));
         console.log(`[Cache] Wrote new permanent cache file for "${slug}".`);
