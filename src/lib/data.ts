@@ -157,7 +157,8 @@ async function generateAndUploadImage(slug: string, title: string, category: str
                     console.log(`[Image Gen] ✅ Successfully recovered image URL after race condition: ${data.download_url}`);
                     return data.download_url;
                 }
-            } catch (refetchError: any) {
+            } catch (refetchError: any)
+                {
                 console.error(`[Image Gen] ❌ Failed to re-fetch image after race condition for "${slug}":`, refetchError.message);
             }
         }
@@ -264,7 +265,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         generateAndUploadImage(slug, staticTopic.title, staticTopic.category)
     ]);
     
-    const articleFailed = !articleResult || articleResult.content.includes("Article Generation Failed") || (articleResult.content.split(' ').length < 1500);
+    const articleFailed = !articleResult || articleResult.content.includes("Article Generation Failed") || (articleResult.content.split(' ').length < 1000);
     const imageFailed = !imageUrlResult || imageUrlResult.includes('placehold.co');
 
     // If either process failed, we return the partial data for display, but do NOT cache it.
@@ -275,7 +276,7 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
             ...staticTopic,
             slug: slug,
             summary: articleFailed ? "Error: Could not generate summary." : articleResult.summary,
-            content: articleFailed ? "<h2>Article Generation Failed</h2><p>Could not generate the article content at this time. This could be due to a network issue, API error, or the generated content not meeting quality standards (e.g., word count). Please try again later.</p>" : articleResult.content,
+            content: articleFailed ? "<h2>Article Generation Failed</h2><p>Could not generate the article content at this time. This could be due to a network issue, API error, or the generated content not meeting quality standards. Please try again later.</p>" : articleResult.content,
             imageUrl: imageUrlResult, 
             status: 'pending',
         };

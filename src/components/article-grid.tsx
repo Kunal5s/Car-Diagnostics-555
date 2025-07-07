@@ -81,7 +81,7 @@ export function ArticleGrid({ topics: initialTopics, proactiveGeneration = false
           }
 
           if (!success) {
-             console.error(`[Proactive Gen] Failed to generate or get a ready status for: ${topic.title} after ${maxAttempts} attempts.`);
+             console.warn(`[Proactive Gen] Failed to generate or get a ready status for: "${topic.title}" after ${maxAttempts} attempts. The process will be retried on the next page visit or manual click.`);
           }
         }
         // Hide the loader once all pending topics for this batch have been processed.
