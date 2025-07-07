@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { type ArticleTopic, categoryDetails } from "@/lib/definitions";
+import { type ArticleTopic } from "@/lib/definitions";
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ImageOff } from "lucide-react";
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
@@ -36,18 +36,16 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
   const articleUrl = `/articles/${topic.slug}`;
   const [imageError, setImageError] = useState(false);
 
-  const categoryInfo = categoryDetails.find(
-    (c) => c.name.toLowerCase() === topic.category.toLowerCase()
-  ) || null;
+  const hasImage = topic.imageUrl && !imageError;
 
   return (
     <motion.div variants={cardVariants}>
       <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
         <CardHeader className="p-0">
           <Link href={articleUrl} className="block relative h-48 w-full group bg-muted overflow-hidden rounded-t-lg">
-             {topic.imageUrl && !imageError ? (
+             {hasImage ? (
                 <Image
-                  src={topic.imageUrl}
+                  src={topic.imageUrl!}
                   alt={topic.title}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -56,7 +54,9 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
                   onError={() => setImageError(true)}
                 />
              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-white dark:bg-zinc-900 rounded-t-lg" />
+                <div className="flex h-full w-full items-center justify-center bg-secondary">
+                  <ImageOff className="h-10 w-10 text-muted-foreground/50" />
+                </div>
              )}
           </Link>
         </CardHeader>
