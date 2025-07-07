@@ -61,17 +61,37 @@ export const generateArticleFlow = ai.defineFlow(
     outputSchema: GenerateArticleOutputSchema,
   },
   async (input) => {
-    // Step 1: Generate the article text.
-    const articleResponse = await articlePrompt({ topic: input.topic });
-    const articleOutput = articleResponse.output;
+    const imagePrompt = `A photorealistic, high-resolution hero image for a technical automotive blog post about "${input.topic}". The image should be clean, modern, professional, and visually interesting with cinematic lighting. Focus on a single strong visual element related to the topic. Avoid text or clutter.`;
 
+    // Generate the article text and the image in parallel to save time.
+    const [articleResponse, imageResponse] = await Promise.all([
+        articlePrompt({ topic: input.topic }),
+        ai.generate({
+            model: 'googleai/gemini-2.0-flash-preview-image-generation',
+            prompt: imagePrompt,
+            config: {
+                responseModalities: ['TEXT', 'IMAGE'],
+            },
+        }).catch(err => {
+            console.warn('Gemini image generation failed:', err);
+            return null; // Return null on error to handle fallback
+        })
+    ]);
+
+    const articleOutput = articleResponse.output;
+    
     if (!articleOutput) {
       throw new Error('Failed to generate article content.');
     }
 
-    // Step 2: Construct the Pollinations image URL.
-    const imagePromptText = `A photorealistic, high-resolution hero image for a technical automotive blog post about "${input.topic}". The image should be clean, modern, professional, and visually interesting with cinematic lighting.`;
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePromptText)}?width=600&height=400&nologo=true`;
+    let imageUrl;
+    if (imageResponse?.media?.url) {
+        imageUrl = imageResponse.media.url;
+    } else {
+        console.warn('Gemini image generation failed, falling back to Pollinations AI.');
+        const fallbackPrompt = `A photorealistic, high-resolution hero image for a technical automotive blog post about "${input.topic}". The image should be clean, modern, professional, and visually interesting with cinematic lighting.`;
+        imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fallbackPrompt)}?width=600&height=400&nologo=true`;
+    }
 
     return {
         ...articleOutput,
