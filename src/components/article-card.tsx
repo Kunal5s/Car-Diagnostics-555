@@ -17,7 +17,7 @@ import { Skeleton } from "./ui/skeleton";
 
 interface ArticleCardProps {
   topic: ArticleTopic;
-  displayState: 'icon' | 'loading' | 'image';
+  displayState: 'icon' | 'image';
   priority?: boolean;
 }
 
@@ -33,11 +33,6 @@ export function ArticleCard({ topic, displayState, priority = false }: ArticleCa
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <CardHeader className="p-0">
         <Link href={articleUrl} className="block relative h-48 w-full group bg-muted overflow-hidden rounded-t-lg">
-           {displayState === 'loading' && (
-              <div className="flex items-center justify-center h-full w-full bg-secondary/40">
-                  <Skeleton className="h-full w-full" />
-              </div>
-           )}
            {displayState === 'icon' && (
               <div className="flex items-center justify-center h-full w-full bg-secondary/40">
                 <Icon className="h-16 w-16 text-muted-foreground/50" />
@@ -48,7 +43,7 @@ export function ArticleCard({ topic, displayState, priority = false }: ArticleCa
                 src={topic.imageUrl!}
                 alt={topic.title}
                 fill
-                className="object-cover" // Removed transition for lightweight feel
+                className="object-cover"
                 priority={priority}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />

@@ -1,11 +1,10 @@
-
 {
   "id": 702,
   "title": "Troubleshooting Common Fuel System Problems",
   "category": "Fuel",
   "slug": "troubleshooting-common-fuel-system-problems-702",
-  "summary": "Learn to diagnose and understand the most common fuel system problems, from a faulty fuel pump to clogged injectors, and what to do about them.",
-  "content": "Content for Troubleshooting Common Fuel System Problems goes here. This diagnostic article guides readers through identifying issues within their vehicle's fuel system. It explains the roles of the key components, including the fuel pump, fuel filter, and fuel injectors. The guide then details the common symptoms associated with a failing fuel system, such as engine hesitation under load, difficulty starting, rough idling, and a lit check engine light (with specific low-pressure codes). It helps car owners differentiate between the symptoms of a clogged filter, a dying pump, and a malfunctioning injector, enabling them to have a more accurate and informed discussion with their mechanic.",
+  "summary": "Error: Could not generate content.",
+  "content": "<h2>Article Generation Failed</h2>\n                        <p>The request failed with status code 402. This could be a network issue or a problem with the AI service.</p>\n                        <p><strong>Topic attempted:</strong> Troubleshooting Common Fuel System Problems</p>\n                        <p><strong>Error Details:</strong> {\"error\":{\"message\":\"This request requires more credits, or fewer max_tokens. You requested up to 6768 tokens, but can only afford 3046. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account\",\"code\":402,\"metadata\":{\"provider_name\":null}},\"user_id\":\"user_2ta6eenp3GBwQk7yY0xUlJ9FCbV\"}</p>",
   "imageUrl": null,
   "status": "ready"
 }

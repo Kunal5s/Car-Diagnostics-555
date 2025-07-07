@@ -1,11 +1,10 @@
-
 {
   "id": 302,
   "title": "Using Live Data and Freeze Frame on OBD2 Scanners",
   "category": "OBD2",
   "slug": "using-live-data-and-freeze-frame-on-obd2-scanners-302",
-  "summary": "Go beyond basic code reading. This guide unlocks the power of live data and freeze frame information to diagnose complex car problems accurately.",
-  "content": "Content for Using Live Data and Freeze Frame on OBD2 Scanners goes here. This advanced guide teaches car enthusiasts how to use two of the most powerful features of modern scan tools. It explains that 'Freeze Frame' data provides a snapshot of the exact engine conditions (RPM, temperature, speed, etc.) at the moment a fault code was triggered, offering crucial clues to the root cause of the problem. The article then explores 'Live Data,' showing readers how to monitor sensor inputs in real-time to diagnose intermittent issues and verify that a repair has worked correctly. It covers key parameters to watch, such as fuel trims and O2 sensor voltages, turning your scan tool from a simple code reader into a professional-grade diagnostic instrument.",
+  "summary": "Error: Could not generate content.",
+  "content": "<h2>Article Generation Failed</h2>\n                        <p>The request failed with status code 402. This could be a network issue or a problem with the AI service.</p>\n                        <p><strong>Topic attempted:</strong> Using Live Data and Freeze Frame on OBD2 Scanners</p>\n                        <p><strong>Error Details:</strong> {\"error\":{\"message\":\"This request requires more credits, or fewer max_tokens. You requested up to 6766 tokens, but can only afford 3046. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account\",\"code\":402,\"metadata\":{\"provider_name\":null}},\"user_id\":\"user_2ta6eenp3GBwQk7yY0xUlJ9FCbV\"}</p>",
   "imageUrl": null,
   "status": "ready"
 }

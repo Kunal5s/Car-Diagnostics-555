@@ -6,7 +6,6 @@ import type { ArticleTopic } from '@/lib/definitions';
 import { ArticleCard } from './article-card';
 import { Card, CardContent } from './ui/card';
 import { AlertCircle, Image as ImageIcon } from 'lucide-react';
-import { generateImageForArticle } from '@/app/actions';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -15,75 +14,25 @@ interface ArticleGridProps {
   showImageGenerator?: boolean;
 }
 
-type DisplayTopic = ArticleTopic & {
-  displayState: 'icon' | 'loading' | 'image';
-};
-
 export function ArticleGrid({ topics, showImageGenerator = false }: ArticleGridProps) {
   const { toast } = useToast();
+  const [showImages, setShowImages] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [displayTopics, setDisplayTopics] = useState<DisplayTopic[]>(() =>
-    topics.map(topic => ({
-      ...topic,
-      displayState: (topic.imageUrl && !topic.imageUrl.includes('placehold.co')) ? 'image' : 'icon',
-    }))
-  );
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const handleGenerateImages = async () => {
-    setIsGenerating(true);
-    const topicsToGenerate = displayTopics.filter(t => t.displayState === 'icon');
-
-    if (topicsToGenerate.length === 0) {
-        toast({
-            title: "Images Already Loaded",
-            description: "All article images for the current view have already been generated.",
-        });
-        setIsGenerating(false);
-        return;
-    }
-
-    setDisplayTopics(prevTopics =>
-      prevTopics.map(t =>
-        t.displayState === 'icon' ? { ...t, displayState: 'loading' } : t
-      )
-    );
-    
-    const generationPromises = topicsToGenerate.map(async (topic) => {
-      try {
-        const result = await generateImageForArticle(topic.slug);
-        if (result?.imageUrl) {
-          setDisplayTopics(prevTopics =>
-            prevTopics.map(t =>
-              t.slug === topic.slug
-                ? { ...t, imageUrl: result.imageUrl, displayState: 'image' }
-                : t
-            )
-          );
-        } else {
-          throw new Error('Image URL was null');
+  const handleToggleImages = () => {
+    setIsLoading(true);
+    // This is now just a simple state toggle.
+    setShowImages(prev => !prev);
+    // Simulate a brief load time for better UX, then turn off loader.
+    setTimeout(() => {
+        setIsLoading(false);
+        if (!showImages) {
+             toast({
+                title: "AI Images Loaded",
+                description: "Showing pre-generated, high-quality images for each article.",
+            });
         }
-      } catch (error) {
-        console.error(`Failed to generate image for ${topic.title}:`, error);
-        toast({
-            variant: "destructive",
-            title: "Image Generation Failed",
-            description: `Could not generate an image for "${topic.title}". Please try again.`,
-        });
-        setDisplayTopics(prevTopics =>
-          prevTopics.map(t =>
-            t.slug === topic.slug ? { ...t, displayState: 'icon' } : t
-          )
-        );
-      }
-    });
-
-    await Promise.all(generationPromises);
-    setIsGenerating(false);
-    toast({
-        title: "Image Generation Complete",
-        description: "All requested article images have been loaded.",
-    });
+    }, 300);
   };
   
   if (!topics || topics.length === 0) {
@@ -109,18 +58,23 @@ export function ArticleGrid({ topics, showImageGenerator = false }: ArticleGridP
           <div>
             <h3 className="font-semibold text-lg text-primary">View with AI-Generated Images</h3>
             <p className="text-sm text-muted-foreground max-w-md">
-              Click the button to use our Pollination Models to generate a unique, high-quality image for each article below.
+              Click the button to toggle between category icons and the unique, high-quality image for each article below.
             </p>
           </div>
-          <Button onClick={handleGenerateImages} disabled={isGenerating}>
+          <Button onClick={handleToggleImages} disabled={isLoading}>
             <ImageIcon className="mr-2 h-4 w-4" />
-            {isGenerating ? 'Generating...' : 'Show Images with AI'}
+            {isLoading ? 'Loading...' : (showImages ? 'Show Category Icons' : 'Show Images with AI')}
           </Button>
         </div>
       )}
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {displayTopics.map((topic, index) => (
-          <ArticleCard key={topic.id} topic={topic} displayState={topic.displayState} priority={index < 3} />
+        {topics.map((topic, index) => (
+          <ArticleCard 
+            key={topic.id} 
+            topic={topic} 
+            displayState={(showImages && topic.imageUrl && !topic.imageUrl.includes('placehold.co')) ? 'image' : 'icon'} 
+            priority={index < 3} 
+          />
         ))}
       </div>
     </div>

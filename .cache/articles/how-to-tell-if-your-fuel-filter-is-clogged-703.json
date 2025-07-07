@@ -1,11 +1,10 @@
-
 {
   "id": 703,
   "title": "How to Tell if Your Fuel Filter is Clogged",
   "category": "Fuel",
   "slug": "how-to-tell-if-your-fuel-filter-is-clogged-703",
-  "summary": "Is a clogged fuel filter causing your car problems? Learn to recognize the common symptoms, from engine sputtering to starting issues.",
-  "content": "Content for How to Tell if Your Fuel Filter is Clogged goes here. This focused diagnostic guide helps car owners pinpoint a common and often overlooked maintenance item. It explains that the primary symptom of a clogged fuel filter is engine hesitation or loss of power during acceleration or when climbing hills, as the engine is starved for fuel. Other key signs discussed include difficulty starting, a rough idle, and stalling. The article also warns that ignoring these symptoms can put excessive strain on the fuel pump, leading to a much more expensive repair. It recommends checking the vehicle's service manual for the recommended replacement interval, as this is a simple, preventative fix that can restore performance.",
+  "summary": "Error: Could not generate content.",
+  "content": "<h2>Article Generation Failed</h2>\n                        <p>The request failed with status code 402. This could be a network issue or a problem with the AI service.</p>\n                        <p><strong>Topic attempted:</strong> How to Tell if Your Fuel Filter is Clogged</p>\n                        <p><strong>Error Details:</strong> {\"error\":{\"message\":\"This request requires more credits, or fewer max_tokens. You requested up to 6768 tokens, but can only afford 3046. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account\",\"code\":402,\"metadata\":{\"provider_name\":null}},\"user_id\":\"user_2ta6eenp3GBwQk7yY0xUlJ9FCbV\"}</p>",
   "imageUrl": null,
   "status": "ready"
 }

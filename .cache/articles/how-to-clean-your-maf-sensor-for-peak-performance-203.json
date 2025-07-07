@@ -1,11 +1,10 @@
-
 {
   "id": 203,
   "title": "How to Clean Your MAF Sensor for Peak Performance",
   "category": "Sensors",
   "slug": "how-to-clean-your-maf-sensor-for-peak-performance-203",
-  "summary": "A simple, step-by-step guide to cleaning your Mass Airflow (MAF) sensor to restore lost power, improve fuel economy, and smooth out idling.",
-  "content": "Content for How to Clean Your MAF Sensor for Peak Performance goes here. This practical DIY guide shows car owners how to perform one of the most cost-effective maintenance tasks: cleaning the Mass Airflow (MAF) sensor. The article explains how a dirty MAF sensor can send incorrect data to the engine's computer, leading to issues like poor acceleration, rough idling, and decreased gas mileage. It provides a clear, step-by-step process for safely removing the sensor, cleaning it with the correct specialized cleaner, and reinstalling it. Complete with a list of necessary tools and important precautions to avoid damaging the delicate sensor components, this guide can help any car owner restore lost performance in under an hour.",
+  "summary": "Error: Could not generate content.",
+  "content": "<h2>Article Generation Failed</h2>\n                        <p>The request failed with status code 402. This could be a network issue or a problem with the AI service.</p>\n                        <p><strong>Topic attempted:</strong> How to Clean Your MAF Sensor for Peak Performance</p>\n                        <p><strong>Error Details:</strong> {\"error\":{\"message\":\"This request requires more credits, or fewer max_tokens. You requested up to 6766 tokens, but can only afford 3393. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account\",\"code\":402,\"metadata\":{\"provider_name\":null}},\"user_id\":\"user_2ta6eenp3GBwQk7yY0xUlJ9FCbV\"}</p>",
   "imageUrl": null,
   "status": "ready"
 }
