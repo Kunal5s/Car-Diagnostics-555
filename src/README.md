@@ -4,31 +4,30 @@ This is a Next.js application built in Firebase Studio. It uses a powerful AI sy
 
 ## Getting Started
 
-This project requires **one environment variable** for all features to work correctly.
+This project requires **two environment variables** for all features to work correctly.
 
-### 1. Required Environment Variable
+### Required Environment Variables
 
-For the website to generate its content, you **must** create a `.env` file in the project's root directory and add your OpenRouter API key.
+For the website to generate its content and images, you **must** create a `.env` file in the project's root directory and add your keys.
 
 The file content should look like this:
 ```
 OPENROUTER_API_KEY="your_openrouter_api_key_here"
+GITHUB_TOKEN="your_github_personal_access_token"
 ```
 
-1.  **`OPENROUTER_API_KEY`**: Your API key for the OpenRouter service, which is used to generate article content with the `meta-llama/llama-3-70b-instruct` model. You can get a free key from the [OpenRouter website](https://openrouter.ai/).
+1.  **`OPENROUTER_API_KEY`**: Your API key for the OpenRouter service, which is used to generate article content. You can get a free key from the [OpenRouter website](https://openrouter.ai/).
+2.  **`GITHUB_TOKEN`**: A GitHub Personal Access Token with `repo` scope. This is required to automatically upload the generated article images to the public GitHub image repository.
 
-> **IMPORTANT:** Without this key in a `.env` file (for local development) or set as an environment variable in your hosting provider (for production), the article generation will fail and users will see an error message on the article pages.
+> **IMPORTANT:** Without these keys, the article and image generation will fail, and users will see an error message on the article pages.
 
-### 2. No Database Setup Needed
+## Content Strategy: Live AI Generation & Integrated Image Upload
 
-This project uses a simple and effective file-based caching system. There is no need to set up any external database like Supabase. The application will automatically create a `.cache` directory in the project to store generated articles, which makes the site fast and reliable.
+This application uses a dynamic content strategy to ensure every article is as fresh as possible.
 
-## Content Strategy: Smart Caching for Speed
-
-This application uses a hybrid content strategy to provide fresh content while ensuring maximum reliability and performance.
-
--   **On-Demand AI Generation:** When a user visits an article page for the very first time, the content is generated in real-time by a powerful AI model via OpenRouter.
--   **File-Based Smart Caching:** Once an article is generated, it's automatically saved (cached) in a local JSON file on the server for 24 hours. Any other user who visits that same article on the same day will be served the content instantly from this file cache, not from the AI.
--   **Reliability & Performance:** This "generate-once, serve-many" approach dramatically reduces API calls, lowers costs, and ensures the site is fast and reliable for most page loads, avoiding the errors and long waits common with live AI generation on every single request.
--   **Static Topic Base:** The site is built on a stable foundation of curated article topics. This ensures that all category pages and article URLs are permanent and SEO-friendly.
--   **Daily Homepage Refresh:** To keep the experience fresh, the homepage automatically shuffles the article topics every 24 hours to feature a new set of 6 "trending" articles.
+-   **Live AI Generation:** When a user visits an article page for the first time, the content and a relevant feature image are generated in real-time by AI models.
+-   **Integrated Image Upload:** The generated image is automatically compressed and uploaded to a dedicated public GitHub repository, ensuring it's permanently available.
+-   **File-Based Caching:** Once an article and its image are generated, the complete data (including the image URL) is cached in a local file on the server. Subsequent visits load instantly from this cache.
+-   **No Database Needed:** This simplified approach removes the need for any external database setup.
+-   **Static Topic Base:** The site is built on a stable foundation of curated article topics, ensuring all URLs are permanent and SEO-friendly.
+-   **Daily Homepage Refresh:** The homepage automatically shuffles topics every 24 hours to feature a new set of 6 "trending" articles.

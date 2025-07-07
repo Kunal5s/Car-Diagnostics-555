@@ -6,7 +6,16 @@ import { slugify } from "./utils";
 import { generateArticle } from "@/ai/flows/generate-article";
 import { promises as fs } from 'fs';
 import path from 'path';
+import { Octokit } from '@octokit/rest';
+import sharp from 'sharp';
 
+// Configuration for GitHub image repository
+const GITHUB_OWNER = 'kunal5s';
+const GITHUB_REPO = 'ai-blog-images';
+const GITHUB_BRANCH = 'main';
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+
+const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 // This is the static list of all topics. It serves as the foundation of our site.
 // There are 4 unique topics per category.
@@ -58,25 +67,93 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
   { id: 36, "title": "Understanding the Important Role of Big Data In Modern Connected Vehicles", category: "Trends" }
 ];
 
-// Helper to construct the image URL from the dedicated image repository
-function getImageUrl(slug: string): string {
-    return `https://raw.githubusercontent.com/kunal5s/ai-blog-images/main/public/images/${slug}.jpg`;
+function getFinalImageUrl(slug: string): string {
+    return `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/public/images/${slug}.jpg`;
+}
+
+async function generateAndUploadImage(slug: string, title: string, category: string): Promise<string | null> {
+    if (!GITHUB_TOKEN) {
+        console.error("[Image Gen] GITHUB_TOKEN is not set. Skipping image generation.");
+        return null;
+    }
+
+    const imagePath = `public/images/${slug}.jpg`;
+    const prompt = `${title}, ${category}, photorealistic`;
+    const imageModel = 'flux-realism';
+
+    console.log(`[Image Gen] Starting image generation for "${title}"`);
+    console.log(`[Image Gen]   - Prompt: "${prompt}"`);
+
+    try {
+        const encodedPrompt = encodeURIComponent(prompt);
+        const seed = Math.floor(Math.random() * 1000000);
+        const pollutionsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${imageModel}&width=512&height=512&nologo=true&seed=${seed}`;
+        
+        console.log(`[Image Gen]   - Fetching from: ${pollutionsUrl}`);
+        const response = await fetch(pollutionsUrl, { signal: AbortSignal.timeout(30000) }); // 30 second timeout
+        if (!response.ok) {
+            throw new Error(`Pollinations API request failed with status ${response.status}: ${await response.text()}`);
+        }
+        const imageBuffer = Buffer.from(await response.arrayBuffer());
+        console.log(`[Image Gen]   - Image fetched successfully.`);
+
+        console.log('[Image Gen]   - Compressing image...');
+        const compressedBuffer = await sharp(imageBuffer)
+            .resize(512, 512)
+            .jpeg({ quality: 30 })
+            .toBuffer();
+        console.log(`[Image Gen]   - Image compressed. Size: ${Math.round(compressedBuffer.length / 1024)}KB`);
+
+        console.log(`[Image Gen]   - Pushing to GitHub at path: ${imagePath}`);
+        const commitMessage = `feat: add image for article ${slug}`;
+        
+        let sha: string | undefined;
+        try {
+            const { data } = await octokit.repos.getContent({
+                owner: GITHUB_OWNER,
+                repo: GITHUB_REPO,
+                path: imagePath,
+                ref: GITHUB_BRANCH,
+            });
+            if (typeof data === 'object' && !Array.isArray(data) && 'sha' in data) {
+                 sha = data.sha;
+            }
+        } catch (error: any) {
+            if (error.status !== 404) throw error;
+        }
+
+        await octokit.repos.createOrUpdateFileContents({
+            owner: GITHUB_OWNER,
+            repo: GITHUB_REPO,
+            path: imagePath,
+            message: commitMessage,
+            content: compressedBuffer.toString('base64'),
+            branch: GITHUB_BRANCH,
+            sha,
+        });
+
+        const finalUrl = getFinalImageUrl(slug);
+        console.log(`[Image Gen]   - ✅ Successfully uploaded image. URL: ${finalUrl}`);
+        return finalUrl;
+
+    } catch (err: any) {
+        console.error(`[Image Gen] ❌ Failed to generate and upload image for "${title}":`, err.message);
+        return null;
+    }
 }
 
 
-// This function adds a slug and an image URL to each static topic.
 export async function getAllTopics(): Promise<ArticleTopic[]> {
   return allArticleTopics.map(topic => {
       const slug = `${slugify(topic.title)}-${topic.id}`;
       return {
           ...topic,
           slug,
-          imageUrl: getImageUrl(slug)
+          imageUrl: getFinalImageUrl(slug)
       };
   });
 }
 
-// This function gets a random selection of topics for the homepage, shuffling them daily.
 export async function getHomepageTopics(): Promise<ArticleTopic[]> {
   const topics = await getAllTopics();
 
@@ -104,22 +181,18 @@ export async function getHomepageTopics(): Promise<ArticleTopic[]> {
 }
 
 
-// Gets all topics for a specific category.
 export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
   const topics = await getAllTopics();
   return topics.filter(topic => topic.category.toLowerCase() === categoryName.toLowerCase());
 }
 
-// This function gets a single article by slug. It uses a file-based cache
-// to improve performance. The first time an article is requested, it's
-// generated by AI and saved. Subsequent requests load from the cache.
 const CACHE_DIR = path.join(process.cwd(), '.cache', 'articles');
 const CACHE_TTL_HOURS = 24;
 
 export async function getArticleBySlug(slug: string): Promise<FullArticle | null> {
     const staticTopic = allArticleTopics.find(topic => `${slugify(topic.title)}-${topic.id}` === slug);
     if (!staticTopic) {
-        return null; // Topic does not exist in our static list.
+        return null;
     }
 
     await fs.mkdir(CACHE_DIR, { recursive: true });
@@ -134,13 +207,9 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         if (ageInHours < CACHE_TTL_HOURS) {
             console.log(`[Cache] HIT for "${slug}". Loading from file.`);
             const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
-            let article = JSON.parse(cachedData) as FullArticle;
+            let article: FullArticle = JSON.parse(cachedData);
 
-            // Force-update the imageUrl to ensure it's always correct,
-            // guarding against stale cache files with 'null' or bad URLs.
-            article.imageUrl = getImageUrl(slug);
-
-            if (article.content && !article.content.includes("Article Generation Failed")) {
+            if (article.imageUrl && article.content && !article.content.includes("Article Generation Failed")) {
                 return article;
             }
             console.log(`[Cache] Stale or invalid content for "${slug}". Regenerating.`);
@@ -151,25 +220,25 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         }
     }
     
-    console.log(`[Cache] MISS for "${slug}". Generating new article.`);
+    console.log(`[Cache] MISS for "${slug}". Generating new article and image.`);
     
-    let articleData = {
-        summary: "Error: Could not generate summary. Please check API key.",
-        content: `<h2>Article Generation Failed</h2><p>There was an error generating the content for this topic. This is often due to an issue with the <strong>OpenRouter API key</strong> provided in the environment variables. Please ensure it is correctly configured and has available credits.</p><p><strong>Topic attempted:</strong> ${staticTopic.title}</p>`,
-    };
-    
-    try {
-        const generatedData = await generateArticle({ topic: staticTopic.title });
-        if (generatedData) articleData = generatedData;
-    } catch (e: any) {
-        console.error(`Failed to generate content for topic: ${staticTopic.title}`, e.message);
-    }
+    const [articleResult, imageUrlResult] = await Promise.all([
+        generateArticle({ topic: staticTopic.title }).catch(e => {
+            console.error(`Failed to generate content for topic: ${staticTopic.title}`, e.message);
+            return {
+                summary: "Error: Could not generate summary.",
+                content: `<h2>Article Generation Failed</h2><p>There was an error generating the content for this topic.</p><p><strong>Topic attempted:</strong> ${staticTopic.title}</p>`,
+            };
+        }),
+        generateAndUploadImage(slug, staticTopic.title, staticTopic.category)
+    ]);
 
     const fullArticle: FullArticle = {
         ...staticTopic,
         slug: slug,
-        ...articleData,
-        imageUrl: getImageUrl(slug),
+        summary: articleResult.summary,
+        content: articleResult.content,
+        imageUrl: imageUrlResult,
     };
 
     try {
