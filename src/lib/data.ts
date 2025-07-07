@@ -134,11 +134,11 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         if (ageInHours < CACHE_TTL_HOURS) {
             console.log(`[Cache] HIT for "${slug}". Loading from file.`);
             const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
-            const article = JSON.parse(cachedData) as FullArticle;
-            // Ensure the cached article has the correct image URL
-            if (!article.imageUrl) {
-                article.imageUrl = getImageUrl(slug);
-            }
+            let article = JSON.parse(cachedData) as FullArticle;
+
+            // Force-update the imageUrl to ensure it's always correct,
+            // guarding against stale cache files with 'null' or bad URLs.
+            article.imageUrl = getImageUrl(slug);
 
             if (article.content && !article.content.includes("Article Generation Failed")) {
                 return article;

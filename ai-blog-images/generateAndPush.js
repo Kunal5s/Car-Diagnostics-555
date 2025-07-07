@@ -13,7 +13,7 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = 'kunal5s';
 const GITHUB_REPO = 'ai-blog-images';
 const BRANCH = 'main';
-const IMAGE_MODEL = 'flux-realism'; // As requested: 'flux-realism'
+const IMAGE_MODEL = 'flux-realism'; // Using the best model as requested.
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
@@ -130,25 +130,28 @@ async function processArticle(topic) {
   const slug = `${slugify(topic.title)}-${topic.id}`;
   const imagePath = `public/images/${slug}.jpg`;
   
-  // A more robust prompt using both title and category.
-  const prompt = `${topic.title}, ${topic.category}, automotive, technical illustration, photorealistic`;
+  // A simplified but effective prompt.
+  const prompt = `${topic.title}, ${topic.category}, photorealistic`;
 
   console.log(`\nProcessing Article #${topic.id}: "${topic.title}"`);
+  console.log(`  - Using model: ${IMAGE_MODEL}`);
   console.log(`  - Prompt: "${prompt}"`);
 
   // 1. Generate Image from Pollinations AI
   let imageBuffer;
   try {
-    console.log(`  - Fetching image from Pollinations AI using model: ${IMAGE_MODEL}...`);
     const encodedPrompt = encodeURIComponent(prompt);
     const seed = Math.floor(Math.random() * 1000000);
     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${IMAGE_MODEL}&width=512&height=512&nologo=true&seed=${seed}`;
     
+    console.log(`  - Fetching image from: ${imageUrl}`);
     const response = await fetch(imageUrl);
+
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}: ${await response.text()}`);
     }
     imageBuffer = await response.buffer();
+    console.log(`  - Image fetched successfully.`);
   } catch (err) {
     console.error(`  ❌ Error generating image for "${topic.title}":`, err.message);
     return; // Skip this article on error
