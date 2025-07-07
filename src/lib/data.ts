@@ -99,7 +99,7 @@ async function generateAndUploadImage(slug: string, title: string, category: str
              // Return placeholder on error to not block article generation
              return `https://placehold.co/600x400.png`;
         }
-        // If 404, continue to generate the image
+        // If 404, it means the file doesn't exist, so we proceed to generate it.
         console.log(`[Image Gen] No existing image found for "${slug}". Generating a new one.`);
     }
 
