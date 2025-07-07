@@ -71,8 +71,8 @@ export async function GET(request: NextRequest) {
         usedTopics.add(articleTopic);
         
         console.log(`📝 Generating article for topic: "${articleTopic}"`);
-        const generationPrompt = `You are an expert automotive writer. Your task is to write a detailed, SEO-friendly article of at least 1500 words on the topic: "${articleTopic}".
-        The article must be well-structured with a main H1 title, multiple H2 sections, and H3 sub-sections.
+        const generationPrompt = `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, SEO-friendly article of at least 1500 words on the topic: "${articleTopic}".
+        The article must be well-structured with a main H1 title. You must use multiple H2 sections for the main topics, and within them, use H3, H4, H5, and H6 sub-headings to create a deep and well-organized structure.
         Your response MUST be a single, valid JSON object with two keys:
         1. "summary": A concise, SEO-friendly summary of the article (around 160 characters).
         2. "content": The full article in Markdown format. The H1 title must be the very first line of the content.`;
