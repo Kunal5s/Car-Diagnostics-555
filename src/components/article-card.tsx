@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { type ArticleTopic } from "@/lib/definitions";
+import { type ArticleTopic, categoryDetails } from "@/lib/definitions";
 import {
   Card,
   CardContent,
@@ -12,39 +12,46 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, FileQuestion } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 
 interface ArticleCardProps {
   topic: ArticleTopic;
+  displayState: 'icon' | 'loading' | 'image';
   priority?: boolean;
 }
 
-export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
+export function ArticleCard({ topic, displayState, priority = false }: ArticleCardProps) {
   const articleUrl = `/articles/${topic.slug}`;
   
-  // The "pending" state is no longer possible for displayed articles,
-  // so the 'isPending' check has been removed for a cleaner component.
+  const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === topic.category.toLowerCase());
+  const Icon = categoryInfo ? categoryInfo.icon : FileQuestion;
+  
+  const hasImage = displayState === 'image' && topic.imageUrl;
 
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <CardHeader className="p-0">
         <Link href={articleUrl} className="block relative h-48 w-full group bg-muted overflow-hidden rounded-t-lg">
-           {topic.imageUrl ? (
-              <Image
-                src={topic.imageUrl}
-                alt={topic.title}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                priority={priority}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
-           ) : (
-              // This skeleton is a fallback for the rare case an image URL is missing,
-              // but this should not happen with the new pre-generated data model.
+           {displayState === 'loading' && (
               <div className="flex items-center justify-center h-full w-full bg-secondary/40">
                   <Skeleton className="h-full w-full" />
               </div>
+           )}
+           {displayState === 'icon' && (
+              <div className="flex items-center justify-center h-full w-full bg-secondary/40">
+                <Icon className="h-16 w-16 text-muted-foreground/50" />
+              </div>
+           )}
+           {hasImage && (
+              <Image
+                src={topic.imageUrl!}
+                alt={topic.title}
+                fill
+                className="object-cover" // Removed transition for lightweight feel
+                priority={priority}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
            )}
         </Link>
       </CardHeader>

@@ -116,15 +116,15 @@ const testimonials = [
 const faqItems = [
     {
     question: "What is Car Diagnostics BrainAi?",
-    answer: "Car Diagnostics BrainAi is an intelligent platform that provides in-depth, pre-generated articles on automotive topics. All content is instantly available to help you understand your vehicle better, with a smart caching system to keep the site fast.",
+    answer: "Car Diagnostics BrainAi is an intelligent platform that provides in-depth, AI-generated articles on automotive topics. Our system ensures all articles are comprehensive and accurate, with options to view AI-generated imagery.",
   },
   {
-    question: "How does the content get generated?",
-    answer: "This site uses a pre-generation strategy. All articles and their assets are created beforehand and stored in a static cache. This means there are no live API calls for content, resulting in an extremely fast and reliable user experience.",
+    question: "How does the image generation work?",
+    answer: "By default, articles are shown with category icons for a fast, clean experience. On pages with article grids, you can click the 'Show Images with AI' button to have our Pollination Models generate unique images for each article in real-time.",
   },
   {
-    question: "Are there any pending or loading articles?",
-    answer: "No. The 'yellow dot' and 'pending' concepts have been removed. Every article you see on the site is 100% ready and will load instantly when you click on it. We prioritize a seamless, wait-free experience.",
+    question: "Are articles permanently saved?",
+    answer: "Yes. Once an article and its associated image are generated, they are permanently cached. This means they load instantly for all subsequent visitors, creating a fast and reliable experience for everyone.",
   },
   {
     question: "What is the 24-hour refresh on the homepage?",
@@ -171,7 +171,7 @@ export default async function HomePage() {
               Today's Trending Articles
             </h2>
           </div>
-          <ArticleGrid topics={trendingTopics} />
+          <ArticleGrid topics={trendingTopics} showImageGenerator={true} />
           <div className="text-center mt-8">
             <Button asChild variant="outline">
               <Link href="/blog">

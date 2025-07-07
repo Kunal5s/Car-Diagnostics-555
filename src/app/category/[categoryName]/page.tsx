@@ -61,7 +61,7 @@ export default async function CategoryPage({
           </p>
         </div>
       </div>
-      <ArticleGrid topics={topicsForCategory} />
+      <ArticleGrid topics={topicsForCategory} showImageGenerator={true} />
     </div>
   );
 }

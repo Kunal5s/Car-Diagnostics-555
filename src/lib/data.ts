@@ -6,8 +6,6 @@ import { slugify } from "./utils";
 import { promises as fs } from 'fs';
 import path from 'path';
 
-// This is the single source of truth for all topics.
-// The content for each is stored in the .cache/articles directory.
 const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>[] = [
     { id: 1, title: "Advanced Diagnostic Techniques for Modern Common Engine Performance Issues", category: "Engine" },
     { id: 2, title: "A Comprehensive Step-by-Step Guide for Resolving Engine Overheating", category: "Engine" },
@@ -50,22 +48,41 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>[] = [
 const CACHE_DIR = path.join(process.cwd(), '.cache', 'articles');
 
 
-// This function now only reads from the pre-generated cache files.
-// It is fast, reliable, and has no external dependencies at runtime.
-async function getArticleFromCache(slug: string): Promise<FullArticle | null> {
+async function getArticleFromCache(slug: string): Promise<Omit<FullArticle, 'icon'> | null> {
     const cacheFilePath = path.join(CACHE_DIR, `${slug}.json`);
     try {
         await fs.access(cacheFilePath);
         const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
-        return JSON.parse(cachedData) as FullArticle;
+        return JSON.parse(cachedData) as Omit<FullArticle, 'icon'>;
     } catch (error) {
-        // This will happen if a cache file for a slug doesn't exist.
-        // All articles are pre-generated, so this indicates a missing file.
-        console.error(`[Cache Error] Could not read cache file for slug: ${slug}. Make sure this file exists.`);
         return null;
     }
 }
 
+export async function updateArticleCache(slug: string, articleData: Partial<Omit<FullArticle, 'icon'>>): Promise<void> {
+    const cacheFilePath = path.join(CACHE_DIR, `${slug}.json`);
+    try {
+        // Ensure cache directory exists
+        await fs.mkdir(CACHE_DIR, { recursive: true });
+        
+        // Read existing data if it exists
+        let existingData: Partial<Omit<FullArticle, 'icon'>> = {};
+        try {
+            const fileContent = await fs.readFile(cacheFilePath, 'utf-8');
+            existingData = JSON.parse(fileContent);
+        } catch (readError) {
+            // File doesn't exist, which is fine.
+        }
+
+        // Merge and write back
+        const dataToWrite = { ...existingData, ...articleData };
+        await fs.writeFile(cacheFilePath, JSON.stringify(dataToWrite, null, 2), 'utf-8');
+
+    } catch (error) {
+        console.error(`[Cache Error] Could not write cache file for slug: ${slug}.`, error);
+        throw error;
+    }
+}
 
 export async function getAllTopics(): Promise<ArticleTopic[]> {
     const topicsWithSlugs = allArticleTopics.map(topic => ({
@@ -73,39 +90,35 @@ export async function getAllTopics(): Promise<ArticleTopic[]> {
       slug: `${slugify(topic.title)}-${topic.id}`,
     }));
 
-    // Populate status and imageUrl by reading from the cache for each topic.
-    // This is very fast as it's just local file access.
     const populatedTopics = await Promise.all(
         topicsWithSlugs.map(async (topic) => {
             const cachedArticle = await getArticleFromCache(topic.slug);
             return {
                 ...topic,
-                // If we have a cached article, it's always 'ready'.
-                status: cachedArticle ? 'ready' : 'pending', 
+                status: (cachedArticle && cachedArticle.content) ? 'ready' : 'pending', 
                 imageUrl: cachedArticle?.imageUrl || null,
             };
         })
     );
     
-    // Only show articles that are fully generated and ready.
-    return populatedTopics.filter(topic => topic.status === 'ready');
+    return populatedTopics;
 }
 
-export async function getArticleBySlug(slug: string): Promise<FullArticle | null> {
-    // The logic is now extremely simple: just read from the cache.
-    // No more on-demand generation. This is fast and reliable.
-    const article = await getArticleFromCache(slug);
+export async function getArticleBySlug(slug: string): Promise<Omit<FullArticle, 'icon'> | null> {
+    const baseTopic = allArticleTopics.find(t => `${slugify(t.title)}-${t.id}` === slug);
+    if (!baseTopic) return null;
 
-    // If the article is not found in the cache, it doesn't exist.
-    if (!article) return null;
+    const cachedArticle = await getArticleFromCache(slug);
 
-    // To be safe, ensure all required fields are present.
-    if (!article.title || !article.content || !article.imageUrl) {
-        console.error(`[Data Integrity Error] Cached article for slug: ${slug} is incomplete.`);
-        return null;
-    }
-
-    return article;
+    // Return merged data: base topic info + cached content/image
+    return {
+      ...baseTopic,
+      slug: slug,
+      summary: cachedArticle?.summary || '',
+      content: cachedArticle?.content || '',
+      imageUrl: cachedArticle?.imageUrl || null,
+      status: (cachedArticle && cachedArticle.content) ? 'ready' : 'pending',
+    };
 }
 
 export async function getHomepageTopics(): Promise<ArticleTopic[]> {
@@ -137,7 +150,5 @@ export async function getHomepageTopics(): Promise<ArticleTopic[]> {
 
 export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
   const allTopics = await getAllTopics();
-  // The filter now only shows ready articles from the specified category.
-  // Shows ALL ready articles for that category.
   return allTopics.filter(topic => topic.category.toLowerCase() === categoryName.toLowerCase());
 }

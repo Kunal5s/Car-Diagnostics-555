@@ -8,6 +8,7 @@ import {
   Wrench,
   Zap,
   type LucideIcon,
+  BookMarked,
 } from 'lucide-react';
 
 export interface ArticleTopic {
@@ -98,6 +99,14 @@ export const categoryDetails: CategoryInfo[] = [
     color: 'bg-amber-500/10',
     iconColor: 'text-amber-500',
   },
+  {
+    name: 'Trends',
+    description: 'Future of auto technology',
+    icon: BookMarked,
+    href: '/category/trends',
+    color: 'bg-pink-500/10',
+    iconColor: 'text-pink-500',
+  }
 ];
 
 export const categories = [
@@ -109,4 +118,5 @@ export const categories = [
   "Maintenance",
   "Fuel",
   "EVs",
+  "Trends",
 ];
