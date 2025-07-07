@@ -2,20 +2,28 @@
 import { ArticleGrid } from "@/components/article-grid";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { getAllTopics } from "@/lib/data";
+import { getLiveArticles } from "@/lib/data";
+import { Suspense } from "react";
+import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
 
 export const metadata: Metadata = {
-  title: 'All Articles',
-  description: 'Browse all our articles on car diagnostics, maintenance, and technology.',
+  title: 'Automotive Articles',
+  description: 'Explore a fresh selection of our AI-generated articles. This page is automatically updated to bring you new content on car diagnostics, maintenance, and technology.',
 };
 
-export default async function BlogPage() {
+// Revalidate this page every 20 minutes (1200 seconds)
+export const revalidate = 1200;
+
+async function LiveBlogContent() {
+  const articles = await getLiveArticles(12); // Fetch 12 random live articles
+  return <ArticleGrid articles={articles} />;
+}
+
+export default function BlogPage() {
   const breadcrumbItems = [
     { label: "Home", href: "/" },
     { label: "Blog" },
   ];
-  
-  const allTopics = await getAllTopics();
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -23,14 +31,16 @@ export default async function BlogPage() {
           <Breadcrumbs items={breadcrumbItems} />
           <div className="text-center mb-12">
               <h1 className="text-4xl font-extrabold tracking-tight text-primary lg:text-5xl">
-                  All Articles
+                  Automotive Articles
               </h1>
               <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
-                  Explore our comprehensive library of automotive articles. Click the button below to generate unique AI images for each topic.
+                  Explore a fresh selection of our AI-generated articles. This page is automatically updated to bring you new content on car diagnostics, maintenance, and technology.
               </p>
           </div>
         </div>
-        <ArticleGrid topics={allTopics} showImageGenerator={true} />
+        <Suspense fallback={<ArticleGridSkeleton count={12} />}>
+            <LiveBlogContent />
+        </Suspense>
     </div>
   );
 }

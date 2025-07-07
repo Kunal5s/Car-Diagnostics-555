@@ -6,6 +6,8 @@ import { slugify } from "./utils";
 import { promises as fs } from 'fs';
 import path from 'path';
 import { generateArticle } from '@/ai/flows/generate-article';
+import { generateImage } from '@/ai/flows/generate-image';
+import { uploadImageToGitHub } from './github';
 
 const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>[] = [
     { id: 101, title: "The Ultimate Guide to Engine Diagnostics", category: "Engine" },
@@ -48,137 +50,114 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>[] = [
 
 const CACHE_DIR = path.join(process.cwd(), '.cache', 'articles');
 
-
-async function getArticleFromCache(slug: string): Promise<Omit<FullArticle, 'icon'> | null> {
+async function getArticleFromCache(slug: string): Promise<FullArticle | null> {
     const cacheFilePath = path.join(CACHE_DIR, `${slug}.json`);
     try {
         await fs.access(cacheFilePath);
         const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
-        return JSON.parse(cachedData) as Omit<FullArticle, 'icon'>;
+        const article = JSON.parse(cachedData) as FullArticle;
+        // Validate essential fields to ensure cache is not corrupt
+        if (article.slug && article.content && article.summary) {
+            return article;
+        }
+        return null;
     } catch (error) {
         return null;
     }
 }
 
-export async function updateArticleCache(slug: string, articleData: Partial<Omit<FullArticle, 'icon'>>): Promise<void> {
-    const cacheFilePath = path.join(CACHE_DIR, `${slug}.json`);
+async function writeArticleToCache(articleData: FullArticle): Promise<void> {
+    const cacheFilePath = path.join(CACHE_DIR, `${articleData.slug}.json`);
     try {
         await fs.mkdir(CACHE_DIR, { recursive: true });
-        
-        let existingData: Partial<Omit<FullArticle, 'icon'>> = {};
-        try {
-            const fileContent = await fs.readFile(cacheFilePath, 'utf-8');
-            existingData = JSON.parse(fileContent);
-        } catch (readError) {
-            // File doesn't exist, which is fine.
-        }
-
-        const dataToWrite = { ...existingData, ...articleData };
-        await fs.writeFile(cacheFilePath, JSON.stringify(dataToWrite, null, 2), 'utf-8');
-
+        await fs.writeFile(cacheFilePath, JSON.stringify(articleData, null, 2), 'utf-8');
     } catch (error) {
-        console.error(`[Cache Error] Could not write cache file for slug: ${slug}.`, error);
-        throw error;
+        console.error(`[Cache Error] Could not write cache file for slug: ${articleData.slug}.`, error);
     }
 }
 
-export async function getAllTopics(): Promise<ArticleTopic[]> {
-    const topicsWithSlugs = allArticleTopics.map(topic => ({
-      ...topic,
-      slug: `${slugify(topic.title)}-${topic.id}`,
-    }));
-
-    const populatedTopics = await Promise.all(
-        topicsWithSlugs.map(async (topic) => {
-            const cachedArticle = await getArticleFromCache(topic.slug);
-            return {
-                ...topic,
-                status: (cachedArticle && cachedArticle.content) ? 'ready' : 'pending', 
-                imageUrl: cachedArticle?.imageUrl || null,
-            };
-        })
-    );
+async function generateAndCacheArticle(topic: Omit<ArticleTopic, 'slug' | 'imageUrl' | 'status'>, slug: string): Promise<FullArticle> {
+    console.log(`[Live Generation] Generating full content for slug: ${slug}`);
     
-    return populatedTopics;
+    const articlePromise = generateArticle({ topic: topic.title });
+    
+    const imagePrompt = `A high-quality, photorealistic, cinematic hero image for an automotive article titled "${topic.title}". Focus on the core concepts of the article. Keywords: ${topic.category}. Style: professional, clean, high-detail.`;
+    const imagePromise = generateImage({ prompt: imagePrompt });
+
+    try {
+        const [articleContent, base64DataUri] = await Promise.all([articlePromise, imagePromise]);
+        
+        if (!articleContent || !articleContent.content || articleContent.content.length < 500) {
+            throw new Error("Generated article content is invalid or too short.");
+        }
+
+        let permanentImageUrl: string | null = null;
+        if (base64DataUri) {
+            const fileName = `${slug}.jpg`;
+            permanentImageUrl = await uploadImageToGitHub(base64DataUri, fileName);
+        }
+
+        const fullArticle: FullArticle = {
+            ...topic,
+            slug,
+            summary: articleContent.summary,
+            content: articleContent.content,
+            imageUrl: permanentImageUrl,
+            status: 'ready'
+        };
+
+        await writeArticleToCache(fullArticle);
+        return fullArticle;
+
+    } catch (error) {
+        console.error(`[Generation Error] Failed to generate or process article for slug ${slug}:`, error);
+        return {
+            ...topic,
+            slug,
+            summary: 'Error: Could not generate this article.',
+            content: `## Article Generation Failed\n\nWe encountered an error while trying to generate this article. This might be a temporary issue with the AI service or network. Please try again later.\n\n**Error Details:** ${error instanceof Error ? error.message : String(error)}`,
+            imageUrl: 'https://placehold.co/600x400.png',
+            status: 'pending'
+        };
+    }
 }
 
-export async function getArticleBySlug(slug: string): Promise<Omit<FullArticle, 'icon'> | null> {
+export async function getArticleBySlug(slug: string): Promise<FullArticle | null> {
     const baseTopic = allArticleTopics.find(t => `${slugify(t.title)}-${t.id}` === slug);
     if (!baseTopic) return null;
 
     let cachedArticle = await getArticleFromCache(slug);
 
-    // If article content is not in cache, generate it
-    if (!cachedArticle?.content) {
-        console.log(`[Cache Miss] Generating article content for slug: ${slug}`);
-        try {
-            const articleContent = await generateArticle({ topic: baseTopic.title });
-            
-            // Check for valid content before proceeding
-            if (!articleContent.content || articleContent.content.length < 500) {
-                 throw new Error("Generated content is too short or invalid.");
-            }
-            
-            await updateArticleCache(slug, { ...baseTopic, slug, ...articleContent, status: 'ready' });
-            
-            // Re-fetch from cache to have the most up-to-date version
-            cachedArticle = await getArticleFromCache(slug);
-
-        } catch (error) {
-            console.error(`[Generation Error] Failed to generate article for slug ${slug}:`, error);
-            // Return base topic info so the page doesn't crash
-            return {
-                ...baseTopic,
-                slug,
-                summary: 'Error generating article.',
-                content: `## Article Generation Failed\n\nWe were unable to generate this article at this time. Please try again later. Error: ${error instanceof Error ? error.message : String(error)}`,
-                imageUrl: null,
-                status: 'pending',
-            };
-        }
+    if (cachedArticle) {
+        console.log(`[Cache Hit] Serving article from cache for slug: ${slug}`);
+        return cachedArticle;
     }
+
+    return await generateAndCacheArticle(baseTopic, slug);
+}
+
+export async function getLiveArticles(count: number, category?: string): Promise<FullArticle[]> {
+    let candidateTopics = [...allArticleTopics];
+    if (category) {
+        candidateTopics = candidateTopics.filter(t => t.category.toLowerCase() === category.toLowerCase());
+    }
+
+    // Fisher-Yates shuffle algorithm for randomness
+    for (let i = candidateTopics.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [candidateTopics[i], candidateTopics[j]] = [candidateTopics[j], candidateTopics[i]];
+    }
+
+    const selectedTopics = candidateTopics.slice(0, count);
+
+    const articlePromises = selectedTopics.map(topic => {
+        const slug = `${slugify(topic.title)}-${topic.id}`;
+        // This will either get from cache or generate live, ensuring speed and freshness
+        return getArticleBySlug(slug);
+    });
+
+    const articles = await Promise.all(articlePromises);
     
-    // This should not happen if the logic above is correct, but it's a safe fallback.
-    if (!cachedArticle) return null;
-
-    return {
-      ...baseTopic,
-      slug: slug,
-      summary: cachedArticle.summary || '',
-      content: cachedArticle.content || '',
-      imageUrl: cachedArticle.imageUrl || null,
-      status: (cachedArticle && cachedArticle.content) ? 'ready' : 'pending',
-    };
-}
-
-export async function getHomepageTopics(): Promise<ArticleTopic[]> {
-  const topics = await getAllTopics();
-  
-  const now = new Date();
-  const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-  const seed = now.getFullYear() * 1000 + dayOfYear;
-  
-  function seededShuffle(array: any[], seed: number) {
-      let currentIndex = array.length, temporaryValue, randomIndex;
-      const random = () => {
-        var x = Math.sin(seed++) * 10000;
-        return x - Math.floor(x);
-      };
-      while (0 !== currentIndex) {
-        randomIndex = Math.floor(random() * currentIndex);
-        currentIndex -= 1;
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-      }
-      return array;
-  }
-
-  const shuffledTopics = seededShuffle([...topics], seed);
-  return shuffledTopics.slice(0, 4);
-}
-
-export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
-  const allTopics = await getAllTopics();
-  return allTopics.filter(topic => topic.category.toLowerCase() === categoryName.toLowerCase());
+    // Filter out any nulls that might have occurred from a topic lookup failure (should be rare)
+    return articles.filter((article): article is FullArticle => article !== null);
 }

@@ -4,7 +4,9 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { categories, categoryDetails } from "@/lib/definitions";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next'
-import { getTopicsByCategory } from "@/lib/data";
+import { getLiveArticles } from "@/lib/data";
+import { Suspense } from "react";
+import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
 
 export async function generateMetadata({ params }: { params: { categoryName: string } }): Promise<Metadata> {
   const categoryName = decodeURIComponent(params.categoryName);
@@ -29,7 +31,15 @@ export async function generateStaticParams() {
     }));
 }
 
-export default async function CategoryPage({ 
+// Revalidate this page every 20 minutes (1200 seconds)
+export const revalidate = 1200;
+
+async function LiveCategoryContent({ categoryName }: { categoryName: string }) {
+    const articles = await getLiveArticles(4, categoryName);
+    return <ArticleGrid articles={articles} />;
+}
+
+export default function CategoryPage({ 
   params
 }: { 
   params: { categoryName: string }; 
@@ -40,8 +50,6 @@ export default async function CategoryPage({
   if (!categoryInfo) {
     notFound();
   }
-  
-  const topicsForCategory = await getTopicsByCategory(categoryInfo.name);
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -61,7 +69,9 @@ export default async function CategoryPage({
           </p>
         </div>
       </div>
-      <ArticleGrid topics={topicsForCategory} showImageGenerator={true} />
+      <Suspense fallback={<ArticleGridSkeleton count={4} />}>
+        <LiveCategoryContent categoryName={categoryInfo.name} />
+      </Suspense>
     </div>
   );
 }

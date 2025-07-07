@@ -1,6 +1,7 @@
 
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -26,16 +27,19 @@ import {
   BrainCircuit,
   FileText,
   Wrench,
-  ChevronRight,
   Star,
 } from "lucide-react";
-import { getHomepageTopics } from "@/lib/data";
+import { getLiveArticles } from "@/lib/data";
+import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
 
 
 export const metadata: Metadata = {
   description: "Detect engine problems instantly with Car Diagnostics BrainAi. Get smart analysis, vehicle health reports, and expert-written articles on maintenance and repair.",
   keywords: ["AI car diagnostics", "OBD2 error codes", "engine fault scan", "vehicle health report", "car diagnostics tool", "Car Diagnostics BrainAi"],
 };
+
+// Revalidate this page every 20 minutes (1200 seconds)
+export const revalidate = 1200;
 
 const howItWorksSteps = [
   {
@@ -116,19 +120,19 @@ const testimonials = [
 const faqItems = [
     {
     question: "What is Car Diagnostics BrainAi?",
-    answer: "Car Diagnostics BrainAi is an intelligent platform that provides in-depth, AI-generated articles on automotive topics. Our system ensures all articles are comprehensive and accurate, with options to view AI-generated imagery.",
+    answer: "Car Diagnostics BrainAi is an intelligent platform that automatically provides in-depth, AI-generated articles on automotive topics. Our system ensures all content is comprehensive, accurate, and always fresh.",
   },
   {
-    question: "How does the image generation work?",
-    answer: "By default, articles are shown with category icons for a fast, clean experience. On pages with article grids, you can click the 'Show Images with AI' button to have our Pollination Models generate unique images for each article in real-time.",
+    question: "How does the content generation work?",
+    answer: "Our website automatically selects new topics and generates full articles and images for them every 20 minutes. This ensures that every time you visit, you are likely to see new, relevant content without any manual intervention.",
   },
   {
     question: "Are articles permanently saved?",
-    answer: "Yes. Once an article and its associated image are generated, they are permanently cached. This means they load instantly for all subsequent visitors, creating a fast and reliable experience for everyone.",
+    answer: "Yes. Once an article is generated for a specific URL (e.g., /articles/my-first-article), it is permanently cached. This ensures that direct links are stable and load instantly, while the main pages (like the homepage) continue to refresh with new selections.",
   },
   {
-    question: "What is the 24-hour refresh on the homepage?",
-    answer: "The homepage features 4 'trending' articles. This selection is automatically shuffled every 24 hours from our extensive library to keep the content fresh and highlight different topics. All other articles remain available on the 'All Articles' page.",
+    question: "What is the 20-minute refresh?",
+    answer: "The homepage and category pages feature a selection of articles. This selection is automatically re-generated from our extensive library of topics every 20 minutes to keep the content fresh and highlight different articles.",
   },
   {
     question: "Is my vehicle compatible?",
@@ -141,9 +145,13 @@ const faqItems = [
 ];
 
 
-export default async function HomePage() {
-  const trendingTopics = await getHomepageTopics();
+async function LiveHomepageContent() {
+  const trendingTopics = await getLiveArticles(4);
+  return <ArticleGrid articles={trendingTopics} />;
+}
 
+
+export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -171,7 +179,9 @@ export default async function HomePage() {
               Today's Trending Articles
             </h2>
           </div>
-          <ArticleGrid topics={trendingTopics} showImageGenerator={true} />
+           <Suspense fallback={<ArticleGridSkeleton count={4} />}>
+            <LiveHomepageContent />
+          </Suspense>
         </div>
       </section>
 

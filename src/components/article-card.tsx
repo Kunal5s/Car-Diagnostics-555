@@ -1,9 +1,7 @@
 
-'use client';
-
 import Link from "next/link";
 import Image from "next/image";
-import { type ArticleTopic, categoryDetails } from "@/lib/definitions";
+import { type FullArticle, categoryDetails } from "@/lib/definitions";
 import {
   Card,
   CardContent,
@@ -16,32 +14,26 @@ import { ArrowRight, FileQuestion } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 
 interface ArticleCardProps {
-  topic: ArticleTopic;
-  showImage: boolean;
-  isLoading: boolean;
+  article: FullArticle;
   priority?: boolean;
 }
 
-export function ArticleCard({ topic, showImage, isLoading, priority = false }: ArticleCardProps) {
-  const articleUrl = `/articles/${topic.slug}`;
+export function ArticleCard({ article, priority = false }: ArticleCardProps) {
+  const articleUrl = `/articles/${article.slug}`;
   
-  const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === topic.category.toLowerCase());
+  const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === article.category.toLowerCase());
   const Icon = categoryInfo ? categoryInfo.icon : FileQuestion;
   
-  const hasImage = showImage && topic.imageUrl && !topic.imageUrl.includes('placehold.co');
+  const hasImage = article.imageUrl && !article.imageUrl.includes('placehold.co');
 
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <CardHeader className="p-0">
         <Link href={articleUrl} className="block relative h-48 w-full group bg-muted overflow-hidden rounded-t-lg">
-           {isLoading ? (
-             <div className="flex items-center justify-center h-full w-full">
-                <Skeleton className="h-full w-full" />
-             </div>
-           ) : hasImage ? (
+           {hasImage ? (
               <Image
-                src={topic.imageUrl!}
-                alt={topic.title}
+                src={article.imageUrl!}
+                alt={article.title}
                 fill
                 className="object-cover"
                 priority={priority}
@@ -57,12 +49,12 @@ export function ArticleCard({ topic, showImage, isLoading, priority = false }: A
       <CardContent className="flex-grow p-6">
          <div className="mb-2">
            <Badge variant="secondary" className="whitespace-nowrap">
-              {topic.category}
+              {article.category}
            </Badge>
          </div>
         <h3 className="mb-2 line-clamp-2 font-semibold leading-tight h-14">
           <Link href={articleUrl} className="hover:text-primary">
-            {topic.title}
+            {article.title}
           </Link>
         </h3>
       </CardContent>
