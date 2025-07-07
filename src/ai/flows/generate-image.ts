@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview An AI flow for generating images for articles using a direct API call.
+ * @fileOverview An AI flow for generating images for articles using a direct API call to OpenRouter's image generation endpoint.
  *
  * - generateImage - A function that handles the image generation process.
  * - GenerateImageInput - The input type for the generateImage function.
@@ -16,44 +16,34 @@ const GenerateImageInputSchema = z.object({
 export type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
 
 // The main exported function that will be called by the application.
-// It uses a direct fetch call to the OpenRouter API for image generation.
 export async function generateImage(
   input: GenerateImageInput
 ): Promise<string | null> {
   const apiKey = process.env.OPENROUTER_API_KEY;
 
   if (!apiKey || apiKey.trim() === '') {
-    console.error("The OpenRouter API key is missing for image generation.");
+    console.error("[Image Generation] The OpenRouter API key is missing.");
     return null;
   }
   
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 45000); // 45-second timeout for image generation
+  // Image generation can be slow, 25s timeout per image
+  const timeoutId = setTimeout(() => controller.abort(), 25000); 
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    // Using the correct OpenRouter endpoint for image generation
+    const response = await fetch('https://openrouter.ai/api/v1/images/generations', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-pro-vision', // Using a powerful vision model available on OpenRouter
-        messages: [
-          { 
-            role: 'user', 
-            content: `Generate a single, high-quality, photorealistic, cinematic image for the following automotive article topic. The image should be visually appealing and suitable for a blog post. Do not include any text in the image. Topic: "${input.prompt}"`
-          }
-        ],
-        // The vision model on OpenRouter doesn't use the same response_format or modalities config.
-        // We rely on its ability to understand the prompt and generate an image, which is then returned in a specific format by OpenRouter.
-        // The actual image is often linked in the response, not returned as base64 directly in this specific setup.
-        // Let's adjust to a model that explicitly generates images.
-        model: 'googleai/gemini-2.0-flash-preview-image-generation',
+        // Using a reliable and fast image generation model
+        model: 'stability-ai/sdxl', 
         prompt: input.prompt,
-        config: {
-            responseModalities: ['TEXT', 'IMAGE'],
-        }
+        n: 1, // We only need one image
+        response_format: 'b64_json', // Request base64 data
       }),
       signal: controller.signal,
     });
@@ -66,14 +56,14 @@ export async function generateImage(
 
     const data = await response.json();
     
-    // Extract base64 image data from the response. The exact path might vary.
-    // Based on Genkit docs, it should be in media.url
-    const media = data?.choices?.[0]?.media;
-    if (media && media.url && media.url.startsWith('data:image/')) {
-        return media.url; // This is the base64 data URI
+    // Extract base64 image data from the response
+    const base64Json = data?.data?.[0]?.b64_json;
+    if (base64Json) {
+        // Return the data URI, which includes the necessary prefix
+        return `data:image/png;base64,${base64Json}`;
     }
     
-    console.error("No valid image data found in API response for prompt:", input.prompt, data);
+    console.error("No valid base64 image data found in API response for prompt:", input.prompt);
     return null;
 
   } catch (error: any) {
