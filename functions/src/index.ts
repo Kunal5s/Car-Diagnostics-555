@@ -1,4 +1,3 @@
-
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import axios from "axios";
@@ -6,94 +5,92 @@ import axios from "axios";
 admin.initializeApp();
 
 // 🔑 Set these in your Firebase environment:
-// firebase functions:config:set keys.together="YOUR_TOGETHER_API_KEY"
+// firebase functions:config:set keys.together="b918fbcf050bcb2505ab730a1afb688162583d7e477706e102d23ffdbdf3a807"
 // firebase functions:config:set keys.github="YOUR_GITHUB_TOKEN"
-const TOGETHER_API_KEY = functions.config().keys.together;
+// firebase functions:config:set github.repo="your_username/your_repo"
+const TOGETHER_API_KEY = functions.config().keys.together || "b918fbcf050bcb2505ab730a1afb688162583d7e477706e102d23ffdbdf3a807";
 const GITHUB_TOKEN = functions.config().keys.github;
-
-const GITHUB_REPO = "your_username/your_repo"; // e.g., kunal21/ai-blog
+const GITHUB_REPO = functions.config().github.repo;
 const GITHUB_BRANCH = "main";
 
 const categories = [
-  "technology", "health", "sports", "food",
-  "finance", "travel", "education", "science", "lifestyle",
+  "Engine", "Sensors", "OBD2", "Alerts", "Apps",
+  "Maintenance", "Fuel", "EVs", "Trends",
 ];
 
-exports.generateAndPushArticles = functions.pubsub
-  .schedule("every day 06:00")
+const slugify = (text: string) => text.toString().toLowerCase().trim().replace(/\s+/g, "-").replace(/[^\w-]+/g, "").replace(/--+/g, "-");
+
+exports.generateAndPushArticles = functions.runWith({ timeoutSeconds: 540, memory: '1GB' }).pubsub
+  .schedule("every 24 hours")
   .timeZone("UTC")
   .onRun(async (context) => {
-    console.log("🚀 Starting daily article generation...");
+    console.log("🚀 Starting daily article generation job...");
 
-    if (!TOGETHER_API_KEY || !GITHUB_TOKEN) {
-      console.error("❌ Missing API keys. Set them using `firebase functions:config:set`");
+    if (!GITHUB_TOKEN || !GITHUB_REPO || GITHUB_REPO === 'your_username/your_repo') {
+      console.error("❌ Missing or default GitHub Token/Repo configuration. Set keys.github and github.repo in Firebase environment.");
       return null;
     }
-    if (GITHUB_REPO === "your_username/your_repo") {
-      console.error("❌ GitHub repository is not configured. Please update GITHUB_REPO variable in the code.");
-      return null;
-    }
+
+    const usedTopics = new Set();
 
     for (const category of categories) {
       for (let i = 0; i < 4; i++) {
-        const topic = `Write a 1500-word blog post in the category "${category}" with SEO, friendly tone, and H2 subheadings. The article should be engaging, informative, and well-structured.`;
-        let content = "Error: Could not generate article content.";
-
         try {
-          console.log(`Generating article for category: ${category} (${i + 1}/4)`);
-          const aiResponse = await axios.post(
-            "https://api.together.xyz/v1/chat/completions",
-            {
-              model: "mistralai/Mixtral-8x7B-Instruct",
-              messages: [{role: "user", content: topic}],
-              temperature: 0.7,
-              max_tokens: 2048,
-            },
-            {
-              headers: {
-                "Authorization": `Bearer ${TOGETHER_API_KEY}`,
-                "Content-Type": "application/json",
-              },
-            },
+          console.log(`🧠 Generating topic for category: ${category} (${i + 1}/4)`);
+          
+          const topicPrompt = `Suggest a unique and engaging blog post title for the automotive category: "${category}". The title should not be on this list: [${Array.from(usedTopics).join(", ")}]. Respond with only the title text, nothing else.`;
+          
+          const topicResponse = await axios.post("https://api.together.xyz/v1/chat/completions",
+              { model: "mistralai/Mixtral-8x7B-Instruct", messages: [{ role: "user", content: topicPrompt }], temperature: 0.8, max_tokens: 60 },
+              { headers: { Authorization: `Bearer ${TOGETHER_API_KEY}` } }
           );
+          const articleTopic = topicResponse.data.choices[0].message.content.trim().replace(/"/g, '');
+          usedTopics.add(articleTopic);
+          
+          console.log(`📝 Generating article for topic: "${articleTopic}"`);
 
-          if (aiResponse.data.choices && aiResponse.data.choices[0]) {
-            content = aiResponse.data.choices[0].message.content;
-          } else {
-            console.error(`❌ Unexpected response from Together AI for category ${category}.`);
-          }
-        } catch (aiError: any) {
-          console.error(`❌ Error calling Together AI for category ${category}:`, aiError.response?.data || aiError.message);
-          continue;
-        }
+          const generationPrompt = `You are an expert automotive writer. Your task is to write a detailed, SEO-friendly article of at least 1500 words on the topic: "${articleTopic}".
+          The article must be well-structured with a main H1 title, multiple H2 sections, and H3 sub-sections.
+          Your response MUST be a single, valid JSON object with two keys:
+          1. "summary": A concise, SEO-friendly summary of the article (around 160 characters).
+          2. "content": The full article in Markdown format. The H1 title must be the very first line of the content.`;
 
-        const date = new Date().toISOString().split("T")[0];
-        const filename = `${date}-${category}-${i + 1}.md`;
-        const path = `articles/${category}/${filename}`;
-        const encodedContent = Buffer.from(content).toString("base64");
+          const aiResponse = await axios.post("https://api.together.xyz/v1/chat/completions",
+              { model: "mistralai/Mixtral-8x7B-Instruct", messages: [{ role: "user", content: generationPrompt }], temperature: 0.7, max_tokens: 4096, response_format: { type: "json_object" }},
+              { headers: { Authorization: `Bearer ${TOGETHER_API_KEY}` } }
+          );
+          
+          const responseContent = aiResponse.data.choices[0].message.content;
+          const articleJson = JSON.parse(responseContent);
 
-        try {
-          await axios.put(
-            `https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`,
-            {
-              message: `feat(content): Add article: ${filename}`,
-              content: encodedContent,
-              branch: GITHUB_BRANCH,
-            },
-            {
-              headers: {
-                "Authorization": `Bearer ${GITHUB_TOKEN}`,
-                "Accept": "application/vnd.github.v3+json",
-              },
-            },
+          const articleId = Math.floor(1000 + Math.random() * 9000);
+          const slug = `${slugify(articleTopic)}-${articleId}`;
+
+          const fullArticle = {
+              id: articleId,
+              title: articleTopic,
+              category: category,
+              slug: slug,
+              summary: articleJson.summary,
+              content: articleJson.content,
+              imageUrl: null,
+              status: "ready"
+          };
+          
+          const path = `.cache/articles/${slug}.json`;
+          const encodedContent = Buffer.from(JSON.stringify(fullArticle, null, 2)).toString("base64");
+
+          await axios.put(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`,
+              { message: `feat(content): Add article on ${articleTopic}`, content: encodedContent, branch: GITHUB_BRANCH, },
+              { headers: { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" } }
           );
           console.log(`✅ Article pushed to GitHub: ${path}`);
-        } catch (githubError: any) {
-          console.error(`❌ Error saving article to GitHub (${path}):`, githubError.response?.data || githubError.message);
+
+        } catch (error: any) {
+          console.error(`❌ Error processing for category "${category}":`, error.response?.data || error.message);
         }
       }
     }
-
     console.log("🎉 Daily article generation job completed.");
     return null;
   });
