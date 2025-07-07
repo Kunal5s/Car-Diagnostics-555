@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ImageIcon } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
@@ -56,9 +56,7 @@ export function ArticleCard({ topic, priority = false }: ArticleCardProps) {
                   onError={() => setImageError(true)}
                 />
              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-muted rounded-t-lg">
-                    <ImageIcon className="h-16 w-16 text-muted-foreground" />
-                </div>
+                <div className="flex h-full w-full items-center justify-center bg-white dark:bg-zinc-900 rounded-t-lg" />
              )}
           </Link>
         </CardHeader>

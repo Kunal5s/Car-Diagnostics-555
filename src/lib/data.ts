@@ -68,9 +68,16 @@ const allArticleTopics: Omit<ArticleTopic, 'slug' | 'imageUrl'>[] = [
   { id: 36, "title": "Understanding the Important Role of Big Data In Modern Connected Vehicles", category: "Trends" }
 ];
 
-function getFinalImageUrl(slug: string): string {
-    return `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/public/images/${slug}.jpg`;
-}
+const CACHE_DIR = path.join(process.cwd(), '.cache', 'articles');
+const CACHE_TTL_HOURS = 24;
+
+
+const POLLINATION_MODELS = [
+    'flux-realism',        // Fastest, reliable, technical realism
+    'dreamlike-photoreal', // Sharp photorealistic parts/objects
+    'realistic-vision-v2', // Clean product-style car part renders
+    'portrait-plus',       // If you want human + dashboard/driver visuals
+];
 
 async function generateAndUploadImage(slug: string, title: string, category: string): Promise<string | null> {
     if (!GITHUB_TOKEN) {
@@ -79,33 +86,28 @@ async function generateAndUploadImage(slug: string, title: string, category: str
     }
 
     const imagePath = `public/images/${slug}.jpg`;
+    const imageModel = POLLINATION_MODELS[Math.floor(Math.random() * POLLINATION_MODELS.length)];
     const prompt = `${title}, ${category}, photorealistic`;
-    const imageModel = 'flux-realism';
-
-    console.log(`[Image Gen] Starting image generation for "${title}"`);
-    console.log(`[Image Gen]   - Prompt: "${prompt}"`);
+    
+    console.log(`[Image Gen] Starting image generation for "${slug}"`);
+    console.log(`[Image Gen]   - Model: "${imageModel}", Prompt: "${prompt}"`);
 
     try {
         const encodedPrompt = encodeURIComponent(prompt);
         const seed = Math.floor(Math.random() * 1000000);
-        const pollutionsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${imageModel}&width=512&height=512&nologo=true&seed=${seed}`;
+        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${imageModel}&width=512&height=512&nologo=true&seed=${seed}`;
         
-        console.log(`[Image Gen]   - Fetching from: ${pollutionsUrl}`);
-        const response = await fetch(pollutionsUrl, { signal: AbortSignal.timeout(30000) }); // 30 second timeout
+        const response = await fetch(pollinationsUrl, { signal: AbortSignal.timeout(30000) });
         if (!response.ok) {
             throw new Error(`Pollinations API request failed with status ${response.status}: ${await response.text()}`);
         }
         const imageBuffer = Buffer.from(await response.arrayBuffer());
-        console.log(`[Image Gen]   - Image fetched successfully.`);
 
-        console.log('[Image Gen]   - Compressing image...');
         const compressedBuffer = await sharp(imageBuffer)
             .resize(512, 512)
             .jpeg({ quality: 30 })
             .toBuffer();
-        console.log(`[Image Gen]   - Image compressed. Size: ${Math.round(compressedBuffer.length / 1024)}KB`);
 
-        console.log(`[Image Gen]   - Pushing to GitHub at path: ${imagePath}`);
         const commitMessage = `feat: add image for article ${slug}`;
         
         let sha: string | undefined;
@@ -133,26 +135,39 @@ async function generateAndUploadImage(slug: string, title: string, category: str
             sha,
         });
 
-        const finalUrl = getFinalImageUrl(slug);
+        const finalUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${imagePath}`;
         console.log(`[Image Gen]   - ✅ Successfully uploaded image. URL: ${finalUrl}`);
         return finalUrl;
 
     } catch (err: any) {
-        console.error(`[Image Gen] ❌ Failed to generate and upload image for "${title}":`, err.message);
+        console.error(`[Image Gen] ❌ Failed to generate and upload image for "${slug}":`, err.message);
         return null;
     }
 }
 
 
 export async function getAllTopics(): Promise<ArticleTopic[]> {
-  return allArticleTopics.map(topic => {
-      const slug = `${slugify(topic.title)}-${topic.id}`;
-      return {
-          ...topic,
-          slug,
-          imageUrl: getFinalImageUrl(slug)
-      };
-  });
+  await fs.mkdir(CACHE_DIR, { recursive: true });
+
+  const topicsWithSlugs = allArticleTopics.map(topic => ({
+    ...topic,
+    slug: `${slugify(topic.title)}-${topic.id}`,
+  }));
+
+  const topicsWithImages = await Promise.all(
+    topicsWithSlugs.map(async (topic) => {
+      const cacheFilePath = path.join(CACHE_DIR, `${topic.slug}.json`);
+      try {
+        const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
+        const article: FullArticle = JSON.parse(cachedData);
+        return { ...topic, imageUrl: article.imageUrl || null };
+      } catch (error) {
+        return { ...topic, imageUrl: null };
+      }
+    })
+  );
+
+  return topicsWithImages;
 }
 
 export async function getHomepageTopics(): Promise<ArticleTopic[]> {
@@ -178,17 +193,48 @@ export async function getHomepageTopics(): Promise<ArticleTopic[]> {
   }
 
   const shuffledTopics = seededShuffle([...topics], seed);
-  return shuffledTopics.slice(0, 6);
+  return shuffledTopics.slice(0, 4);
 }
-
 
 export async function getTopicsByCategory(categoryName: string): Promise<ArticleTopic[]> {
   const topics = await getAllTopics();
   return topics.filter(topic => topic.category.toLowerCase() === categoryName.toLowerCase());
 }
 
-const CACHE_DIR = path.join(process.cwd(), '.cache', 'articles');
-const CACHE_TTL_HOURS = 24;
+export async function generateAndCacheImageOnly(slug: string, title: string, category: string): Promise<string | null> {
+    const cacheFilePath = path.join(CACHE_DIR, `${slug}.json`);
+
+    try {
+        const data = await fs.readFile(cacheFilePath, 'utf-8');
+        const article = JSON.parse(data) as FullArticle;
+        if (article.imageUrl) {
+            console.log(`[Image Action] Race condition prevented. Image already exists for ${slug}.`);
+            return article.imageUrl;
+        }
+    } catch (error) { /* File may not exist, which is fine */ }
+    
+    const newImageUrl = await generateAndUploadImage(slug, title, category);
+    if (!newImageUrl) return null;
+
+    let articleData: FullArticle;
+    const staticTopic = allArticleTopics.find(topic => `${slugify(topic.title)}-${topic.id}` === slug)!;
+    try {
+        const data = await fs.readFile(cacheFilePath, 'utf-8');
+        articleData = JSON.parse(data);
+        articleData.imageUrl = newImageUrl;
+    } catch (error) {
+        articleData = {
+            ...staticTopic,
+            slug: slug,
+            summary: 'Summary will be generated when the article is visited.',
+            content: 'Content will be generated when the article is visited.',
+            imageUrl: newImageUrl,
+        };
+    }
+    
+    await fs.writeFile(cacheFilePath, JSON.stringify(articleData, null, 2));
+    return newImageUrl;
+}
 
 export async function getArticleBySlug(slug: string): Promise<FullArticle | null> {
     const staticTopic = allArticleTopics.find(topic => `${slugify(topic.title)}-${topic.id}` === slug);
@@ -199,7 +245,6 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
     await fs.mkdir(CACHE_DIR, { recursive: true });
     const cacheFilePath = path.join(CACHE_DIR, `${slug}.json`);
 
-    // 1. Check local file cache
     try {
         const stats = await fs.stat(cacheFilePath);
         const lastModified = stats.mtime;
@@ -207,76 +252,44 @@ export async function getArticleBySlug(slug: string): Promise<FullArticle | null
         const ageInHours = (now.getTime() - lastModified.getTime()) / (1000 * 60 * 60);
 
         if (ageInHours < CACHE_TTL_HOURS) {
-            console.log(`[Cache] HIT for "${slug}". Loading from file.`);
             const cachedData = await fs.readFile(cacheFilePath, 'utf-8');
             const article: FullArticle = JSON.parse(cachedData);
-            // Simple validation to ensure the cached content is not an error or missing an image
-            if (article.content && !article.content.includes("Article Generation Failed") && article.imageUrl) {
+            if (article.content && !article.content.includes("not generated yet")) {
+                console.log(`[Cache] HIT for "${slug}". Loading from file.`);
                 return article;
             }
-            console.log(`[Cache] Stale or invalid cache for "${slug}". Regenerating.`);
         }
     } catch (error: any) {
         if (error.code !== 'ENOENT') {
             console.error(`[Cache] Error reading cache file for ${slug}:`, error);
         }
-        // If file doesn't exist (ENOENT), we continue to the generation logic.
     }
     
-    console.log(`[Cache] MISS for "${slug}". Checking remote assets and generating if needed.`);
+    console.log(`[Cache] MISS for "${slug}". Generating content.`);
 
-    // 2. If cache miss, check if image already exists on GitHub to avoid re-generating it
-    const imagePath = `public/images/${slug}.jpg`;
+    const articleResult = await generateArticle({ topic: staticTopic.title });
+    
     let finalImageUrl: string | null = null;
-
     try {
-        await octokit.repos.getContent({
-            owner: GITHUB_OWNER,
-            repo: GITHUB_REPO,
-            path: imagePath,
-            ref: GITHUB_BRANCH,
-        });
-        finalImageUrl = getFinalImageUrl(slug);
-        console.log(`[GitHub] Image already exists for "${slug}". Re-using it.`);
-    } catch (error: any) {
-        if (error.status === 404) {
-            console.log(`[GitHub] Image does not exist for "${slug}". Generating new image.`);
-            finalImageUrl = await generateAndUploadImage(slug, staticTopic.title, staticTopic.category);
-        } else {
-            console.error(`[GitHub] Error checking for image existence for "${slug}":`, error.message);
-        }
-    }
-
-    // 3. Generate article content (this is always needed on a cache miss)
-    const articleResult = await generateArticle({ topic: staticTopic.title }).catch(e => {
-        console.error(`Failed to generate content for topic: ${staticTopic.title}`, e.message);
-        return {
-            summary: "Error: Could not generate content.",
-            content: `<h2>Article Generation Failed</h2><p>An unexpected error occurred while trying to generate the article.</p><p><strong>Topic attempted:</strong> ${staticTopic.title}</p><p><strong>Error Details:</strong> ${e.message}</p>`,
-        };
-    });
+        const data = await fs.readFile(cacheFilePath, 'utf-8');
+        const article = JSON.parse(data) as FullArticle;
+        finalImageUrl = article.imageUrl || null;
+    } catch (error) { /* no image yet */ }
 
     const fullArticle: FullArticle = {
         ...staticTopic,
         slug: slug,
         summary: articleResult.summary,
         content: articleResult.content,
-        imageUrl: finalImageUrl, // Use the determined image URL
+        imageUrl: finalImageUrl,
     };
 
-    // 4. Write to cache ONLY IF image generation was successful
-    if (fullArticle.imageUrl && !fullArticle.content.includes("Article Generation Failed")) {
-        try {
-            await fs.writeFile(cacheFilePath, JSON.stringify(fullArticle, null, 2));
-            console.log(`[Cache] Wrote new cache file for "${slug}".`);
-        } catch (error) {
-            console.error(`[Cache] Error writing cache file for ${slug}:`, error);
-        }
+    if (!fullArticle.content.includes("Article Generation Failed")) {
+        await fs.writeFile(cacheFilePath, JSON.stringify(fullArticle, null, 2));
+        console.log(`[Cache] Wrote new cache file for "${slug}".`);
     } else {
-        console.warn(`[Cache] SKIPPING cache write for "${slug}" because image or content generation failed.`);
+        console.warn(`[Cache] SKIPPING cache write for "${slug}" because content generation failed.`);
     }
     
     return fullArticle;
 }
-
-    
