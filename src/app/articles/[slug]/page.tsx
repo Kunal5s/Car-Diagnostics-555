@@ -1,12 +1,12 @@
 
 import React from 'react';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Metadata } from 'next';
 import { getArticleBySlug, getAllTopics } from '@/lib/data';
+import { AiArticleImage } from '@/components/ai-article-image';
 
 export async function generateStaticParams() {
   const topics = await getAllTopics();
@@ -30,6 +30,8 @@ export async function generateMetadata({ params }: { params: { slug:string } }):
     openGraph: {
       title: article.title,
       description: article.summary,
+      // For social media previews, we can still use the stable GitHub image.
+      // Live generation is for the on-page experience.
       images: article.imageUrl ? [article.imageUrl] : [],
     },
   }
@@ -55,25 +57,16 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         <article>
             <Breadcrumbs items={breadcrumbItems} />
             
-            {article.imageUrl && (
-              <div className="relative mb-8 h-64 w-full overflow-hidden rounded-lg md:h-96">
-                <Image
-                  src={article.imageUrl}
-                  alt={article.title}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 768px) 100vw, 896px"
-                />
-              </div>
-            )}
-
             <header className="my-8">
-            <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
-                {article.title}
-            </h1>
-            <p className="text-lg text-muted-foreground">{article.summary}</p>
+              <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
+                  {article.title}
+              </h1>
+              <p className="text-lg text-muted-foreground">{article.summary}</p>
             </header>
+
+            {/* The new live AI image component */}
+            <AiArticleImage title={article.title} />
+            
             <div className="prose prose-lg dark:prose-invert max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>
             </div>
