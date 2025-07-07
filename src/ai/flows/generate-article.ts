@@ -54,24 +54,6 @@ In addition to the article, you must provide a concise, SEO-friendly summary for
 });
 
 
-const imagePrompt = ai.definePrompt({
-    name: 'articleImagePrompt',
-    input: { schema: z.object({ topic: z.string(), category: z.string() })},
-    prompt: `Generate a photorealistic, high-resolution hero image for a technical automotive blog post.
-    
-    The article topic is: "{{{topic}}}"
-    The category is: "{{{category}}}"
-
-    The image should be:
-    - Clean, modern, and professional.
-    - Visually interesting and relevant to the topic.
-    - Avoid text and clutter. Focus on a single, strong visual element.
-    - Cinematic lighting and a shallow depth of field.
-    - Example subjects: A clean engine bay, a detailed shot of a car sensor, a modern car dashboard, an electric vehicle charging.
-    `
-});
-
-
 export const generateArticleFlow = ai.defineFlow(
   {
     name: 'generateArticleFlow',
@@ -79,31 +61,21 @@ export const generateArticleFlow = ai.defineFlow(
     outputSchema: GenerateArticleOutputSchema,
   },
   async (input) => {
-    // Generate the article text and the image in parallel to save time.
-    const [articleResponse, imageResponse] = await Promise.all([
-        articlePrompt({ topic: input.topic }),
-        ai.generate({
-            model: 'googleai/gemini-2.0-flash-preview-image-generation',
-            prompt: await imagePrompt(input),
-            config: {
-                responseModalities: ['TEXT', 'IMAGE'],
-            },
-        })
-    ]);
-
+    // Step 1: Generate the article text.
+    const articleResponse = await articlePrompt({ topic: input.topic });
     const articleOutput = articleResponse.output;
-    const imageOutput = imageResponse.media;
 
     if (!articleOutput) {
       throw new Error('Failed to generate article content.');
     }
-    if (!imageOutput?.url) {
-        throw new Error('Failed to generate article image.');
-    }
+
+    // Step 2: Construct the Pollinations image URL.
+    const imagePromptText = `A photorealistic, high-resolution hero image for a technical automotive blog post about "${input.topic}". The image should be clean, modern, professional, and visually interesting with cinematic lighting.`;
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePromptText)}?width=600&height=400&nologo=true`;
 
     return {
         ...articleOutput,
-        imageUrl: imageOutput.url,
+        imageUrl: imageUrl,
     };
   }
 );
