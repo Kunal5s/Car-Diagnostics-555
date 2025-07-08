@@ -87,7 +87,11 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ message: `Successfully generated article: ${topicToGenerate.title}` });
 
     } catch (error) {
-        console.error('Error in cron job:', error);
+        console.error('Error in cron job:', { 
+            message: (error as Error).message,
+            stack: (error as Error).stack,
+            cause: (error as Error).cause
+        });
         return NextResponse.json({ message: 'Error generating article', error: (error as Error).message }, { status: 500 });
     }
 }
