@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 import type { Metadata } from 'next';
 import { getArticleBySlug, getAllArticleSlugs } from '@/lib/data';
 import Image from 'next/image';
+import { ShareButtons } from '@/components/share-buttons';
 
 export async function generateStaticParams() {
   const slugs = await getAllArticleSlugs();
@@ -62,6 +63,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               </h1>
               <p className="text-lg text-muted-foreground">{article.summary}</p>
             </header>
+
+            <ShareButtons title={article.title} />
 
             <div className="relative mb-8 h-64 w-full overflow-hidden rounded-lg md:h-96">
                 <Image
