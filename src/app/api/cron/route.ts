@@ -9,7 +9,7 @@ import type { FullArticle } from '@/lib/definitions';
 // Revalidate the page every 24 hours
 export const revalidate = 86400;
 
-async function getExistingArticleSlugs(octokit: Octokit, owner: string, repo: string): Promise<string[]> {
+async function getExistingArticleSlugs(octokit: Octokit, owner: string, repo: string): Promise<Set<number>> {
     try {
         const { data: files } = await octokit.repos.getContent({
             owner,
@@ -18,13 +18,14 @@ async function getExistingArticleSlugs(octokit: Octokit, owner: string, repo: st
         });
 
         if (Array.isArray(files)) {
-            return files.map(file => file.name.replace('.json', ''));
+            const ids = files.map(file => parseInt(file.name.split('-').pop() || '0'));
+            return new Set(ids.filter(id => !isNaN(id)));
         }
-        return [];
+        return new Set();
     } catch (error: any) {
         if (error.status === 404) {
             // The directory doesn't exist yet, which is fine.
-            return [];
+            return new Set();
         }
         console.error('Error fetching existing articles from GitHub:', error);
         throw error;
@@ -52,14 +53,16 @@ export async function GET(request: NextRequest) {
     const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
     try {
-        const existingSlugs = await getExistingArticleSlugs(octokit, GITHUB_REPO_OWNER, GITHUB_REPO_NAME);
-        const existingIds = new Set(existingSlugs.map(slug => parseInt(slug.split('-').pop() || '0')));
+        const existingIds = await getExistingArticleSlugs(octokit, GITHUB_REPO_OWNER, GITHUB_REPO_NAME);
+        
+        const availableTopics = allArticleTopics.filter(topic => !existingIds.has(topic.id));
 
-        const topicToGenerate = allArticleTopics.find(topic => !existingIds.has(topic.id));
-
-        if (!topicToGenerate) {
-            return NextResponse.json({ message: 'All articles have been generated.' });
+        if (availableTopics.length === 0) {
+            return NextResponse.json({ message: 'All available articles have been generated.' });
         }
+
+        // Select a random topic from the available ones
+        const topicToGenerate = availableTopics[Math.floor(Math.random() * availableTopics.length)];
 
         console.log(`Generating article for topic: "${topicToGenerate.title}"`);
         const generatedData = await generateArticle({ topic: topicToGenerate.title, category: topicToGenerate.category });
