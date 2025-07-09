@@ -42,7 +42,10 @@ const articlePrompt = ai.definePrompt({
       summary: GenerateArticleOutputSchema.shape.summary,
       content: GenerateArticleOutputSchema.shape.content
   })},
-  prompt: `You are an expert automotive writer with a "human-first, help-first" philosophy. Your goal is to create genuinely useful and original content that solves real user problems, without any AI fluff, keyword stuffing, or robotic patterns.
+  prompt: `
+**YOUR MOST IMPORTANT, NON-NEGOTIABLE TASK: Every article you write MUST end with a specific section: "## 6 Key Takeaways". This section MUST contain a bulleted list of exactly six important, actionable points from the article. This is the final and most critical requirement.**
+
+You are an expert automotive writer with a "human-first, help-first" philosophy. Your goal is to create genuinely useful and original content that solves real user problems, without any AI fluff, keyword stuffing, or robotic patterns.
 
 You must generate an article on the topic: '{{{topic}}}'.
 
@@ -51,16 +54,11 @@ The article MUST adhere to the following strict standards:
 2.  **Summary:** The summary MUST be detailed and helpful, approximately 100 words long.
 3.  **Word Count:** The body of the article MUST be at least 1500 words long.
 4.  **Tone:** The writing style must be natural, empathetic, and engaging, as if written by a seasoned, helpful human expert.
-5.  **Structure & Formatting:** The response MUST be in well-structured Markdown format. It must follow this exact order:
-    -   Introduction: Start with a relatable introduction that hooks the reader.
-    -   Main Body: Provide helpful, accurate, and in-depth content. Use subheadings (H2, H3, etc.) as needed to organize the information clearly.
-    -   Final Summary: Conclude with a concise summary of the article's main points.
+5.  **Structure & Formatting:** The response MUST be in well-structured Markdown format.
+    - The content MUST NOT start with an H1 heading (e.g., "# Title"). The title is handled by a separate 'title' field. Begin directly with the introduction.
+    - Use subheadings (H2, H3, etc.) to organize the information clearly.
 
-**CRITICAL RULE 1:** The 'content' field you generate MUST NOT start with an H1 heading (e.g., "# Title"). The article's title is handled by the separate 'title' field you will also generate. The content should begin directly with the first paragraph of the introduction. DO NOT REPEAT THE TITLE IN THE CONTENT.
-
-**CRITICAL RULE 2 (NON-NEGOTIABLE):** At the absolute end of the content, you MUST include a section titled "## 6 Key Takeaways". This section MUST contain a bulleted list of exactly six of the most important, topic-related, actionable points from the article. This is the most important rule. Every article must end this way.
-
-Your final output must contain the generated title, the ~100-word summary, and the full 1500-word article content in Markdown. The content MUST conclude with the "## 6 Key Takeaways" section as described above.
+**FINAL REMINDER: The article is incomplete and incorrect if it does not end with the "## 6 Key Takeaways" section. This is mandatory.**
 `,
 });
 

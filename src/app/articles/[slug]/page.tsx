@@ -8,6 +8,7 @@ import type { Metadata } from 'next';
 import { getArticleBySlug, getAllArticleSlugs } from '@/lib/data';
 import Image from 'next/image';
 import { ShareButtons } from '@/components/share-buttons';
+import { generateTakeaways } from '@/ai/flows/generate-takeaways';
 
 export async function generateStaticParams() {
   const slugs = await getAllArticleSlugs();
@@ -63,6 +64,19 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       processedContent = processedContent.substring(article.title.length).trim();
   }
 
+  // Check if takeaways are missing and generate them if needed. This fixes old articles.
+  let finalContent = processedContent;
+  if (!finalContent.includes('## 6 Key Takeaways')) {
+    try {
+      console.log(`Dynamically generating takeaways for old article: "${article.title}"`);
+      const result = await generateTakeaways({ title: article.title, content: finalContent });
+      finalContent += `\n\n${result.takeaways}`;
+    } catch (error) {
+      console.error(`Failed to generate takeaways for "${article.title}":`, error);
+      // If generation fails, we just show the original content without takeaways.
+    }
+  }
+
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
@@ -73,12 +87,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
                   {article.title}
               </h1>
-              <blockquote className="mt-4 border-l-4 border-primary bg-muted/50 p-4 text-lg italic">
-                {article.summary}
-              </blockquote>
             </header>
-
-            <ShareButtons title={article.title} />
 
             <div className="relative mb-8 h-64 w-full overflow-hidden rounded-lg md:h-96">
                 <Image
@@ -92,8 +101,14 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 />
             </div>
             
+            <blockquote className="mb-8 border-l-4 border-primary bg-muted/50 p-4 text-lg italic">
+              {article.summary}
+            </blockquote>
+
+            <ShareButtons title={article.title} />
+            
             <div className="prose prose-lg dark:prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{finalContent}</ReactMarkdown>
             </div>
         </article>
     </div>
