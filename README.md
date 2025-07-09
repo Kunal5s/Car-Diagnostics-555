@@ -43,8 +43,8 @@ Create a `.env.local` file for local development or add these directly to your V
 GOOGLE_API_KEY="your_google_api_key"
 CRON_SECRET="your_secret_cron_job_string"
 GITHUB_TOKEN="your_github_personal_access_token"
-GITHUB_REPO_OWNER="your_github_username"
-GITHUB_REPO_NAME="your_github_repository_name"
+GITHUB_REPO_OWNER="Kunal5s"
+GITHUB_REPO_NAME="Car-Diagnostics-555"
 ```
 
 ### Running the Development Server
@@ -72,3 +72,4 @@ If new articles are not being generated every two hours, it is almost certainly 
 1.  **Missing Environment Variables in Vercel:** The most common cause. Double-check that all five required environment variables (`GOOGLE_API_KEY`, `CRON_SECRET`, `GITHUB_TOKEN`, `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME`) are correctly set in your Vercel project's settings.
 2.  **Incorrect GitHub Token Permissions:** Ensure your `GITHUB_TOKEN` has the full `repo` scope selected when you generate it. Without this, the system cannot write files to your repository.
 3.  **Vercel Cron Job Logs:** Check the logs for your cron job in the Vercel dashboard. Go to your project, click on the "Logs" tab, and then select "Crons" from the dropdown. Any errors (like "Unauthorized" or "GitHub environment variables are not set") will appear there and will tell you exactly what is wrong.
+
