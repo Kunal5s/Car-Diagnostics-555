@@ -48,9 +48,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     { label: 'Blog', href: '/blog' },
     { label: article.title },
   ];
-  
-  // Remove the H1 title from the markdown content, as we render it separately.
-  const contentWithoutTitle = article.content.replace(/^\s*#\s*[^\n]*\n*/, '');
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
@@ -79,7 +76,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             </div>
             
             <div className="prose prose-lg dark:prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentWithoutTitle}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content}</ReactMarkdown>
             </div>
         </article>
     </div>

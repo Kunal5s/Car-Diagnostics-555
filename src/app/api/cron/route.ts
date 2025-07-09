@@ -18,7 +18,11 @@ async function getExistingArticleSlugs(octokit: Octokit, owner: string, repo: st
         });
 
         if (Array.isArray(files)) {
-            const ids = files.map(file => parseInt(file.name.split('-').pop() || '0'));
+            const ids = files.map(file => {
+                const name = file.name;
+                const match = name.match(/-(\d+)\.json$/);
+                return match ? parseInt(match[1], 10) : NaN;
+            });
             return new Set(ids.filter(id => !isNaN(id)));
         }
         return new Set();
@@ -67,10 +71,11 @@ export async function GET(request: NextRequest) {
         console.log(`Generating article for topic: "${topicToGenerate.title}"`);
         const generatedData = await generateArticle({ topic: topicToGenerate.title, category: topicToGenerate.category });
         
-        const slug = slugify(`${topicToGenerate.title}-${topicToGenerate.id}`);
+        const slug = slugify(`${generatedData.title}-${topicToGenerate.id}`);
 
         const newArticle: FullArticle = {
-            ...topicToGenerate,
+            id: topicToGenerate.id,
+            category: topicToGenerate.category,
             slug,
             ...generatedData,
         };
@@ -82,12 +87,12 @@ export async function GET(request: NextRequest) {
             owner: GITHUB_REPO_OWNER,
             repo: GITHUB_REPO_NAME,
             path: filePath,
-            message: `feat: add article '${topicToGenerate.title}'`,
+            message: `feat: add article '${generatedData.title}'`,
             content: content,
         });
 
         console.log(`Successfully generated and committed article: ${filePath}`);
-        return NextResponse.json({ message: `Successfully generated article: ${topicToGenerate.title}` });
+        return NextResponse.json({ message: `Successfully generated article: ${generatedData.title}` });
 
     } catch (error) {
         console.error('Error in cron job:', { 

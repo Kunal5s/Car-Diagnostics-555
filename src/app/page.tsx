@@ -15,101 +15,59 @@ import { ArticleGrid } from "@/components/article-grid";
 import { categoryDetails } from "@/lib/definitions";
 import { CategoryCard } from "@/components/category-card";
 import {
-  Car,
-  Truck,
-  Zap,
-  Caravan,
-  ScanLine,
-  Smartphone,
-  ShieldCheck,
-  Lightbulb,
-  PlugZap,
-  BrainCircuit,
   FileText,
   Wrench,
   Star,
+  BookOpen,
+  Users,
+  BrainCircuit
 } from "lucide-react";
 import { getRecentArticles } from "@/lib/data";
 import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
 
 
 export const metadata: Metadata = {
-  description: "Detect engine problems instantly with Car Diagnostics BrainAi. Get smart analysis, vehicle health reports, and expert-written articles on maintenance and repair.",
-  keywords: ["AI car diagnostics", "OBD2 error codes", "engine fault scan", "vehicle health report", "car diagnostics tool", "Car Diagnostics BrainAi"],
+  description: "A genuinely helpful automotive knowledge base. Get original, useful, and accurate articles on car repair, maintenance, and technology, all written with a human-first approach.",
+  keywords: ["car repair help", "automotive maintenance guides", "vehicle help", "car problems", "DIY car repair", "Car Diagnostics BrainAi"],
 };
 
 const howItWorksSteps = [
   {
-    icon: Smartphone,
-    title: "Describe the Issue",
-    description: "Use our AI chat to describe your car's symptoms in simple terms.",
+    icon: Users,
+    title: "Start with a Question",
+    description: "Think of a real-world car problem or a topic you're curious about.",
+  },
+  {
+    icon: BookOpen,
+    title: "Explore Our Library",
+    description: "Browse categories or our full blog to find a helpful, in-depth article.",
   },
   {
     icon: BrainCircuit,
-    title: "AI Analysis",
-    description: "Our AI analyzes the problem and provides potential causes and solutions.",
-  },
-  {
-    icon: FileText,
-    title: "Instant Report",
-    description: "Get a detailed, easy-to-understand vehicle health report in seconds.",
+    title: "Gain Real Knowledge",
+    description: "Our AI-powered, human-centric articles provide clear, actionable advice.",
   },
   {
     icon: Wrench,
-    title: "Explore Articles",
-    description: "Browse our expert knowledge base for detailed guides and DIY tips.",
-  },
-];
-
-const supportedVehicles = [
-  { icon: Car, name: "SUVs & Sedans" },
-  { icon: Truck, name: "Trucks" },
-  { icon: Caravan, name: "Pickups" },
-  { icon: Zap, name: "EVs" },
-];
-
-const features = [
-  {
-    icon: ScanLine,
-    title: "AI Fault Scanning",
-    description: "Our advanced AI goes beyond standard checks to find hidden problems.",
-  },
-  {
-    icon: Smartphone,
-    title: "Mobile-Friendly",
-    description: "Access your diagnostics report anytime, anywhere, on any device.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Secure & Private",
-    description: "Your vehicle data is encrypted and handled with utmost privacy.",
-  },
-  {
-    icon: Lightbulb,
-    title: "Smart Fixes",
-    description: "Get cost estimates and DIY guides for recommended repairs.",
-  },
-  {
-    icon: PlugZap,
-    title: "OBD2 Compatibility",
-    description: "Works with most cars manufactured after 1996.",
+    title: "Apply Your Learning",
+    description: "Use your newfound knowledge for DIY tasks or informed talks with mechanics.",
   },
 ];
 
 const testimonials = [
   {
     name: "Sarah J.",
-    review: "Car Diagnostics BrainAi helped me identify a sensor issue my mechanic missed. Saved me over $500 on needless repairs!",
+    review: "Finally, a car website that actually helps! The articles are so detailed and easy to follow. I was able to fix a sensor issue myself.",
     rating: 5,
   },
   {
     name: "Mike T.",
-    review: "As someone who knows nothing about cars, Car Diagnostics BrainAi is a lifesaver. The reports are so easy to understand.",
+    review: "As someone who knows nothing about cars, this site is a lifesaver. The 'Key Takeaways' section is brilliant for quick summaries.",
     rating: 5,
   },
   {
     name: "Carlos R.",
-    review: "I was quoted $1,000 for a repair. The AI found the real, much cheaper problem. This tool is a must-have for any car owner.",
+    review: "Incredibly well-written content without the usual fluff. This is now my go-to resource before I even think about visiting a mechanic.",
     rating: 5,
   },
 ];
@@ -117,43 +75,27 @@ const testimonials = [
 const faqItems = [
     {
     question: "What is Car Diagnostics BrainAi?",
-    answer: "Car Diagnostics BrainAi is an intelligent platform that automatically provides in-depth, AI-generated articles on automotive topics. Our system ensures all content is comprehensive, accurate, and always fresh.",
+    answer: "Car Diagnostics BrainAi is an intelligent knowledge base dedicated to providing genuinely helpful, original, and accurate articles about automotive repair and maintenance. Our core philosophy is to help readers solve real-life problems.",
   },
   {
-    question: "How does the content generation work?",
-    answer: "Our backend system automatically generates new topics, full articles, and images daily. This ensures that every time you visit, you are likely to see new, relevant content without any manual intervention.",
+    question: "How is the content created?",
+    answer: "Our content is generated by an advanced AI system that is guided by a 'human-first' principle. Every day, it automatically writes a new, in-depth article on a unique topic, which is then added to our permanent library.",
   },
   {
-    question: "Are articles permanently saved?",
-    answer: "Yes. Once an article is generated and saved to our content repository on GitHub, it is permanently available. This ensures that direct links are stable and load instantly, while the main pages continue to refresh with new selections.",
+    question: "Are the articles accurate and reliable?",
+    answer: "We strive for the highest accuracy. The AI is trained to produce useful, factual content. However, all articles are for informational purposes and should not replace advice from a qualified professional mechanic.",
   },
   {
-    question: "What is the refresh cycle?",
-    answer: "A Vercel Cron Job runs daily to generate a new article and commit it to our GitHub repository. This automatically triggers a new deployment on Vercel, ensuring the site is always updated with the latest content.",
+    question: "Do I need any tools to use this website?",
+    answer: "No, not at all. Our website is a free knowledge platform accessible on any device. No scanners, hardware, or special tools are required. Our goal is to empower you with information.",
   },
   {
-    question: "Is my vehicle compatible?",
-    answer: "Our knowledge base covers a wide array of topics for most modern cars, trucks, and SUVs, including gasoline, diesel, and electric vehicles. The information is designed to be broadly applicable.",
+    question: "How often is new content published?",
+    answer: "A new, completely unique article is automatically generated and published once every day, ensuring our library is always growing with fresh, helpful content.",
   },
   {
-    question: "How accurate are the articles?",
-    answer: "The articles are generated by a state-of-the-art AI model to be as accurate and helpful as possible. However, they are for informational purposes only and should always be used as a guide, not as a substitute for professional advice from a qualified mechanic.",
-  },
-   {
-    question: "Do I need to buy any special tools to use this website?",
-    answer: "No, not at all. Car Diagnostics BrainAi is a web-based knowledge platform. All our AI-generated articles and guides are accessible for free from any device with an internet browser, like your phone, tablet, or computer. No physical hardware or scanner is required."
-  },
-  {
-    question: "Is there a cost or subscription to read the articles?",
-    answer: "No, our entire library of automotive articles is completely free to access. Our mission is to provide valuable, accessible information to all car owners. There are no hidden fees or subscription requirements."
-  },
-  {
-    question: "How do I find information about a specific problem?",
-    answer: "You can start by exploring our categories using the navigation bar at the top of the site. Each category, like 'Engine' or 'Sensors', contains the most recent articles on that topic. You can also visit our 'Blog' page to see a complete, historical list of all published articles."
-  },
-  {
-    question: "What if I can't find an article on my specific issue?",
-    answer: "Our automated system generates new articles on a wide range of topics every single day. If you don't see your topic today, it's very likely it will be covered in the near future. Keep checking back as our knowledge base grows continuously."
+    question: "Can I search for a specific topic?",
+    answer: "Yes! You can use the search bar on the 'Blog' page to find articles related to specific keywords. You can also browse by category to explore different areas of automotive care."
   }
 ];
 
@@ -172,10 +114,10 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <div>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
-              AI Car Diagnostics Made Easy with BrainAi
+              Genuinely Helpful Car Repair and Maintenance Guides
             </h1>
             <p className="text-lg md:text-xl text-primary-foreground/80 max-w-3xl mx-auto mb-8">
-              Detect engine problems instantly using artificial intelligence. Fast, reliable, and always available.
+              Original, useful, and accurate help for real-life automotive problems. Written for humans, by an intelligent system focused on quality.
             </p>
             <Button size="lg" variant="secondary" asChild>
               <Link href="/blog">Explore Our Articles</Link>
@@ -191,6 +133,7 @@ export default function HomePage() {
             <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-primary lg:text-4xl">
               Recently Added Articles
             </h2>
+            <p className="mx-auto -mt-4 max-w-2xl text-center text-lg text-muted-foreground">Our library grows every day with a new, in-depth article. Here are the latest additions.</p>
           </div>
            <Suspense fallback={<ArticleGridSkeleton count={4} />}>
             <HomepageContent />
@@ -202,8 +145,8 @@ export default function HomePage() {
       <section className="py-16 md:py-24 bg-secondary/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-primary">How It Works</h2>
-            <p className="text-muted-foreground mt-2">A simple, 4-step process to a healthy car.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-primary">Our Help-First Approach</h2>
+            <p className="text-muted-foreground mt-2">A simple, 4-step process to empower you with knowledge.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {howItWorksSteps.map((step) => (
@@ -234,68 +177,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Real-Time Error Code Example Section */}
-      <div className="bg-secondary/50 py-12">
-        <div className="container mx-auto px-4 text-center">
-            <p className="text-sm uppercase tracking-widest text-muted-foreground mb-2">Real-Time Error Code Diagnostics</p>
-            <div className="bg-card inline-flex items-center gap-4 p-4 rounded-lg shadow-md border">
-                <span className="font-mono text-destructive font-bold text-lg">P0171</span>
-                <span className="text-foreground text-lg">System Too Lean (Bank 1)</span>
-            </div>
-        </div>
-      </div>
-
-      {/* Supported Vehicle Types */}
-      <section className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-primary">Works With Your Vehicle</h2>
-            <p className="text-muted-foreground mt-2">We support a wide range of vehicle types manufactured after 1996.</p>
-          </div>
-          <div className="flex justify-center items-center gap-8 md:gap-16 flex-wrap">
-            {supportedVehicles.map((vehicle) => (
-              <div key={vehicle.name} className="flex flex-col items-center gap-2 text-muted-foreground">
-                <vehicle.icon className="h-12 w-12" />
-                <span className="font-medium">{vehicle.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* BrainAi Features Section */}
+      {/* Testimonials Section */}
       <section className="py-16 md:py-24 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold">Why Choose Car Diagnostics BrainAi?</h2>
-            <p className="text-primary-foreground/80 mt-2">Unlock powerful features for complete peace of mind.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {features.map((feature) => (
-              <div key={feature.title} className="flex items-start gap-4">
-                 <div className="bg-primary-foreground/20 rounded-lg p-3">
-                    <feature.icon className="h-6 w-6" />
-                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">{feature.title}</h3>
-                  <p className="text-primary-foreground/80 text-sm">{feature.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-primary">Loved by Car Owners</h2>
-            <p className="text-muted-foreground mt-2">See what our users are saying about BrainAi.</p>
+            <h2 className="text-3xl md:text-4xl font-bold">What Our Readers Say</h2>
+            <p className="text-primary-foreground/80 mt-2">Real feedback from people we've helped.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial) => (
-              <Card key={testimonial.name} className="flex flex-col">
+              <Card key={testimonial.name} className="flex flex-col bg-background/10 border-primary-foreground/20 text-primary-foreground">
                 <CardHeader>
                   <div className="flex items-center gap-1">
                     {Array.from({ length: testimonial.rating }).map((_, i) => (
@@ -304,8 +195,8 @@ export default function HomePage() {
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow">
-                  <p className="text-foreground mb-4">"{testimonial.review}"</p>
-                  <p className="font-semibold text-muted-foreground">- {testimonial.name}</p>
+                  <p className="mb-4">"{testimonial.review}"</p>
+                  <p className="font-semibold text-primary-foreground/80">- {testimonial.name}</p>
                 </CardContent>
               </Card>
             ))}
@@ -335,8 +226,8 @@ export default function HomePage() {
       {/* Newsletter Signup Section */}
       <div className="bg-primary py-16 text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-2">Get Weekly Car Health Tips</h2>
-          <p className="text-primary-foreground/80 mb-6">Join our newsletter for maintenance advice and product updates.</p>
+          <h2 className="text-3xl font-bold mb-2">Get Our Best Content Weekly</h2>
+          <p className="text-primary-foreground/80 mb-6">Join our newsletter for helpful maintenance advice and new article alerts.</p>
           <form className="flex max-w-md mx-auto">
             <Input 
               type="email" 
