@@ -36,6 +36,7 @@ export type GenerateArticleOutput = z.infer<typeof GenerateArticleOutputSchema>;
 
 const articlePrompt = ai.definePrompt({
   name: 'articleGeneratorPrompt',
+  model: 'googleai/gemini-1.5-flash',
   input: {schema: z.object({ topic: z.string() })},
   output: {schema: z.object({
       title: GenerateArticleOutputSchema.shape.title,

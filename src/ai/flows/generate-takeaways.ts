@@ -20,6 +20,7 @@ export type GenerateTakeawaysOutput = z.infer<typeof GenerateTakeawaysOutputSche
 
 const takeawaysPrompt = ai.definePrompt({
   name: 'takeawaysGeneratorPrompt',
+  model: 'googleai/gemini-1.5-flash',
   input: {schema: GenerateTakeawaysInputSchema},
   output: {schema: GenerateTakeawaysOutputSchema},
   prompt: `Based on the following article content, your task is to generate a concluding section.
