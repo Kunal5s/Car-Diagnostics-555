@@ -58,38 +58,43 @@ export async function GET(request: NextRequest) {
         
         const availableTopics = allArticleTopics.filter(topic => !existingIds.has(topic.id));
 
-        if (availableTopics.length === 0) {
+        // Get the next two topics to generate. This doubles the content output.
+        const topicsToGenerate = availableTopics.slice(0, 2);
+
+        if (topicsToGenerate.length === 0) {
             return NextResponse.json({ message: 'All available articles have been generated.' });
         }
 
-        // Select the next available topic sequentially to ensure balanced category coverage
-        const topicToGenerate = availableTopics[0];
-
-        console.log(`Generating article for topic: "${topicToGenerate.title}"`);
-        const generatedData = await generateArticle({ topic: topicToGenerate.title, category: topicToGenerate.category });
-        
-        const slug = slugify(`${generatedData.title}-${topicToGenerate.id}`);
-
-        const newArticle: FullArticle = {
-            id: topicToGenerate.id,
-            category: topicToGenerate.category,
-            slug,
-            ...generatedData,
-        };
-
-        const filePath = `_articles/${slug}.json`;
-        const content = Buffer.from(JSON.stringify(newArticle, null, 2)).toString('base64');
-
-        await octokit.repos.createOrUpdateFileContents({
-            owner: GITHUB_REPO_OWNER,
-            repo: GITHUB_REPO_NAME,
-            path: filePath,
-            message: `feat: add article '${generatedData.title}'`,
-            content: content,
+        const generationPromises = topicsToGenerate.map(async (topicToGenerate) => {
+             console.log(`Generating article for topic: "${topicToGenerate.title}"`);
+             const generatedData = await generateArticle({ topic: topicToGenerate.title, category: topicToGenerate.category });
+             
+             const slug = slugify(`${generatedData.title}-${topicToGenerate.id}`);
+     
+             const newArticle: FullArticle = {
+                 id: topicToGenerate.id,
+                 category: topicToGenerate.category,
+                 slug,
+                 ...generatedData,
+             };
+     
+             const filePath = `_articles/${slug}.json`;
+             const content = Buffer.from(JSON.stringify(newArticle, null, 2)).toString('base64');
+     
+             await octokit.repos.createOrUpdateFileContents({
+                 owner: GITHUB_REPO_OWNER,
+                 repo: GITHUB_REPO_NAME,
+                 path: filePath,
+                 message: `feat: add article '${generatedData.title}'`,
+                 content: content,
+             });
+             return generatedData.title;
         });
+        
+        const generatedTitles = await Promise.all(generationPromises);
 
-        console.log(`Successfully generated and committed article: ${filePath}`);
-        return NextResponse.json({ message: `Successfully generated article: ${generatedData.title}` });
+        console.log(`Successfully generated and committed ${generatedTitles.length} articles.`);
+        return NextResponse.json({ message: `Successfully generated ${generatedTitles.length} articles: ${generatedTitles.join(', ')}` });
 
     } catch (error) {
         console.error('Error in cron job:', { 
