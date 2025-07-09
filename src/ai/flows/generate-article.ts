@@ -54,9 +54,9 @@ The article MUST adhere to the following strict standards:
     -   Introduction: Start with a relatable introduction that hooks the reader.
     -   Main Body: Provide helpful, accurate, and in-depth content. Use subheadings (H2, H3, etc.) as needed to organize the information clearly.
     -   Final Summary: Conclude with a concise summary of the article's main points.
-    -   6 Key Takeaways: At the very end, include a section titled "## 6 Key Takeaways" with a bulleted list of the six most important, actionable points from the article.
+    -   **MANDATORY: 6 Key Takeaways:** At the very end of the content, you MUST include a section titled "## 6 Key Takeaways". This section MUST contain a bulleted list of exactly six of the most important, actionable points from the article. This is a non-negotiable requirement for every article.
 
-Your final output must contain the generated title, a concise SEO-friendly summary (around 160 characters), and the full 1500-word article content in Markdown, ending with the "6 Key Takeaways" section.
+Your final output must contain the generated title, a concise SEO-friendly summary (around 160 characters), and the full 1500-word article content in Markdown. The content MUST conclude with the "## 6 Key Takeaways" section as described above.
 `,
 });
 
