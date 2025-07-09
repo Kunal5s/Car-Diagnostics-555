@@ -49,6 +49,21 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     { label: article.title },
   ];
 
+  // This logic cleans up old articles that might have the title duplicated in the content.
+  let processedContent = article.content.trim();
+  const titleAsH1WithSpace = `# ${article.title}`;
+  const titleAsH1NoSpace = `#${article.title}`;
+  
+  if (processedContent.toLowerCase().startsWith(titleAsH1WithSpace.toLowerCase())) {
+      processedContent = processedContent.substring(titleAsH1WithSpace.length).trim();
+  } else if (processedContent.toLowerCase().startsWith(titleAsH1NoSpace.toLowerCase())) {
+      processedContent = processedContent.substring(titleAsH1NoSpace.length).trim();
+  } else if (processedContent.toLowerCase().startsWith(article.title.toLowerCase())) {
+      // Also check for the title without any markdown heading, just in case.
+      processedContent = processedContent.substring(article.title.length).trim();
+  }
+
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
         <article>
@@ -58,6 +73,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
                   {article.title}
               </h1>
+              <blockquote className="mt-4 border-l-4 border-primary bg-muted/50 p-4 text-lg italic">
+                {article.summary}
+              </blockquote>
             </header>
 
             <ShareButtons title={article.title} />
@@ -75,10 +93,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             </div>
             
             <div className="prose prose-lg dark:prose-invert max-w-none">
-                <blockquote className="border-l-4 border-primary bg-muted/50 p-4 text-lg italic">
-                  {article.summary}
-                </blockquote>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
             </div>
         </article>
     </div>
