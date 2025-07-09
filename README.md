@@ -19,13 +19,24 @@ To run this project, you need to set up the following environment variables in y
 
 ### Required Environment Variables
 
-Create a `.env.local` file for local development or add these directly to your Vercel project's "Environment Variables" section.
+<br />
+<div style="background-color: #ffdddd; border-left: 6px solid #f44336; padding: 15px; margin-bottom: 15px;">
+  <h3 style="margin-top: 0; color: #f44336;"><strong>IMPORTANT: Critical Setup Required</strong></h3>
+  <p>The automatic article generation will <strong>NOT</strong> work without setting these environment variables in your Vercel project. This is the most common reason for the cron job failing.</p>
+</div>
 
--   `GOOGLE_API_KEY`: Your API key for Google AI Studio (Gemini).
--   `CRON_SECRET`: A secret string to secure your cron job endpoint. Generate a strong, random string for this.
--   `GITHUB_TOKEN`: A GitHub Personal Access Token with `repo` scope to allow the cron job to commit articles to the repository.
--   `GITHUB_REPO_OWNER`: The owner of the GitHub repository (e.g., your GitHub username).
--   `GITHUB_REPO_NAME`: The name of the GitHub repository.
+Create a `.env.local` file for local development or add these directly to your Vercel project's "Environment Variables" section in your Vercel dashboard.
+
+-   **`GOOGLE_API_KEY`**: Your API key for Google AI Studio (Gemini).
+    -   **Why it's needed:** This key allows the application to use the AI model to write the articles.
+-   **`CRON_SECRET`**: A secret string to secure your cron job endpoint. Generate a strong, random string for this (e.g., using a password generator).
+    -   **Why it's needed:** This prevents unauthorized users from running your article generation process and using your resources.
+-   **`GITHUB_TOKEN`**: A GitHub Personal Access Token with `repo` scope.
+    -   **Why it's needed:** This allows the application to save the newly generated articles back into your GitHub repository.
+-   **`GITHUB_REPO_OWNER`**: The owner of the GitHub repository (e.g., your GitHub username).
+    -   **Why it's needed:** To tell the system which GitHub account owns the repository.
+-   **`GITHUB_REPO_NAME`**: The name of the GitHub repository.
+    -   **Why it's needed:** To tell the system which repository to save the articles in.
 
 ```bash
 # .env.local
@@ -46,6 +57,18 @@ Open [http://localhost:9002](http://localhost:9002) with your browser to see the
 
 ### Manually Triggering the Cron Job
 
-To test the article generation process without waiting for the scheduled time, you can trigger it manually by visiting the following URL in your browser (after deployment):
+To test the article generation process without waiting for the scheduled time, you can trigger it manually by visiting the following URL in your browser (after deployment and setting environment variables):
 
 `https://<your-vercel-domain>/api/cron?secret=<your_cron_secret>`
+
+---
+
+## Troubleshooting
+
+### Problem: New articles are not appearing automatically.
+
+If new articles are not being generated every two hours, it is almost certainly due to one of the following issues:
+
+1.  **Missing Environment Variables in Vercel:** The most common cause. Double-check that all five required environment variables (`GOOGLE_API_KEY`, `CRON_SECRET`, `GITHUB_TOKEN`, `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME`) are correctly set in your Vercel project's settings.
+2.  **Incorrect GitHub Token Permissions:** Ensure your `GITHUB_TOKEN` has the full `repo` scope selected when you generate it. Without this, the system cannot write files to your repository.
+3.  **Vercel Cron Job Logs:** Check the logs for your cron job in the Vercel dashboard. Go to your project, click on the "Logs" tab, and then select "Crons" from the dropdown. Any errors (like "Unauthorized" or "GitHub environment variables are not set") will appear there and will tell you exactly what is wrong.
