@@ -58,7 +58,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tighter text-primary md:text-5xl">
                   {article.title}
               </h1>
-              <p className="text-lg text-muted-foreground">{article.summary}</p>
             </header>
 
             <ShareButtons title={article.title} />
@@ -76,6 +75,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             </div>
             
             <div className="prose prose-lg dark:prose-invert max-w-none">
+                <blockquote className="border-l-4 border-primary bg-muted/50 p-4 text-lg italic">
+                  {article.summary}
+                </blockquote>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content}</ReactMarkdown>
             </div>
         </article>

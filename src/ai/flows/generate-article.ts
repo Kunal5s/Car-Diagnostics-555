@@ -56,6 +56,8 @@ The article MUST adhere to the following strict standards:
     -   Final Summary: Conclude with a concise summary of the article's main points.
     -   **MANDATORY: 6 Key Takeaways:** At the very end of the content, you MUST include a section titled "## 6 Key Takeaways". This section MUST contain a bulleted list of exactly six of the most important, actionable points from the article. This is a non-negotiable requirement for every article.
 
+**CRITICAL:** The 'content' field MUST NOT start with an H1 heading (e.g., "# Title"). The article's title is handled by the separate 'title' field. The content should begin directly with the first paragraph of the introduction.
+
 Your final output must contain the generated title, a concise SEO-friendly summary (around 160 characters), and the full 1500-word article content in Markdown. The content MUST conclude with the "## 6 Key Takeaways" section as described above.
 `,
 });
@@ -100,11 +102,6 @@ export const generateArticleFlow = ai.defineFlow(
         imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fallbackPrompt)}?width=600&height=400&nologo=true`;
     }
 
-    // Since the prompt now generates the title within the content, we'll use it for the title field
-    // and extract the content separately. For now, we assume the prompt gives us a separate title field.
-    // If it includes H1 in content, we'll need to adjust.
-    // Let's assume the output schema is fulfilled correctly by the model.
-
     return {
         title: articleOutput.title,
         summary: articleOutput.summary,
@@ -120,11 +117,19 @@ export async function generateArticle(
 ): Promise<GenerateArticleOutput> {
   const result = await generateArticleFlow(input);
   
-  // The model might put the H1 title inside the content. Let's ensure it's not duplicated.
-  const contentWithoutH1 = result.content.replace(/^# .*/, '').trim();
+  // The model might ignore the prompt and put the H1 title inside the content.
+  // This is a safeguard to ensure it's not duplicated.
+  let processedContent = result.content.trim();
+  const titleAsH1 = `# ${result.title}`;
+  
+  if (processedContent.startsWith(titleAsH1)) {
+      processedContent = processedContent.substring(titleAsH1.length).trim();
+  } else if (processedContent.startsWith(result.title)) {
+      processedContent = processedContent.substring(result.title.length).trim();
+  }
 
   return {
     ...result,
-    content: contentWithoutH1,
+    content: processedContent,
   };
 }
