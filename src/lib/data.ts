@@ -31,17 +31,30 @@ async function readArticleFile(file: string): Promise<FullArticle | null> {
   }
 }
 
-export async function getAllArticles(): Promise<FullArticle[]> {
+export async function getAllArticles(query?: string): Promise<FullArticle[]> {
   const files = await getArticleFiles();
   if (files.length === 0) {
     return [];
   }
   
   const articlePromises = files.map(readArticleFile);
-  const articles = await Promise.all(articlePromises);
+  let articles = (await Promise.all(articlePromises))
+    .filter(a => a) as FullArticle[];
 
-  // Filter out any nulls from failed reads and sort by ID descending
-  return (articles.filter(a => a) as FullArticle[]).sort((a, b) => b.id - a.id);
+  // Sort by ID descending (newest first)
+  articles.sort((a, b) => b.id - a.id);
+
+  if (query) {
+    const lowercasedQuery = query.toLowerCase();
+    articles = articles.filter(article => 
+      article.title.toLowerCase().includes(lowercasedQuery) ||
+      article.summary.toLowerCase().includes(lowercasedQuery) ||
+      article.category.toLowerCase().includes(lowercasedQuery) ||
+      article.content.toLowerCase().includes(lowercasedQuery)
+    );
+  }
+
+  return articles;
 }
 
 export async function getRecentArticles(count: number): Promise<FullArticle[]> {

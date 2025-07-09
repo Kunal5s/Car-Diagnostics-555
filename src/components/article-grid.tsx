@@ -2,7 +2,7 @@
 import type { FullArticle } from '@/lib/definitions';
 import { ArticleCard } from './article-card';
 import { Card, CardContent } from './ui/card';
-import { AlertCircle } from 'lucide-react';
+import { SearchX } from 'lucide-react';
 
 interface ArticleGridProps {
   articles: FullArticle[];
@@ -14,12 +14,12 @@ export function ArticleGrid({ articles }: ArticleGridProps) {
     return (
       <Card className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground shadow-none border-dashed">
         <CardContent className="p-6">
-          <AlertCircle className="mx-auto h-10 w-10 text-primary/50 mb-4" />
+          <SearchX className="mx-auto h-10 w-10 text-primary/50 mb-4" />
           <p className="font-semibold text-lg text-foreground mb-2">
-            No Articles Available
+            No Articles Found
           </p>
           <p className="max-w-md mx-auto">
-            There was an issue generating live articles. This may be due to API limits or a temporary network issue. Please check back later.
+            We couldn't find any articles matching your search. Please try a different term or browse our categories.
           </p>
         </CardContent>
       </Card>
