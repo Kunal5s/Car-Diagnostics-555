@@ -75,49 +75,61 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: 'All available articles have been generated.' });
         }
 
-        const generationPromises = topicsToGenerate.map(async (topicToGenerate) => {
-             console.log(`Generating article for topic: "${topicToGenerate.title}"`);
-             const generatedData = await generateArticle({ topic: topicToGenerate.title, category: topicToGenerate.category });
-             
-             let finalContent = generatedData.content;
-             // If the model forgot the takeaways, generate them separately as a fallback.
-             if (!finalContent.includes('## 6 Key Takeaways')) {
-                console.warn(`Article for "${topicToGenerate.title}" was generated without takeaways. Generating them now as a fallback.`);
-                try {
-                    const takeawaysResult = await generateTakeaways({ title: generatedData.title, content: finalContent });
-                    finalContent += `\n\n${takeawaysResult.takeaways}`;
-                } catch (takeawayError) {
-                    console.error(`Could not generate takeaways for "${topicToGenerate.title}". The article will be saved without them.`, takeawayError);
+        const generatedTitles = [];
+        for (const topicToGenerate of topicsToGenerate) {
+            try {
+                console.log(`Generating article for topic: "${topicToGenerate.title}"`);
+                const generatedData = await generateArticle({ topic: topicToGenerate.title, category: topicToGenerate.category });
+                
+                let finalContent = generatedData.content;
+                // If the model forgot the takeaways, generate them separately as a fallback.
+                if (!finalContent.includes('## 6 Key Takeaways')) {
+                    console.warn(`Article for "${topicToGenerate.title}" was generated without takeaways. Generating them now as a fallback.`);
+                    try {
+                        const takeawaysResult = await generateTakeaways({ title: generatedData.title, content: finalContent });
+                        finalContent += `\n\n${takeawaysResult.takeaways}`;
+                    } catch (takeawayError) {
+                        console.error(`Could not generate takeaways for "${topicToGenerate.title}". The article will be saved without them.`, takeawayError);
+                    }
                 }
-             }
-             
-             const slug = slugify(`${generatedData.title}-${topicToGenerate.id}`);
-     
-             const newArticle: FullArticle = {
-                 id: topicToGenerate.id,
-                 category: topicToGenerate.category,
-                 slug,
-                 ...generatedData,
-                 content: finalContent, // Use the potentially updated content
-             };
-     
-             const filePath = `_articles/${slug}.json`;
-             const content = Buffer.from(JSON.stringify(newArticle, null, 2)).toString('base64');
-     
-             await octokit.repos.createOrUpdateFileContents({
-                 owner: GITHUB_REPO_OWNER,
-                 repo: GITHUB_REPO_NAME,
-                 path: filePath,
-                 message: `feat: add article '${generatedData.title}'`,
-                 content: content,
-             });
-             return generatedData.title;
-        });
+                
+                const slug = slugify(`${generatedData.title}-${topicToGenerate.id}`);
         
-        const generatedTitles = await Promise.all(generationPromises);
+                const newArticle: FullArticle = {
+                    id: topicToGenerate.id,
+                    category: topicToGenerate.category,
+                    slug,
+                    ...generatedData,
+                    content: finalContent, // Use the potentially updated content
+                };
+        
+                const filePath = `_articles/${slug}.json`;
+                const content = Buffer.from(JSON.stringify(newArticle, null, 2)).toString('base64');
+        
+                await octokit.repos.createOrUpdateFileContents({
+                    owner: GITHUB_REPO_OWNER,
+                    repo: GITHUB_REPO_NAME,
+                    path: filePath,
+                    message: `feat: add article '${generatedData.title}'`,
+                    content: content,
+                });
+                generatedTitles.push(generatedData.title);
+            } catch(error) {
+                 console.error(`Failed to generate or commit article for topic "${topicToGenerate.title}". Skipping to next one.`, { 
+                    message: (error as Error).message,
+                    stack: (error as Error).stack,
+                    cause: (error as Error).cause
+                });
+            }
+        }
+        
 
-        console.log(`Successfully generated and committed ${generatedTitles.length} articles.`);
-        return NextResponse.json({ message: `Successfully generated ${generatedTitles.length} articles: ${generatedTitles.join(', ')}` });
+        if (generatedTitles.length > 0) {
+            console.log(`Successfully generated and committed ${generatedTitles.length} articles.`);
+            return NextResponse.json({ message: `Successfully generated ${generatedTitles.length} articles: ${generatedTitles.join(', ')}` });
+        } else {
+            return NextResponse.json({ message: 'Failed to generate any articles in this run.' }, { status: 500 });
+        }
 
     } catch (error) {
         console.error('Error in cron job:', { 
