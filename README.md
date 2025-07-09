@@ -7,7 +7,7 @@ This is a Next.js application built in Firebase Studio. It features a fully auto
 
 This application is designed for a "set it and forget it" content strategy, ensuring the site remains fresh and up-to-date with minimal human intervention.
 
--   **Daily Content Generation**: A Vercel Cron Job runs automatically every day to generate a new, in-depth automotive article.
+-   **High-Frequency Content Generation**: Vercel Cron Jobs run automatically every two hours, generating up to 12 new, in-depth automotive articles daily.
 -   **AI-Powered**: The cron job uses Google's Gemini model via Genkit to create high-quality, SEO-friendly articles complete with a relevant hero image.
 -   **Git as CMS**: Generated articles are saved as individual JSON files directly into the `/_articles` directory of this GitHub repository. This acts as a permanent, version-controlled database.
 -   **Automatic Redeployment**: Committing a new article to the repository automatically triggers a new deployment on Vercel, ensuring the latest content is always live.
