@@ -25,8 +25,6 @@ To run this project, you need to set up the following environment variables in y
   <p>The automatic article generation will <strong>NOT</strong> work without setting these environment variables in your Vercel project. This is the most common reason for the cron job failing.</p>
 </div>
 
-Create a `.env.local` file for local development or add these directly to your Vercel project's "Environment Variables" section in your Vercel dashboard.
-
 -   **`GOOGLE_API_KEY`**: Your API key for Google AI Studio (Gemini).
     -   **Why it's needed:** This key allows the application to use the AI model to write the articles.
 -   **`CRON_SECRET`**: A secret string to secure your cron job endpoint. Generate a strong, random string for this (e.g., using a password generator).
@@ -38,16 +36,26 @@ Create a `.env.local` file for local development or add these directly to your V
 -   **`GITHUB_REPO_NAME`**: The name of the GitHub repository.
     -   **Why it's needed:** To tell the system which repository to save the articles in.
 
+<br />
+<div style="background-color: #fffde7; border-left: 6px solid #fbc02d; padding: 15px; margin-bottom: 15px;">
+  <h3 style="margin-top: 0; color: #c79100;"><strong>SECURITY WARNING: Protect Your GitHub Token!</strong></h3>
+  <p>Your `GITHUB_TOKEN` is a secret password for your repository. <strong>NEVER</strong> share it publicly or save it directly in your code. Add it ONLY to the "Environment Variables" section in your Vercel project settings. If you accidentally expose your token, you should delete it on GitHub and generate a new one immediately.</p>
+</div>
+
+### Running the Development Server
+
+Create a `.env.local` file for local development or add these directly to your Vercel project's "Environment Variables" section in your Vercel dashboard.
+
 ```bash
 # .env.local
+# IMPORTANT: This file is for local testing only. DO NOT commit this file to GitHub.
+# For deployment on Vercel, you must set these variables in the Project Settings.
 GOOGLE_API_KEY="your_google_api_key"
 CRON_SECRET="your_secret_cron_job_string"
 GITHUB_TOKEN="your_github_personal_access_token"
 GITHUB_REPO_OWNER="Kunal5s"
 GITHUB_REPO_NAME="Car-Diagnostics-555"
 ```
-
-### Running the Development Server
 
 ```bash
 npm run dev
