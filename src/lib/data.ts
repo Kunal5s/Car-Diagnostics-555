@@ -31,7 +31,7 @@ async function readArticleFile(file: string): Promise<FullArticle | null> {
   }
 }
 
-export async function getAllArticles(query?: string): Promise<FullArticle[]> {
+export async function getAllArticles(): Promise<FullArticle[]> {
   const files = await getArticleFiles();
   if (files.length === 0) {
     return [];
@@ -43,16 +43,6 @@ export async function getAllArticles(query?: string): Promise<FullArticle[]> {
 
   // Sort by ID descending (newest first)
   articles.sort((a, b) => b.id - a.id);
-
-  if (query) {
-    const lowercasedQuery = query.toLowerCase();
-    articles = articles.filter(article => 
-      article.title.toLowerCase().includes(lowercasedQuery) ||
-      article.summary.toLowerCase().includes(lowercasedQuery) ||
-      article.category.toLowerCase().includes(lowercasedQuery) ||
-      article.content.toLowerCase().includes(lowercasedQuery)
-    );
-  }
 
   return articles;
 }
