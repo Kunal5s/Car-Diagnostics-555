@@ -22,7 +22,7 @@ To run this project, you need to set up the following environment variables in y
 <br />
 <div style="background-color: #ffdddd; border-left: 6px solid #f44336; padding: 15px; margin-bottom: 15px;">
   <h3 style="margin-top: 0; color: #f44336;"><strong>IMPORTANT: Critical Setup Required</strong></h3>
-  <p>The automatic article generation will <strong>NOT</strong> work without setting these environment variables in your Vercel project. This is the most common reason for the cron job failing.</p>
+  <p>The automatic article generation will <strong>NOT</strong> work without setting these environment variables in your Vercel project. This is the most common reason for the cron job failing. After setting them, you must <strong>REDEPLOY</strong> your application for the changes to take effect.</p>
 </div>
 
 -   **`GOOGLE_API_KEY`**: Your API key for Google AI Studio (Gemini).
@@ -77,7 +77,7 @@ To test the article generation process without waiting for the scheduled time, y
 
 If new articles are not being generated every two hours, it is almost certainly due to one of the following issues:
 
-1.  **Missing Environment Variables in Vercel:** The most common cause. Double-check that all five required environment variables (`GOOGLE_API_KEY`, `CRON_SECRET`, `GITHUB_TOKEN`, `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME`) are correctly set in your Vercel project's settings.
+1.  **Missing or Incorrect Environment Variables in Vercel:** The most common cause. Double-check that all five required environment variables (`GOOGLE_API_KEY`, `CRON_SECRET`, `GITHUB_TOKEN`, `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME`) are correctly set in your Vercel project's settings.
 2.  **Incorrect GitHub Token Permissions:** Ensure your `GITHUB_TOKEN` has the full `repo` scope selected when you generate it. Without this, the system cannot write files to your repository.
-3.  **Vercel Cron Job Logs:** Check the logs for your cron job in the Vercel dashboard. Go to your project, click on the "Logs" tab, and then select "Crons" from the dropdown. Any errors (like "Unauthorized" or "GitHub environment variables are not set") will appear there and will tell you exactly what is wrong.
-
+3.  **Deployment Not Redeployed:** After adding or changing environment variables in Vercel, you **must redeploy** your application for the new settings to apply.
+4.  **Vercel Cron Job Logs:** Check the logs for your cron job in the Vercel dashboard. Go to your project, click on the "Logs" tab, and then select "Crons" from the dropdown. Any errors (like "Unauthorized" or "GitHub environment variables are not set") will appear there and will tell you exactly what is wrong.
