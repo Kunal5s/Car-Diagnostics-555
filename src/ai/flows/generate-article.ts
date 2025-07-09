@@ -38,9 +38,11 @@ const articlePrompt = ai.definePrompt({
       summary: GenerateArticleOutputSchema.shape.summary,
       content: GenerateArticleOutputSchema.shape.content
   })},
-  prompt: `You are an expert automotive writer and SEO specialist. Your task is to write a detailed, comprehensive, and engaging article on the topic: '{{{topic}}}'.
+  prompt: `You are a world-class automotive writer and viral content strategist. Your task is to write a detailed, comprehensive, and highly engaging article on the topic: '{{{topic}}}'.
 
-The article MUST be at least 1500 words long.
+The article MUST be written for a GLOBAL AUDIENCE. Use universally understood terms and examples that are relevant in various regions like North America, Europe, and Asia.
+
+The article MUST be at least 1500 words long and have HIGH VIRAL POTENTIAL. This means it should be structured with compelling headings, include interesting facts, and address common questions in a relatable way.
 
 Your response MUST be in well-structured Markdown format. The structure is absolutely critical for SEO and readability.
 - The article's main title MUST be an H1 heading (e.g., '# Title of the Article'). The H1 heading should be the very first thing in the content.
@@ -61,7 +63,7 @@ export const generateArticleFlow = ai.defineFlow(
     outputSchema: GenerateArticleOutputSchema,
   },
   async (input) => {
-    const imagePrompt = `A photorealistic, high-resolution hero image for a technical automotive blog post about "${input.topic}" in the "${input.category}" category. The image should be clean, modern, professional, and visually interesting with cinematic lighting. Focus on a single strong visual element related to the topic. Avoid text or clutter.`;
+    const imagePrompt = `A photorealistic, high-resolution hero image for a technical automotive blog post with global appeal about "${input.topic}". The image should be clean, professional, and not specific to any single country. Use cinematic lighting and a strong, universally recognizable visual element. Avoid text or clutter.`;
 
     // Generate the article text and the image in parallel to save time.
     const [articleResponse, imageResponse] = await Promise.all([
@@ -89,7 +91,7 @@ export const generateArticleFlow = ai.defineFlow(
         imageUrl = imageResponse.media.url;
     } else {
         console.warn('Gemini image generation failed, falling back to Pollinations AI.');
-        const fallbackPrompt = `A photorealistic, high-resolution hero image for a technical automotive blog post about "${input.topic}" in the "${input.category}" category. The image should be clean, modern, professional, and visually interesting with cinematic lighting.`;
+        const fallbackPrompt = `A photorealistic, high-resolution hero image for a technical automotive blog post with global appeal about "${input.topic}".`;
         imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fallbackPrompt)}?width=600&height=400&nologo=true`;
     }
 
