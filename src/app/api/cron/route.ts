@@ -62,8 +62,8 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: 'All available articles have been generated.' });
         }
 
-        // Select a random topic from the available ones
-        const topicToGenerate = availableTopics[Math.floor(Math.random() * availableTopics.length)];
+        // Select the next available topic sequentially to ensure balanced category coverage
+        const topicToGenerate = availableTopics[0];
 
         console.log(`Generating article for topic: "${topicToGenerate.title}"`);
         const generatedData = await generateArticle({ topic: topicToGenerate.title, category: topicToGenerate.category });
