@@ -6,9 +6,6 @@ import { allArticleTopics } from '@/lib/definitions';
 import { slugify } from '@/lib/utils';
 import type { FullArticle } from '@/lib/definitions';
 
-// Revalidate the page every 24 hours
-export const revalidate = 86400;
-
 async function getExistingArticleSlugs(octokit: Octokit, owner: string, repo: string): Promise<Set<number>> {
     try {
         const { data: files } = await octokit.repos.getContent({
