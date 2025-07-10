@@ -15,12 +15,11 @@ import { ArticleGrid } from "@/components/article-grid";
 import { categoryDetails } from "@/lib/definitions";
 import { CategoryCard } from "@/components/category-card";
 import {
-  FileText,
+  Users,
+  BookOpen,
+  BrainCircuit,
   Wrench,
   Star,
-  BookOpen,
-  Users,
-  BrainCircuit
 } from "lucide-react";
 import { getRecentArticles } from "@/lib/data";
 import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
@@ -96,6 +95,22 @@ const faqItems = [
   {
     question: "Can I search for a specific topic?",
     answer: "Yes! You can use the search bar on the 'Blog' page to find articles related to specific keywords. You can also browse by category to explore different areas of automotive care."
+  },
+  {
+    question: "Is Car Diagnostics BrainAi free to use?",
+    answer: "Yes, access to all of our articles and diagnostic information is completely free. Our mission is to make automotive knowledge accessible to everyone."
+  },
+  {
+    question: "How does the site make money if it's free?",
+    answer: "We focus on building a large, engaged audience. The site is supported through unobtrusive advertising and affiliate partnerships for tools or parts we genuinely recommend. This allows us to keep the core content free."
+  },
+  {
+    question: "Can I contribute articles or suggest topics?",
+    answer: "Currently, all our content is AI-generated to maintain a consistent style and quality. However, we love hearing from our users! Please use our Contact page to suggest topics you'd like to see covered."
+  },
+  {
+    question: "What is a cron job and how does it relate to this site?",
+    answer: "A cron job is simply a scheduled task that runs automatically. We use a Vercel Cron Job to trigger our AI to write new articles at regular intervals (e.g., every hour). This ensures our content library is always fresh without any manual intervention."
   }
 ];
 
@@ -244,3 +259,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    

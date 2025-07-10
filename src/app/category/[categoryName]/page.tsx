@@ -18,9 +18,11 @@ export async function generateMetadata({ params }: { params: { categoryName: str
     }
   }
 
+  const categoryInfo = categoryDetails.find(c => c.name.toLowerCase() === categoryName);
+
   return {
     title: `${formattedCategoryName} Articles`,
-    description: `Browse articles about ${formattedCategoryName}. Find tips on car maintenance, diagnostics, and more.`,
+    description: categoryInfo?.description || `Browse articles about ${formattedCategoryName}. Find tips on car maintenance, diagnostics, and more.`,
   }
 }
 
@@ -32,9 +34,7 @@ export async function generateStaticParams() {
 }
 
 async function CategoryContent({ categoryName }: { categoryName: string }) {
-    // Fetch all articles for the category, then slice to show only the 4 most recent.
-    // The `getAllArticles` function in `data.ts` sorts by ID descending, so the newest are first.
-    const articles = (await getArticlesByCategory(categoryName)).slice(0, 4);
+    const articles = await getArticlesByCategory(categoryName);
     return <ArticleGrid articles={articles} />;
 }
 
@@ -68,9 +68,11 @@ export default function CategoryPage({
           </p>
         </div>
       </div>
-      <Suspense fallback={<ArticleGridSkeleton count={4} />}>
+      <Suspense fallback={<ArticleGridSkeleton count={8} />}>
         <CategoryContent categoryName={categoryInfo.name} />
       </Suspense>
     </div>
   );
 }
+
+    
