@@ -7,7 +7,7 @@ import path from 'path';
 
 // This is now the ONLY way articles are retrieved.
 // The app reads from the filesystem, which is populated by the cron job.
-// No article generation happens here.
+// No article generation happens at build time.
 
 const articlesDir = path.join(process.cwd(), '_articles');
 

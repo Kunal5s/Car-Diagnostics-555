@@ -3,7 +3,7 @@ import { ClientDate } from '@/components/client-date';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Read the privacy policy for Car Diagnostics BrainAi to understand how we collect, use, and protect your personal information.',
+  description: 'Read the privacy policy for Car Diagnostics AI to understand how we collect, use, and protect your personal information.',
 };
 
 export default function PrivacyPolicyPage() {
@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
         <p><strong>Last Updated:</strong> <ClientDate /></p>
         
         <p>
-          Car Diagnostics BrainAi ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.
+          Car Diagnostics AI ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.
         </p>
 
         <h2 className="text-2xl font-semibold">Collection of Your Information</h2>
@@ -39,7 +39,7 @@ export default function PrivacyPolicyPage() {
         
         <h2 className="text-2xl font-semibold">Contact Us</h2>
         <p>
-          If you have questions or comments about this Privacy Policy, please contact us at: <a href="mailto:privacy@cardiagnosticsbrainai.com" className="text-primary hover:underline">privacy@cardiagnosticsbrainai.com</a>.
+          If you have questions or comments about this Privacy Policy, please contact us at: <a href="mailto:privacy@cardiagnosticsai.com" className="text-primary hover:underline">privacy@cardiagnosticsai.com</a>.
         </p>
       </div>
     </div>

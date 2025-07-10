@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
-  description: "Get in touch with Car Diagnostics BrainAi. We're here to answer your questions and receive your feedback.",
+  description: "Get in touch with Car Diagnostics AI. We're here to answer your questions and receive your feedback.",
 };
 
 export default function ContactPage() {
@@ -19,14 +19,14 @@ export default function ContactPage() {
           <p>
             For all general questions and feedback, please email us at:
             <br />
-            <a href="mailto:contact@cardiagnosticsbrainai.com" className="text-primary hover:underline">contact@cardiagnosticsbrainai.com</a>
+            <a href="mailto:contact@cardiagnosticsai.com" className="text-primary hover:underline">contact@cardiagnosticsai.com</a>
           </p>
         </div>
         
         <div>
           <h2 className="text-2xl font-semibold">Our Office</h2>
           <p>
-            Car Diagnostics BrainAi Headquarters
+            Car Diagnostics AI Headquarters
             <br />
             123 Auto Lane
             <br />

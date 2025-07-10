@@ -57,7 +57,7 @@ GOOGLE_API_KEY="your_google_api_key"
 CRON_SECRET="your_secret_cron_job_string"
 GITHUB_TOKEN="your_github_personal_access_token"
 GITHUB_REPO_OWNER="Kunal5s"
-GITHUB_REPO_NAME="Car-Diagnostics-555"
+GITHUB_REPO_NAME="Car-Diagnostics-AI"
 VERCEL_DEPLOY_HOOK_URL="your_vercel_deploy_hook_url"
 ```
 

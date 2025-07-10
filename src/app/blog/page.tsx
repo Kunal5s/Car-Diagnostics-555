@@ -11,8 +11,10 @@ export const metadata: Metadata = {
   description: 'Explore our complete library of AI-generated articles on car diagnostics, maintenance, and technology.',
 };
 
+// This makes sure the page is re-rendered on-demand by the deploy hook, not on a timer.
+export const revalidate = false;
+
 async function AllArticlesContent() {
-  // This now just reads from the filesystem, it does not generate articles.
   const articles = await getAllArticles();
   return <ArticleGrid articles={articles} />;
 }

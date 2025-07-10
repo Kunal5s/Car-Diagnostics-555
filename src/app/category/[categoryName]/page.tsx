@@ -33,8 +33,10 @@ export async function generateStaticParams() {
     }));
 }
 
+// This makes sure pages are revalidated on-demand by the deploy hook, not on a timer.
+export const revalidate = false;
+
 async function CategoryContent({ categoryName }: { categoryName: string }) {
-    // This now just reads from the filesystem, it does not generate articles.
     const articles = await getArticlesByCategory(categoryName);
     return <ArticleGrid articles={articles} />;
 }

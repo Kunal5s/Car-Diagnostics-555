@@ -27,7 +27,7 @@ import { ArticleGridSkeleton } from "@/components/article-grid-skeleton";
 
 export const metadata: Metadata = {
   description: "A genuinely helpful automotive knowledge base. Get original, useful, and accurate articles on car repair, maintenance, and technology, all written with a human-first approach.",
-  keywords: ["car repair help", "automotive maintenance guides", "vehicle help", "car problems", "DIY car repair", "Car Diagnostics BrainAi"],
+  keywords: ["car repair help", "automotive maintenance guides", "vehicle help", "car problems", "DIY car repair", "Car Diagnostics AI"],
 };
 
 const howItWorksSteps = [
@@ -73,8 +73,8 @@ const testimonials = [
 
 const faqItems = [
     {
-    question: "What is Car Diagnostics BrainAi?",
-    answer: "Car Diagnostics BrainAi is an intelligent knowledge base dedicated to providing genuinely helpful, original, and accurate articles about automotive repair and maintenance. Our core philosophy is to help readers solve real-life problems.",
+    question: "What is Car Diagnostics AI?",
+    answer: "Car Diagnostics AI is an intelligent knowledge base dedicated to providing genuinely helpful, original, and accurate articles about automotive repair and maintenance. Our core philosophy is to help readers solve real-life problems.",
   },
   {
     question: "How is the content created?",
@@ -94,10 +94,10 @@ const faqItems = [
   },
   {
     question: "How often is new content published?",
-    answer: "Our automated cron job is configured to generate and publish new articles at regular intervals throughout the day. This ensures our library is always growing with fresh, helpful content.",
+    answer: "Our automated cron job is configured to generate and publish new articles at regular intervals. This ensures our library is always growing with fresh, helpful content.",
   },
   {
-    question: "Is Car Diagnostics BrainAi free to use?",
+    question: "Is Car Diagnostics AI free to use?",
     answer: "Yes, access to all of our articles and diagnostic information is completely free. Our mission is to make automotive knowledge accessible to everyone."
   },
   {
@@ -109,7 +109,7 @@ const faqItems = [
     answer: "Currently, all our content is AI-generated to maintain a consistent style and quality. However, we love hearing from our users! Please use our Contact page to suggest topics you'd like to see covered."
   },
   {
-    question: "What is Git-as-a-CMS?",
+    question: "What is 'Git as a CMS'?",
     answer: "It means we use our GitHub repository as our Content Management System. Instead of a complex database, our articles are stored as simple text files in a folder in our codebase. This makes the website extremely fast, reliable, and easy to manage."
   }
 ];

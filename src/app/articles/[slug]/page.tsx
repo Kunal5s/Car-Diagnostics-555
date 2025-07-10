@@ -37,6 +37,9 @@ export async function generateMetadata({ params }: { params: { slug:string } }):
   }
 }
 
+// This makes sure pages are revalidated on-demand by the deploy hook, not on a timer.
+export const revalidate = false;
+
 export default async function ArticlePage({ params }: { params: { slug: string }}) {
   const article = await getArticleBySlug(params.slug);
 

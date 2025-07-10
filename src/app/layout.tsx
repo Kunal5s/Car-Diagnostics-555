@@ -10,8 +10,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: 'Car Diagnostics BrainAi - Your Intelligent Automotive Assistant',
-    template: '%s - Car Diagnostics BrainAi',
+    default: 'Car Diagnostics AI - Your Intelligent Automotive Assistant',
+    template: '%s - Car Diagnostics AI',
   },
   description: "Your intelligent assistant for vehicle diagnostics and maintenance.",
 };

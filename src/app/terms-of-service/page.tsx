@@ -3,7 +3,7 @@ import { ClientDate } from '@/components/client-date';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'Review the terms of service for using the Car Diagnostics BrainAi website and its content.',
+  description: 'Review the terms of service for using the Car Diagnostics AI website and its content.',
 };
 
 export default function TermsOfServicePage() {
@@ -14,7 +14,7 @@ export default function TermsOfServicePage() {
         <p><strong>Last Updated:</strong> <ClientDate /></p>
         
         <p>
-          Please read these Terms of Service ("Terms", "Terms of Service") carefully before using the Car Diagnostics BrainAi website (the "Service") operated by Car Diagnostics BrainAi ("us", "we", or "our"). Your access to and use of the Service is conditioned on your acceptance of and compliance with these Terms. These Terms apply to all visitors, users, and others who access or use the Service.
+          Please read these Terms of Service ("Terms", "Terms of Service") carefully before using the Car Diagnostics AI website (the "Service") operated by Car Diagnostics AI ("us", "we", or "our"). Your access to and use of the Service is conditioned on your acceptance of and compliance with these Terms. These Terms apply to all visitors, users, and others who access or use the Service.
         </p>
 
         <h2 className="text-2xl font-semibold">1. Use of Service</h2>
@@ -24,12 +24,12 @@ export default function TermsOfServicePage() {
 
         <h2 className="text-2xl font-semibold">2. Intellectual Property</h2>
         <p>
-          The Service and its original content, features, and functionality are and will remain the exclusive property of Car Diagnostics BrainAi and its licensors. The Service is protected by copyright, trademark, and other laws of both the United States and foreign countries.
+          The Service and its original content, features, and functionality are and will remain the exclusive property of Car Diagnostics AI and its licensors. The Service is protected by copyright, trademark, and other laws of both the United States and foreign countries.
         </p>
 
         <h2 className="text-2xl font-semibold">3. Limitation Of Liability</h2>
         <p>
-          In no event shall Car Diagnostics BrainAi, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.
+          In no event shall Car Diagnostics AI, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.
         </p>
         
         <h2 className="text-2xl font-semibold">4. Governing Law</h2>
@@ -44,7 +44,7 @@ export default function TermsOfServicePage() {
         
         <h2 className="text-2xl font-semibold">Contact Us</h2>
         <p>
-          If you have any questions about these Terms, please contact us at: <a href="mailto:terms@cardiagnosticsbrainai.com" className="text-primary hover:underline">terms@cardiagnosticsbrainai.com</a>.
+          If you have any questions about these Terms, please contact us at: <a href="mailto:terms@cardiagnosticsai.com" className="text-primary hover:underline">terms@cardiagnosticsai.com</a>.
         </p>
       </div>
     </div>
