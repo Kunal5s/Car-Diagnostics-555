@@ -33,7 +33,7 @@ To run this project, you need to set up the following environment variables in y
     -   **Why it's needed:** This allows the application to save the newly generated articles back into your GitHub repository.
 -   **`GITHUB_REPO_OWNER`**: The owner of the GitHub repository (e.g., your GitHub username).
     -   **Why it's needed:** To tell the system which GitHub account owns the repository.
--   **`GITHUB_REPO_NAME`**: The name of the GitHub repository.
+-   **`GITHUB_REPO_NAME`**: The name of the GitHub repository. For this project, it should be `Car-Diagnostics-555`.
     -   **Why it's needed:** To tell the system which repository to save the articles in.
 -   **`VERCEL_DEPLOY_HOOK_URL`**: A special URL from Vercel that starts a new deployment when called.
     -   **Why it's needed:** This is the key to automatically publishing new articles. After the cron job saves an article to GitHub, it calls this URL to tell Vercel to update the live website with the new content.
@@ -56,7 +56,7 @@ Create a `.env.local` file for local development or add these directly to your V
 GOOGLE_API_KEY="your_google_api_key"
 CRON_SECRET="your_secret_cron_job_string"
 GITHUB_TOKEN="your_github_personal_access_token"
-GITHUB_REPO_OWNER="Kunal5s"
+GITHUB_REPO_OWNER="your_github_username"
 GITHUB_REPO_NAME="Car-Diagnostics-555"
 VERCEL_DEPLOY_HOOK_URL="your_vercel_deploy_hook_url"
 ```
@@ -92,4 +92,3 @@ This means the `secret` you provided in the URL does not match the `CRON_SECRET`
 1.  **Check for Typos:** Make sure you typed the secret correctly in the URL.
 2.  **Avoid Special Characters:** Sometimes, special characters (like `@`, `#`, `&`, `?`) can cause problems in a URL. Try changing your `CRON_SECRET` in Vercel to something simpler that only uses letters and numbers (e.g., `MySecretKey12345`), redeploy, and try the URL again with the new secret.
 3.  **Ensure Redeployment:** Remember to redeploy after changing the `CRON_SECRET` in Vercel.
-
