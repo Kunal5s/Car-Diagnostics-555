@@ -54,9 +54,9 @@ export function ArticleCard({ article, priority = false }: ArticleCardProps) {
           </p>
       </CardContent>
       <CardFooter className="p-6 pt-0">
-        <Button asChild variant="link" className="p-0 text-primary">
-          <Link href={articleUrl} className="flex items-center">
-            Read More <ArrowRight className="ml-1 h-4 w-4" />
+        <Button asChild className="w-full">
+          <Link href={articleUrl}>
+            Read Article <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
       </CardFooter>
