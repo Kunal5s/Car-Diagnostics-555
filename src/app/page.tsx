@@ -61,7 +61,7 @@ const testimonials = [
   },
   {
     name: "Mike T.",
-    review: "As someone who knows nothing about cars, this site is a lifesaver. The 'Key Takeaways' section is brilliant for quick summaries.",
+    review: "As someone who knows nothing about cars, this site is a lifesaver. The summaries are perfect for a quick overview.",
     rating: 5,
   },
   {

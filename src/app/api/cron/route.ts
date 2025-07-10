@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Octokit } from '@octokit/rest';
 import { generateArticle } from '@/ai/flows/generate-article';
-import { generateTakeaways } from '@/ai/flows/generate-takeaways';
 import { allArticleTopics } from '@/lib/definitions';
 import { slugify } from '@/lib/utils';
 import type { FullArticle } from '@/lib/definitions';
@@ -90,23 +89,11 @@ export async function GET(request: NextRequest) {
         }
         
         // Process one topic per run to avoid timeouts and rate limits
-        const topicToGenerate = availableTopics[0]; 
+        const topicToGenerate = availableTopics[Math.floor(Math.random() * availableTopics.length)];
 
         try {
             console.log(`Generating article for topic: "${topicToGenerate.title}"`);
             const generatedData = await generateArticle({ topic: topicToGenerate.title, category: topicToGenerate.category });
-            
-            let finalContent = generatedData.content;
-            // If the model forgot the takeaways, generate them separately as a fallback.
-            if (!finalContent.includes('## 6 Key Takeaways')) {
-                console.warn(`Article for "${topicToGenerate.title}" was generated without takeaways. Generating them now as a fallback.`);
-                try {
-                    const takeawaysResult = await generateTakeaways({ title: generatedData.title, content: finalContent });
-                    finalContent += `\n\n${takeawaysResult.takeaways}`;
-                } catch (takeawayError) {
-                    console.error(`Could not generate takeaways for "${topicToGenerate.title}". The article will be saved without them.`, takeawayError);
-                }
-            }
             
             const slug = slugify(`${generatedData.title}-${topicToGenerate.id}`);
     
@@ -117,7 +104,7 @@ export async function GET(request: NextRequest) {
                 category: topicToGenerate.category,
                 summary: generatedData.summary,
                 imageUrl: generatedData.imageUrl,
-                content: finalContent,
+                content: generatedData.content,
             };
     
             const filePath = `_articles/${slug}.json`;

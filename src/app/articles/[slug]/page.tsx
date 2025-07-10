@@ -8,7 +8,6 @@ import type { Metadata } from 'next';
 import { getArticleBySlug, getAllArticleSlugs } from '@/lib/data';
 import Image from 'next/image';
 import { ShareButtons } from '@/components/share-buttons';
-import { generateTakeaways } from '@/ai/flows/generate-takeaways';
 
 export async function generateStaticParams() {
   const slugs = await getAllArticleSlugs();
@@ -67,21 +66,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       processedContent = processedContent.substring(article.title.length).trim();
   }
 
-  // Check if takeaways are missing and generate them if needed. This fixes old articles.
-  let finalContent = processedContent;
-  // ONLY try to generate takeaways if an API key is available and takeaways are missing.
-  if (process.env.GOOGLE_API_KEY && !finalContent.includes('## 6 Key Takeaways')) {
-    try {
-      console.log(`Dynamically generating takeaways for old article: "${article.title}"`);
-      const result = await generateTakeaways({ title: article.title, content: finalContent });
-      finalContent += `\n\n${result.takeaways}`;
-    } catch (error) {
-      console.error(`Failed to generate takeaways for "${article.title}":`, error);
-      // If generation fails, we just show the original content without takeaways.
-    }
-  }
-
-
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
         <article>
@@ -112,7 +96,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             <ShareButtons title={article.title} />
             
             <div className="prose prose-lg dark:prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{finalContent}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
             </div>
         </article>
     </div>
