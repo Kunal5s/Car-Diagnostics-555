@@ -6,6 +6,7 @@ import { generateTakeaways } from '@/ai/flows/generate-takeaways';
 import { allArticleTopics } from '@/lib/definitions';
 import { slugify } from '@/lib/utils';
 import type { FullArticle } from '@/lib/definitions';
+import axios from 'axios';
 
 async function getExistingArticleSlugs(octokit: Octokit, owner: string, repo: string): Promise<Set<number>> {
     try {
@@ -31,6 +32,21 @@ async function getExistingArticleSlugs(octokit: Octokit, owner: string, repo: st
         }
         console.error('Error fetching existing articles from GitHub:', error);
         throw error;
+    }
+}
+
+async function triggerVercelDeploy() {
+    const deployHookUrl = process.env.VERCEL_DEPLOY_HOOK_URL;
+    if (!deployHookUrl) {
+        console.warn('VERCEL_DEPLOY_HOOK_URL is not set. Skipping automatic redeployment.');
+        return;
+    }
+    try {
+        console.log('Triggering Vercel deployment...');
+        await axios.post(deployHookUrl);
+        console.log('Vercel deployment triggered successfully.');
+    } catch (error) {
+        console.error('Failed to trigger Vercel deployment:', error);
     }
 }
 
@@ -68,8 +84,7 @@ export async function GET(request: NextRequest) {
         
         const availableTopics = allArticleTopics.filter(topic => !existingIds.has(topic.id));
 
-        // Get the next two topics to generate. This doubles the content output.
-        const topicsToGenerate = availableTopics.slice(0, 2);
+        const topicsToGenerate = availableTopics.slice(0, 1);
 
         if (topicsToGenerate.length === 0) {
             return NextResponse.json({ message: 'All available articles have been generated.' });
@@ -100,7 +115,7 @@ export async function GET(request: NextRequest) {
                     category: topicToGenerate.category,
                     slug,
                     ...generatedData,
-                    content: finalContent, // Use the potentially updated content
+                    content: finalContent,
                 };
         
                 const filePath = `_articles/${slug}.json`;
@@ -115,7 +130,7 @@ export async function GET(request: NextRequest) {
                 });
                 generatedTitles.push(generatedData.title);
             } catch(error) {
-                 console.error(`Failed to generate or commit article for topic "${topicToGenerate.title}". Skipping to next one.`, { 
+                 console.error(`Failed to generate or commit article for topic "${topicToGenerate.title}". Skipping.`, { 
                     message: (error as Error).message,
                     stack: (error as Error).stack,
                     cause: (error as Error).cause
@@ -126,6 +141,7 @@ export async function GET(request: NextRequest) {
 
         if (generatedTitles.length > 0) {
             console.log(`Successfully generated and committed ${generatedTitles.length} articles.`);
+            await triggerVercelDeploy(); // Trigger deployment after successful commit.
             return NextResponse.json({ message: `Successfully generated ${generatedTitles.length} articles: ${generatedTitles.join(', ')}` });
         } else {
             return NextResponse.json({ message: 'Failed to generate any articles in this run.' }, { status: 500 });
