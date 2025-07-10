@@ -67,7 +67,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   // Check if takeaways are missing and generate them if needed. This fixes old articles.
   let finalContent = processedContent;
   // ONLY try to generate takeaways if an API key is available and takeaways are missing.
-  if (process.env.GEMINI_API_KEY && !finalContent.includes('## 6 Key Takeaways')) {
+  if (process.env.GOOGLE_API_KEY && !finalContent.includes('## 6 Key Takeaways')) {
     try {
       console.log(`Dynamically generating takeaways for old article: "${article.title}"`);
       const result = await generateTakeaways({ title: article.title, content: finalContent });

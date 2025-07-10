@@ -63,14 +63,14 @@ export async function GET(request: NextRequest) {
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
     const GITHUB_REPO_OWNER = process.env.GITHUB_REPO_OWNER;
     const GITHUB_REPO_NAME = process.env.GITHUB_REPO_NAME;
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
-    if (!GITHUB_TOKEN || !GITHUB_REPO_OWNER || !GITHUB_REPO_NAME || !GEMINI_API_KEY) {
+    if (!GITHUB_TOKEN || !GITHUB_REPO_OWNER || !GITHUB_REPO_NAME || !GOOGLE_API_KEY) {
         const missing = [
             !GITHUB_TOKEN && 'GITHUB_TOKEN',
             !GITHUB_REPO_OWNER && 'GITHUB_REPO_OWNER',
             !GITHUB_REPO_NAME && 'GITHUB_REPO_NAME',
-            !GEMINI_API_KEY && 'GEMINI_API_KEY'
+            !GOOGLE_API_KEY && 'GOOGLE_API_KEY'
         ].filter(Boolean).join(', ');
         const message = `The following environment variables are not set: ${missing}. The cron job cannot run without them.`;
         console.error(message);

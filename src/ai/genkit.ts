@@ -15,11 +15,11 @@ class GenkitError extends Error {
 
 // Quietly log un-configured API key errors, but don't throw.
 let errorOnce = false;
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey = process.env.GOOGLE_API_KEY;
 if (!apiKey) {
   const err = new GenkitError(
     'unconfigured',
-    'GEMINI_API_KEY environment variable not set'
+    'GOOGLE_API_KEY environment variable not set'
   );
   if (!errorOnce) {
     console.error(err.message, {code: err.code});
