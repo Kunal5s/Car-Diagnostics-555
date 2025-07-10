@@ -75,5 +75,3 @@ export async function getAllArticleSlugs(): Promise<string[]> {
     const files = await getArticleFiles();
     return files.map(file => file.replace('.json', ''));
 }
-
-    

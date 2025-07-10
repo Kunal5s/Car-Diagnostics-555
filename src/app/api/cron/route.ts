@@ -84,67 +84,60 @@ export async function GET(request: NextRequest) {
         
         const availableTopics = allArticleTopics.filter(topic => !existingIds.has(topic.id));
 
-        const topicsToGenerate = availableTopics.slice(0, 1);
-
-        if (topicsToGenerate.length === 0) {
+        if (availableTopics.length === 0) {
             return NextResponse.json({ message: 'All available articles have been generated.' });
         }
+        
+        const topicToGenerate = availableTopics[0]; // Process one topic per run to avoid timeouts/rate limits
 
-        const generatedTitles = [];
-        for (const topicToGenerate of topicsToGenerate) {
-            try {
-                console.log(`Generating article for topic: "${topicToGenerate.title}"`);
-                const generatedData = await generateArticle({ topic: topicToGenerate.title, category: topicToGenerate.category });
-                
-                let finalContent = generatedData.content;
-                // If the model forgot the takeaways, generate them separately as a fallback.
-                if (!finalContent.includes('## 6 Key Takeaways')) {
-                    console.warn(`Article for "${topicToGenerate.title}" was generated without takeaways. Generating them now as a fallback.`);
-                    try {
-                        const takeawaysResult = await generateTakeaways({ title: generatedData.title, content: finalContent });
-                        finalContent += `\n\n${takeawaysResult.takeaways}`;
-                    } catch (takeawayError) {
-                        console.error(`Could not generate takeaways for "${topicToGenerate.title}". The article will be saved without them.`, takeawayError);
-                    }
+        try {
+            console.log(`Generating article for topic: "${topicToGenerate.title}"`);
+            const generatedData = await generateArticle({ topic: topicToGenerate.title, category: topicToGenerate.category });
+            
+            let finalContent = generatedData.content;
+            // If the model forgot the takeaways, generate them separately as a fallback.
+            if (!finalContent.includes('## 6 Key Takeaways')) {
+                console.warn(`Article for "${topicToGenerate.title}" was generated without takeaways. Generating them now as a fallback.`);
+                try {
+                    const takeawaysResult = await generateTakeaways({ title: generatedData.title, content: finalContent });
+                    finalContent += `\n\n${takeawaysResult.takeaways}`;
+                } catch (takeawayError) {
+                    console.error(`Could not generate takeaways for "${topicToGenerate.title}". The article will be saved without them.`, takeawayError);
                 }
-                
-                const slug = slugify(`${generatedData.title}-${topicToGenerate.id}`);
-        
-                const newArticle: FullArticle = {
-                    id: topicToGenerate.id,
-                    category: topicToGenerate.category,
-                    slug,
-                    ...generatedData,
-                    content: finalContent,
-                };
-        
-                const filePath = `_articles/${slug}.json`;
-                const content = Buffer.from(JSON.stringify(newArticle, null, 2)).toString('base64');
-        
-                await octokit.repos.createOrUpdateFileContents({
-                    owner: GITHUB_REPO_OWNER,
-                    repo: GITHUB_REPO_NAME,
-                    path: filePath,
-                    message: `feat: add article '${generatedData.title}'`,
-                    content: content,
-                });
-                generatedTitles.push(generatedData.title);
-            } catch(error) {
-                 console.error(`Failed to generate or commit article for topic "${topicToGenerate.title}". Skipping.`, { 
-                    message: (error as Error).message,
-                    stack: (error as Error).stack,
-                    cause: (error as Error).cause
-                });
             }
-        }
-        
-
-        if (generatedTitles.length > 0) {
-            console.log(`Successfully generated and committed ${generatedTitles.length} articles.`);
+            
+            const slug = slugify(`${generatedData.title}-${topicToGenerate.id}`);
+    
+            const newArticle: FullArticle = {
+                id: topicToGenerate.id,
+                category: topicToGenerate.category,
+                slug,
+                ...generatedData,
+                content: finalContent,
+            };
+    
+            const filePath = `_articles/${slug}.json`;
+            const content = Buffer.from(JSON.stringify(newArticle, null, 2)).toString('base64');
+    
+            await octokit.repos.createOrUpdateFileContents({
+                owner: GITHUB_REPO_OWNER,
+                repo: GITHUB_REPO_NAME,
+                path: filePath,
+                message: `feat: add article '${generatedData.title}'`,
+                content: content,
+            });
+            
+            console.log(`Successfully generated and committed article: ${generatedData.title}.`);
             await triggerVercelDeploy(); // Trigger deployment after successful commit.
-            return NextResponse.json({ message: `Successfully generated ${generatedTitles.length} articles: ${generatedTitles.join(', ')}` });
-        } else {
-            return NextResponse.json({ message: 'Failed to generate any articles in this run.' }, { status: 500 });
+            return NextResponse.json({ message: `Successfully generated article: ${generatedData.title}` });
+
+        } catch(error) {
+             console.error(`Failed to generate or commit article for topic "${topicToGenerate.title}".`, { 
+                message: (error as Error).message,
+                stack: (error as Error).stack,
+                cause: (error as Error).cause
+            });
+            return NextResponse.json({ message: `Failed to generate article for topic: ${topicToGenerate.title}` }, { status: 500 });
         }
 
     } catch (error) {
@@ -153,6 +146,6 @@ export async function GET(request: NextRequest) {
             stack: (error as Error).stack,
             cause: (error as Error).cause
         });
-        return NextResponse.json({ message: 'Error generating article', error: (error as Error).message }, { status: 500 });
+        return NextResponse.json({ message: 'Error running cron job', error: (error as Error).message }, { status: 500 });
     }
 }

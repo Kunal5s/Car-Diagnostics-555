@@ -116,7 +116,7 @@ const faqItems = [
 
 
 async function HomepageContent() {
-  const trendingArticles = await getRecentArticles(4);
+  const trendingArticles = await getRecentArticles(6);
   return <ArticleGrid articles={trendingArticles} />;
 }
 
@@ -148,9 +148,9 @@ export default function HomePage() {
             <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-primary lg:text-4xl">
               Recently Added Articles
             </h2>
-            <p className="mx-auto -mt-4 max-w-2xl text-center text-lg text-muted-foreground">Our library grows every day with a new, in-depth article. Here are the latest additions.</p>
+            <p className="mx-auto -mt-4 max-w-2xl text-center text-lg text-muted-foreground">Our library grows every day with new, in-depth articles. Here are the latest additions.</p>
           </div>
-           <Suspense fallback={<ArticleGridSkeleton count={4} />}>
+           <Suspense fallback={<ArticleGridSkeleton count={6} />}>
             <HomepageContent />
           </Suspense>
         </div>
@@ -259,5 +259,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-    

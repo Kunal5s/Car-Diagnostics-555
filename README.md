@@ -37,7 +37,7 @@ To run this project, you need to set up the following environment variables in y
     -   **Why it's needed:** To tell the system which repository to save the articles in.
 -   **`VERCEL_DEPLOY_HOOK_URL`**: A special URL from Vercel that starts a new deployment when called.
     -   **Why it's needed:** This is the key to automatically publishing new articles. After the cron job saves an article to GitHub, it calls this URL to tell Vercel to update the live website with the new content.
-    -   **How to get it:** In your Vercel project dashboard, go to **Settings** -> **Deploy Hooks**. Create a new hook (give it a name like "Cron Job Trigger") for your `master` or `main` branch. Vercel will give you a URL to use for this variable.
+    -   **How to get it:** In your Vercel project dashboard, go to **Settings** -> **Deploy Hooks**. Create a new hook (give it a name like "Cron Job Trigger") for your `main` or `master` branch. Vercel will give you a URL to use for this variable.
 
 <br />
 <div style="background-color: #fffde7; border-left: 6px solid #fbc02d; padding: 15px; margin-bottom: 15px;">
