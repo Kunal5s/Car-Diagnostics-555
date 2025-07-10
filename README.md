@@ -57,7 +57,7 @@ GOOGLE_API_KEY="your_google_api_key"
 CRON_SECRET="your_secret_cron_job_string"
 GITHUB_TOKEN="your_github_personal_access_token"
 GITHUB_REPO_OWNER="Kunal5s"
-GITHUB_REPO_NAME="Car-Diagnostics-AI"
+GITHUB_REPO_NAME="Car-Diagnostics-555"
 VERCEL_DEPLOY_HOOK_URL="your_vercel_deploy_hook_url"
 ```
 
@@ -92,3 +92,4 @@ This means the `secret` you provided in the URL does not match the `CRON_SECRET`
 1.  **Check for Typos:** Make sure you typed the secret correctly in the URL.
 2.  **Avoid Special Characters:** Sometimes, special characters (like `@`, `#`, `&`, `?`) can cause problems in a URL. Try changing your `CRON_SECRET` in Vercel to something simpler that only uses letters and numbers (e.g., `MySecretKey12345`), redeploy, and try the URL again with the new secret.
 3.  **Ensure Redeployment:** Remember to redeploy after changing the `CRON_SECRET` in Vercel.
+
