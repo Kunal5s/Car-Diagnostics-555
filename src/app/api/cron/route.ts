@@ -8,7 +8,7 @@ import { slugify } from '@/lib/utils';
 import type { FullArticle } from '@/lib/definitions';
 import axios from 'axios';
 
-async function getExistingArticleSlugs(octokit: Octokit, owner: string, repo: string): Promise<Set<number>> {
+async function getExistingArticleIds(octokit: Octokit, owner: string, repo: string): Promise<Set<number>> {
     try {
         const { data: files } = await octokit.repos.getContent({
             owner,
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
             !GITHUB_REPO_NAME && 'GITHUB_REPO_NAME',
             !GOOGLE_API_KEY && 'GOOGLE_API_KEY'
         ].filter(Boolean).join(', ');
-        const message = `The following environment variables are not set: ${missing}. The cron job cannot run without them.`;
+        const message = `The following environment variables are not set: ${missing}. The cron job cannot run without them. Please check your Vercel project settings.`;
         console.error(message);
         return NextResponse.json({ message }, { status: 500 });
     }
@@ -80,15 +80,17 @@ export async function GET(request: NextRequest) {
     const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
     try {
-        const existingIds = await getExistingArticleSlugs(octokit, GITHUB_REPO_OWNER, GITHUB_REPO_NAME);
+        const existingIds = await getExistingArticleIds(octokit, GITHUB_REPO_OWNER, GITHUB_REPO_NAME);
         
         const availableTopics = allArticleTopics.filter(topic => !existingIds.has(topic.id));
 
         if (availableTopics.length === 0) {
+            console.log('All available articles have been generated.');
             return NextResponse.json({ message: 'All available articles have been generated.' });
         }
         
-        const topicToGenerate = availableTopics[0]; // Process one topic per run to avoid timeouts/rate limits
+        // Process one topic per run to avoid timeouts and rate limits
+        const topicToGenerate = availableTopics[0]; 
 
         try {
             console.log(`Generating article for topic: "${topicToGenerate.title}"`);
@@ -110,9 +112,11 @@ export async function GET(request: NextRequest) {
     
             const newArticle: FullArticle = {
                 id: topicToGenerate.id,
-                category: topicToGenerate.category,
+                title: generatedData.title,
                 slug,
-                ...generatedData,
+                category: topicToGenerate.category,
+                summary: generatedData.summary,
+                imageUrl: generatedData.imageUrl,
                 content: finalContent,
             };
     
@@ -137,7 +141,7 @@ export async function GET(request: NextRequest) {
                 stack: (error as Error).stack,
                 cause: (error as Error).cause
             });
-            return NextResponse.json({ message: `Failed to generate article for topic: ${topicToGenerate.title}` }, { status: 500 });
+            return NextResponse.json({ message: `Failed to generate article for topic: ${topicToGenerate.title}`, error: (error as Error).message }, { status: 500 });
         }
 
     } catch (error) {

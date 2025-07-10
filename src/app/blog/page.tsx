@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 };
 
 async function AllArticlesContent() {
+  // This now just reads from the filesystem, it does not generate articles.
   const articles = await getAllArticles();
   return <ArticleGrid articles={articles} />;
 }

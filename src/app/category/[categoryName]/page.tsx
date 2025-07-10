@@ -34,6 +34,7 @@ export async function generateStaticParams() {
 }
 
 async function CategoryContent({ categoryName }: { categoryName: string }) {
+    // This now just reads from the filesystem, it does not generate articles.
     const articles = await getArticlesByCategory(categoryName);
     return <ArticleGrid articles={articles} />;
 }
@@ -68,11 +69,9 @@ export default function CategoryPage({
           </p>
         </div>
       </div>
-      <Suspense fallback={<ArticleGridSkeleton count={8} />}>
+      <Suspense fallback={<ArticleGridSkeleton count={6} />}>
         <CategoryContent categoryName={categoryInfo.name} />
       </Suspense>
     </div>
   );
 }
-
-    
