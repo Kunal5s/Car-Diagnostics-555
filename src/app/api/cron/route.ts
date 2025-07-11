@@ -6,6 +6,7 @@ import { slugify } from '@/lib/utils';
 import type { FullArticle } from '@/lib/definitions';
 import axios from 'axios';
 
+// Lazy import Octokit
 async function getExistingArticleIds(octokit: Octokit, owner: string, repo: string): Promise<Set<number>> {
     const { Octokit } = await import('@octokit/rest'); // Lazy import
     try {
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ message }, { status: 500 });
     }
     
-    const { Octokit } = await import('@octokit/rest'); // Lazy import
+    const { Octokit } = await import('@octokit/rest');
 
     try {
         const existingIds = await getExistingArticleIds(octokit, GITHUB_REPO_OWNER, GITHUB_REPO_NAME);
