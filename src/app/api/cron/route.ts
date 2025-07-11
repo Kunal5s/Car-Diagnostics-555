@@ -1,6 +1,5 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { Octokit } from '@octokit/rest';
 import { generateArticle } from '@/ai/flows/generate-article';
 import { allArticleTopics } from '@/lib/definitions';
 import { slugify } from '@/lib/utils';
@@ -8,6 +7,7 @@ import type { FullArticle } from '@/lib/definitions';
 import axios from 'axios';
 
 async function getExistingArticleIds(octokit: Octokit, owner: string, repo: string): Promise<Set<number>> {
+    const { Octokit } = await import('@octokit/rest'); // Lazy import
     try {
         const { data: files } = await octokit.repos.getContent({
             owner,
@@ -62,21 +62,19 @@ export async function GET(request: NextRequest) {
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
     const GITHUB_REPO_OWNER = process.env.GITHUB_REPO_OWNER;
     const GITHUB_REPO_NAME = process.env.GITHUB_REPO_NAME;
-    const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
-    if (!GITHUB_TOKEN || !GITHUB_REPO_OWNER || !GITHUB_REPO_NAME || !GOOGLE_API_KEY) {
+    if (!GITHUB_TOKEN || !GITHUB_REPO_OWNER || !GITHUB_REPO_NAME) {
         const missing = [
             !GITHUB_TOKEN && 'GITHUB_TOKEN',
             !GITHUB_REPO_OWNER && 'GITHUB_REPO_OWNER',
             !GITHUB_REPO_NAME && 'GITHUB_REPO_NAME',
-            !GOOGLE_API_KEY && 'GOOGLE_API_KEY'
-        ].filter(Boolean).join(', ');
+        ].filter(Boolean).join(', '); // Filter out false values before joining
         const message = `The following environment variables are not set: ${missing}. The cron job cannot run without them. Please check your Vercel project settings.`;
         console.error(message);
         return NextResponse.json({ message }, { status: 500 });
     }
     
-    const octokit = new Octokit({ auth: GITHUB_TOKEN });
+    const { Octokit } = await import('@octokit/rest'); // Lazy import
 
     try {
         const existingIds = await getExistingArticleIds(octokit, GITHUB_REPO_OWNER, GITHUB_REPO_NAME);
